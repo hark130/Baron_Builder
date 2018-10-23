@@ -3,7 +3,7 @@
 #################################################
 
 import pwd                                      # getpwuid
-import os                                       # path.join, getuid, path.isdir
+import os                                       # path.join, getuid, path.isdir, system
 from stat import S_ISREG, ST_CTIME, ST_MODE, ST_MTIME
 import sys                                      # version_info
 
@@ -16,6 +16,8 @@ OS_UNKNOWS = 0  # Unknows OS
 OS_LINUX = 1    # All *nix
 OS_WINDOWS = 2  # All Windows
 OS_APPLE = 3    # All OS/?
+# USER TOLERANCE
+MAX_ERRS = 3    # Maximum number of bad user answers tolerated before giving up
 
 #################################################
 #################### GLOBALS ####################
@@ -33,6 +35,7 @@ nixSaveGamePath =  os.path.join(".config", "unity3d", "Owlcat Games", "Pathfinde
 winSaveGamePath =  os.path.join("AppData", "LocalLow", "Owlcat Games", "Pathfinder Kingmaker", "Saved Games")
 # Apple - /home/user/Library/Application\ Support/unity.Owlcat\ Games.Pathfinder\ Kingmaker/Saved\ Games 
 macSaveGamePath =  os.path.join("Library", "Application Support", "unity.Owlcat Games.Pathfinder Kingmaker", "Saved Games")
+numBadAnswers = 0  # Current number of bad answers
 
 #################################################
 ################### FUNCTIONS ###################
@@ -237,6 +240,190 @@ def list_save_games(saveGamePath, operSys, fileExt="zks"):
     return retVal
 
 
+def clear_screen(operSys):
+    '''
+        PURPOSE - Clear the screen
+        INPUT
+            operSys - See OPERATAING SYSTEM macros
+        OUTPUT
+            On success, True
+            On failure, False
+            On error, Exception
+    '''
+    # LOCAL VARIABLES
+    retVal = True
+    supportedOS = supportedOSGlobal
+
+    # INPUT VALIDATION
+    if not isinstance(operSys, int):
+        raise TypeError('Operating system is of type "{}" instead of integer'.format(type(operSys)))
+    elif operSys not in supportedOS:
+        raise ValueError("Operating system value is unknown")
+
+    # CLEAR SCREEN
+    if OS_LINUX == operSys or OS_APPLE == operSys:
+        os.system("clear")
+    elif OS_WINDOWS == operSys:
+        os.system("cls")
+    else:
+        raise RuntimeError("Consider updating supportedOS list or control flow in clear_screen()")
+
+    # DONE
+    return retVal
+
+
+def user_menu(operSys, saveGamePath, saveGameFileList):
+    '''
+        PURPOSE - User menu
+        INPUT
+            operSys - See OPERATAING SYSTEM macros
+            saveGamePath - Relative or absolute path to check for save games
+            saveGameFileList - Sorted list of save games found in saveGamePath
+        OUTPUT
+            On success, True
+            On failure, False
+            On error, Exception
+    '''
+    # LOCAL VARIABLES
+    retVal = True
+    supportedOS = supportedOSGlobal
+    selection = 0
+
+    # GLOBAL VARIABLES
+    global numBadAnswers
+
+    # INPUT VALIDATION
+    if not isinstance(operSys, int):
+        raise TypeError('Operating system is of type "{}" instead of integer'.format(type(operSys)))
+    elif operSys not in supportedOS:
+        raise ValueError("Operating system value is unknown")
+    elif not isinstance(saveGamePath, str):
+        raise TypeError('Save game path is of type "{}" instead of string'.format(type(saveGamePath)))
+    elif len(saveGamePath) <= 0:
+        raise ValueError("Invalid directory length")
+    elif not isinstance(saveGameFileList, list):
+        raise TypeError('Save game file list is of type "{}" instead of list'.format(type(saveGameFileList)))
+    elif len(saveGameFileList) <= 0:
+        raise ValueError("Invalid file name list length")
+    
+    # CLEAR SCREEN
+    clear_screen(operSys)
+
+    while retVal and numBadAnswers <= MAX_ERRS:
+        print("")  # Blank line
+        # PRINT MENU
+        # Print options
+        print("SAVE GAME FILE MODIFICATIONS")
+        print("(a) Add Build Points (BPs)")
+        print("(b) Change Kingdom Stability")
+        print("")
+        print('Type "clear" to clear the screen')
+        print('Type "open" to open a new file')
+        print('Type "save" to save the changes')
+        print('Type "close" to close the file without saving')
+        print('Type "quit" to save and exit this program')
+
+        # Take input
+        selection = input("Make your selection [Quit]: ")
+
+        # Modify input
+        if len(selection) == 0:
+            selection = "quit"
+        else:
+            selection = selection.lower()
+
+        # Execute selection
+        if "clear" == selection:
+            numBadAnswers = 0
+            clear_screen(operSys)
+        elif "open" == selection:
+            numBadAnswers = 0
+            print("\nOpening a new file")  # Placeholder
+            pass
+        elif "save" == selection:
+            numBadAnswers = 0
+            print("\nSaving file contents")  # Placeholder
+            pass
+        elif "close" == selection:
+            numBadAnswers = 0
+            print("\nClosing file")  # Placeholder
+            are_you_sure("close the file without saving")
+            pass
+        elif "quit" == selection:
+            numBadAnswers = 0
+            print("\nSaving file")  # Placeholder
+            break
+        elif "a" == selection:
+            numBadAnswers = 0
+            print("\nAdding BPs")  # Placeholder
+            pass
+        elif "b" == selection:
+            numBadAnswers = 0
+            print("\nChanging stability")  # Placeholder
+            pass
+        else:
+            print("\nInvalid selection.  Try again.")
+            numBadAnswers += 1
+
+    # DONE
+    print("")  # Blank line
+    return retVal
+
+
+def are_you_sure(actionStr=""):
+    '''
+        PURPOSE - Verify the user knows what they're doing
+        INPUT
+            actionStr - Optional string to confirm with the user
+        OUTPUT
+            If they're sure, True
+            If not, False
+            On error, Exception
+        NOTES
+            Too many bad answers will eventually return False
+    '''
+    # LOCAL VARIABLES
+    retVal = False
+    selection = ""
+
+    # GLOBAL VARIABLES
+    global numBadAnswers
+
+    # INPUT VALIDATION
+    if not isinstance(actionStr, str):
+        raise TypeError('Action string is of type "{}" instead of string'.format(type(actionStr)))
+
+    # PROMPT USER
+    if len(actionStr) > 0:
+        print('Are you sure you want to "{}"?'.format(actionStr))
+    else:
+        print("Are you sure?")
+
+    while numBadAnswers <= MAX_ERRS:
+        # Take input
+        selection = input("Enter Y or [N]\t")
+
+        # Modify input
+        if len(selection) == 0:
+            selection = "N"
+        else:
+            selection = selection.upper()
+
+        # Parse input
+        if "Y" == selection:
+            retVal = True
+            break
+        elif "N" == selection:
+            retVal = False
+            break
+        else:
+            print("Invalid selection.  Try again.")
+            numBadAnswers += 1
+
+    # DONE
+    return retVal
+
+
 def main():
     # LOCAL VARIABLES
     retVal = True          # Indicates flow control success
@@ -292,17 +479,22 @@ def main():
             if len(saveGameFileList) <= 0:
                 print("Unable to locate any save game files in directory.")
 
-
     # Print Menu
     if retVal:
-        pass
+        try:
+            retVal = user_menu(operSys, saveGamePath, saveGameFileList)
+        except Exception as err:
+            print('user_menu() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
+            retVal = False
+        else:
+            pass
 
     # DEBUGGING
     print("retVal:             \t{}".format(retVal))
     print("Operating system:   \t{}".format(operSys))
     print("Save game directory:\t{}".format(saveGamePath))
-    for file in saveGameFileList:
-        print(file)
+    # for file in saveGameFileList:
+    #     print(file)
 
     # DONE
     return retVal
