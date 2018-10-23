@@ -4,6 +4,7 @@
 
 import pwd                                      # getpwuid
 import os                                       # path.join, getuid, path.isdir
+from stat import S_ISREG, ST_CTIME, ST_MODE, ST_MTIME
 import sys                                      # version_info
 
 #################################################
@@ -19,6 +20,8 @@ OS_APPLE = 3    # All OS/?
 #################################################
 #################### GLOBALS ####################
 #################################################
+# SUPPORTED OPERATING SYSTEMS
+supportedOSGlobal = [ OS_LINUX, OS_WINDOWS, OS_APPLE ]
 # PYTHON MINIMUM VERSION REQUIRED
 minMajNum = 3  # Minimum Python version major number
 minMinNum = 5  # Minimum Python version minor number
@@ -133,13 +136,15 @@ def locate_save_games(operSys):
     '''
     # LOCAL VARIABLES
     retVal = ""    # Absolute path of the save games directory
-    supportedOS = [ OS_LINUX, OS_WINDOWS, OS_APPLE ]
+    supportedOS = supportedOSGlobal
     userName = ""  # User name of the user
     homeDir = ""   # Home directory of the user
     relDir = ""    # Relative directory of the save games
 
     # INPUT VALIDATION
-    if operSys not in supportedOS:
+    if not isinstance(operSys, int):
+        raise TypeError('Operating system is of type "{}" instead of integer'.format(type(operSys)))
+    elif operSys not in supportedOS:
         raise ValueError("Operating system value is unknown")
 
     # DETERMINE USER NAME
@@ -175,11 +180,69 @@ def locate_save_games(operSys):
     return retVal
 
 
+def list_save_games(saveGamePath, operSys, fileExt="zks"):
+    '''
+        PURPOSE - Provide a time-sorted list of all the save games in a given path, starting with
+            the most recently modified
+        INPUT
+            saveGamePath - Relative or absolute path to check for save games
+            operSys - See OPERATAING SYSTEM macros
+            fileExt - File extension to look for (default: zks)
+        OUTPUT
+            On success, list of file names
+            On failure, empty list
+            On error, Exception
+        NOTES
+            This function will not add an periods (.) to the file extension
+            This function will sort the file names so the most recent modification is first
+    '''
+    # LOCAL VARIABLES
+    retVal = []  # List of file names sorted by modification time, descending
+    supportedOS = supportedOSGlobal
+    rawTupList = []  # Unsorted list of tuples
+    sortBy = None  # Set this to ST_MTIME for *nix and ST_CTIME for Windows
+
+    # INPUT VALIDATION
+    if not isinstance(saveGamePath, str):
+        raise TypeError('Save game path is of type "{}" instead of string'.format(type(saveGamePath)))
+    elif len(saveGamePath) <= 0:
+        raise ValueError("Invalid directory length")
+    elif not isinstance(operSys, int):
+        raise TypeError('Operating system is of type "{}" instead of integer'.format(type(operSys)))
+    elif operSys not in supportedOS:
+        raise ValueError("Operating system value is unknown")        
+    elif not isinstance(fileExt, str):
+        raise TypeError('File extension is of type "{}" instead of string'.format(type(fileExt)))
+    elif not os.path.isdir(saveGamePath):
+        raise RuntimeError('Directory "{}" does not exist'.format(saveGamePath))
+
+    # SET SORT BY
+    if OS_LINUX == operSys or OS_APPLE == operSys:
+        sortBy = ST_MTIME
+    elif OS_WINDOWS == operSys:
+        sortBy = ST_CTIME
+    else:
+        raise RuntimeError("Consider updating supportedOS list or control flow in list_save_games()")
+
+
+    # GET THE SAVE GAME FILE LIST
+    # Get the list of tuples
+    rawTupList = [ (os.stat(os.path.join(saveGamePath, file)), file) for file in os.listdir(saveGamePath) if os.path.isfile(os.path.join(saveGamePath, file)) and file.endswith(fileExt) ]
+    # Leave only regular files
+    rawTupList = [ (stat[sortBy], file) for stat, file in rawTupList if S_ISREG(stat[ST_MODE]) ]
+    # Sort the raw tuples into a file list
+    retVal = [ sortedFile for stat, sortedFile in sorted(rawTupList, reverse=True) ]
+
+    # DONE
+    return retVal
+
+
 def main():
     # LOCAL VARIABLES
-    retVal = True         # Indicates flow control success
-    operSys = OS_UNKNOWS  # Operating system macro
-    saveGamePath = ""     # Absolute path to save games
+    retVal = True          # Indicates flow control success
+    operSys = OS_UNKNOWS   # Operating system macro
+    saveGamePath = ""      # Absolute path to save games
+    saveGameFileList = []  # List of save game files
 
     # WORK
     # Verify Python Version
@@ -220,7 +283,15 @@ def main():
 
     # Parse Save Games
     if retVal:
-        pass
+        try:
+            saveGameFileList = list_save_games(saveGamePath, operSys)
+        except Exception as err:
+            print('list_save_games() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
+            retVal = False
+        else:
+            if len(saveGameFileList) <= 0:
+                print("Unable to locate any save game files in directory.")
+
 
     # Print Menu
     if retVal:
@@ -230,6 +301,8 @@ def main():
     print("retVal:             \t{}".format(retVal))
     print("Operating system:   \t{}".format(operSys))
     print("Save game directory:\t{}".format(saveGamePath))
+    for file in saveGameFileList:
+        print(file)
 
     # DONE
     return retVal
