@@ -18,12 +18,13 @@ My end goal is to create a save game editor that works on all operating systems 
 | :--- | :---: | :-----: | :---: |
 | Verify Python version | ✓ | ✓ | ✓ |
 | Check OS | ✓ | ✓ | ✓ |
-| Locate save games | | | |
+| Locate save games dir | ✓ | ? | ? |
 | Parse save games | | | |
 | Print menu | | | |
 | Release wheel | | | |
 | Write wiki | | | |
 | Python command not required to run | | | |
+| Search _all_ home dirs for save games(?) | | | |
 
 ### Editor Features 
 
