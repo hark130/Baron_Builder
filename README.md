@@ -19,7 +19,7 @@ My end goal is to create a save game editor that works on all operating systems 
 | Verify Python version | ✓ | ✓ | ✓ |
 | Check OS | ✓ | ✓ | ✓ |
 | Locate save games dir | ✓ | ? | ? |
-| Parse save games | | | |
+| Parse save games | ✓ | ? | ? |
 | Print menu | | | |
 | Release wheel | | | |
 | Write wiki | | | |
@@ -36,7 +36,7 @@ My end goal is to create a save game editor that works on all operating systems 
 ### Legend
 
 | Symbol | Meaning |
-| :----- | :------ |
+| :----: | :------ |
 | | Not implemented |
 | ? | Implemented but not tested |
 | ✓ | Implemented and tested |
