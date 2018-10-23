@@ -2,6 +2,8 @@
 #################### IMPORTS ####################
 #################################################
 
+import pwd                                      # getpwuid
+import os                                       # path.join, getuid, path.isdir
 import sys                                      # version_info
 
 #################################################
@@ -17,13 +19,22 @@ OS_APPLE = 3    # All OS/?
 #################################################
 #################### GLOBALS ####################
 #################################################
+# PYTHON MINIMUM VERSION REQUIRED
 minMajNum = 3  # Minimum Python version major number
 minMinNum = 5  # Minimum Python version minor number
 minMicNum = 2  # Minimum Python version micro number
+# OPERATING SYSTEM SAVE GAME LOCATIONS
+# Linux - /home/user/.config/unity3d/Owlcat Games/Pathfinder Kingmaker/Saved Games
+nixSaveGamePath =  os.path.join(".config", "unity3d", "Owlcat Games", "Pathfinder Kingmaker", "Saved Games")
+# Windows - C:\Users\user\AppData\LocalLow\Owlcat Games\Pathfinder Kingmaker\Saved Games
+winSaveGamePath =  os.path.join("AppData", "LocalLow", "Owlcat Games", "Pathfinder Kingmaker", "Saved Games")
+# Apple - /home/user/Library/Application\ Support/unity.Owlcat\ Games.Pathfinder\ Kingmaker/Saved\ Games 
+macSaveGamePath =  os.path.join("Library", "Application Support", "unity.Owlcat Games.Pathfinder Kingmaker", "Saved Games")
 
 #################################################
 ################### FUNCTIONS ###################
 #################################################
+
 
 def check_py_ver(majNum, minNum, micNum):
     '''
@@ -110,12 +121,67 @@ def determine_os():
     return retVal
 
 
+def locate_save_games(operSys):
+    '''
+        PURPOSE - Find the absolute path to the save games directory
+        INPUT
+            operSys - See OPERATAING SYSTEM macros
+        OUTPUT
+            On success, String holding the absolute path to the save games
+            If not found, empty string
+            On failure, Exception
+    '''
+    # LOCAL VARIABLES
+    retVal = ""    # Absolute path of the save games directory
+    supportedOS = [ OS_LINUX, OS_WINDOWS, OS_APPLE ]
+    userName = ""  # User name of the user
+    homeDir = ""   # Home directory of the user
+    relDir = ""    # Relative directory of the save games
+
+    # INPUT VALIDATION
+    if operSys not in supportedOS:
+        raise ValueError("Operating system value is unknown")
+
+    # DETERMINE USER NAME
+    if OS_LINUX == operSys:
+        userName = pwd.getpwuid(os.getuid()).pw_name
+        homeDir = pwd.getpwuid(os.getuid()).pw_dir
+        relDir = nixSaveGamePath
+    elif OS_WINDOWS == operSys:
+        userName = pwd.getpwuid(os.getuid()).pw_name
+        homeDir = pwd.getpwuid(os.getuid()).pw_dir
+        relDir = winSaveGamePath
+    elif OS_APPLE == operSys:
+        userName = pwd.getpwuid(os.getuid()).pw_name
+        homeDir = pwd.getpwuid(os.getuid()).pw_dir
+        relDir = macSaveGamePath
+    else:
+        raise RuntimeError("Consider updating supportedOS list or control flow in locate_save_games()")
+
+    # CONSTRUCT HOME DIRECTORY
+    if len(homeDir) == 0 and isinstance(userName, str) and len(userName) > 0:
+        pass  # Already constructed?
+
+    # FIND SAVE GAMES
+    if isinstance(homeDir, str) and len(homeDir) > 0:
+        retVal = os.path.join(homeDir, relDir)
+        if not os.path.isdir(retVal):
+            print("Unable to locate save game directory at:\n{}".format(retVal))  # DEBUGGING
+            retVal = ""
+    else:
+        raise RuntimeError('Invalid home directory of type "{}" and length "{}"'.format(type(homeDir), len(homeDir)))
+
+    # DONE
+    return retVal
+
+
 def main():
     # LOCAL VARIABLES
     retVal = True         # Indicates flow control success
     operSys = OS_UNKNOWS  # Operating system macro
     saveGamePath = ""     # Absolute path to save games
 
+    # WORK
     # Verify Python Version
     if retVal:
         try:
@@ -143,7 +209,14 @@ def main():
 
     # Locate Save Games
     if retVal:
-        pass
+        try:
+            saveGamePath = locate_save_games(operSys)
+        except Exception as err:
+            print('locate_save_games() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
+            retVal = False
+        else:
+            if len(saveGamePath) <= 0:
+                print("Unable to locate the save game directory.")
 
     # Parse Save Games
     if retVal:
@@ -153,6 +226,19 @@ def main():
     if retVal:
         pass
 
+    # DEBUGGING
+    print("retVal:             \t{}".format(retVal))
+    print("Operating system:   \t{}".format(operSys))
+    print("Save game directory:\t{}".format(saveGamePath))
+
+    # DONE
+    return retVal
+
 
 if __name__ == "__main__":
-    main()
+    if main():
+        print("Success!")  # DEBUGGING
+        pass
+    else:
+        print("FAIL!")  # DEBUGGING
+        pass
