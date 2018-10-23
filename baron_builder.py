@@ -210,7 +210,7 @@ def list_save_games(saveGamePath, operSys, fileExt="zks"):
     elif not isinstance(operSys, int):
         raise TypeError('Operating system is of type "{}" instead of integer'.format(type(operSys)))
     elif operSys not in supportedOS:
-        raise ValueError("Operating system value is unknown")        
+        raise ValueError("Operating system value is unknown")
     elif not isinstance(fileExt, str):
         raise TypeError('File extension is of type "{}" instead of string'.format(type(fileExt)))
     elif not os.path.isdir(saveGamePath):
