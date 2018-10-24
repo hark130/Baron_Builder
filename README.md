@@ -20,8 +20,10 @@ My end goal is to create a save game editor that works on all operating systems 
 | Check OS | ✓ | ✓ | ✓ |
 | Locate save games dir | ✓ | ? | ? |
 | Parse save games | ✓ | ? | ? |
-| Print file open menu | | | |
+| Print file open menu | ✓ | ? | ? |
 | Print user selection menu | ✓ | ? | ? |
+| Write json-parsing class | | | |
+| Write save-file-parsing class | | | |
 | Release wheel | | | |
 | Write wiki | | | |
 | Python command not required to run | | | |
@@ -44,3 +46,11 @@ My end goal is to create a save game editor that works on all operating systems 
 | | Not implemented |
 | ? | Implemented but not tested |
 | ✓ | Implemented and tested |
+
+### Design
+
+* Sub-directories created in save game directory
+	* "Baron_Builder" (Encapsulating directory for all work done)
+		* "Archive" (Move old save game files here)
+		* "Backup" (Back up save game files here)
+		* "Working" (Working directory to unarchive save files into)
