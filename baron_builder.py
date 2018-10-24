@@ -18,6 +18,11 @@ OS_WINDOWS = 2  # All Windows
 OS_APPLE = 3    # All OS/?
 # USER TOLERANCE
 MAX_ERRS = 3    # Maximum number of bad user answers tolerated before giving up
+# DIRECTORY NAMES
+TOP_DIR = "Baron_Builder"  # Store everything in there
+ARCHIVE_DIR = "Archive"    # Move archived save files here
+BACKUP_DIR = "Backup"      # Backup save files here
+WORKING_DIR = "Working"    # Use this directory to unarchive and modify save games
 
 #################################################
 #################### GLOBALS ####################
@@ -30,11 +35,11 @@ minMinNum = 5  # Minimum Python version minor number
 minMicNum = 2  # Minimum Python version micro number
 # OPERATING SYSTEM SAVE GAME LOCATIONS
 # Linux - /home/user/.config/unity3d/Owlcat Games/Pathfinder Kingmaker/Saved Games
-nixSaveGamePath =  os.path.join(".config", "unity3d", "Owlcat Games", "Pathfinder Kingmaker", "Saved Games")
+nixSaveGamePath = os.path.join(".config", "unity3d", "Owlcat Games", "Pathfinder Kingmaker", "Saved Games")
 # Windows - C:\Users\user\AppData\LocalLow\Owlcat Games\Pathfinder Kingmaker\Saved Games
-winSaveGamePath =  os.path.join("AppData", "LocalLow", "Owlcat Games", "Pathfinder Kingmaker", "Saved Games")
+winSaveGamePath = os.path.join("AppData", "LocalLow", "Owlcat Games", "Pathfinder Kingmaker", "Saved Games")
 # Apple - /home/user/Library/Application\ Support/unity.Owlcat\ Games.Pathfinder\ Kingmaker/Saved\ Games 
-macSaveGamePath =  os.path.join("Library", "Application Support", "unity.Owlcat Games.Pathfinder Kingmaker", "Saved Games")
+macSaveGamePath = os.path.join("Library", "Application Support", "unity.Owlcat Games.Pathfinder Kingmaker", "Saved Games")
 numBadAnswers = 0  # Current number of bad answers
 
 #################################################
@@ -183,13 +188,13 @@ def locate_save_games(operSys):
     return retVal
 
 
-def list_save_games(saveGamePath, operSys, fileExt="zks"):
+def list_save_games(operSys, saveGamePath, fileExt="zks"):
     '''
         PURPOSE - Provide a time-sorted list of all the save games in a given path, starting with
             the most recently modified
         INPUT
-            saveGamePath - Relative or absolute path to check for save games
             operSys - See OPERATAING SYSTEM macros
+            saveGamePath - Relative or absolute path to check for save games
             fileExt - File extension to look for (default: zks)
         OUTPUT
             On success, list of file names
@@ -263,8 +268,10 @@ def clear_screen(operSys):
     # CLEAR SCREEN
     if OS_LINUX == operSys or OS_APPLE == operSys:
         os.system("clear")
+        # print("\n\n\n")  # DEBUGGING
     elif OS_WINDOWS == operSys:
         os.system("cls")
+        # print("\n\n\n")  # DEBUGGING
     else:
         raise RuntimeError("Consider updating supportedOS list or control flow in clear_screen()")
 
@@ -272,9 +279,155 @@ def clear_screen(operSys):
     return retVal
 
 
-def user_menu(operSys, saveGamePath, saveGameFileList):
+def user_file_menu(operSys, saveGamePath, saveGameFileList):
     '''
-        PURPOSE - User menu
+        PURPOSE - Allow the user to choose a save game file to edit
+        INPUT
+            operSys - See OPERATAING SYSTEM macros
+            saveGamePath - Relative or absolute path to check for save games
+            saveGameFileList - Sorted list of save games found in saveGamePath
+        OUTPUT
+            On success, index of file selected from saveGameFileList
+            On failure, -1
+            On error, Exception
+    '''
+    # LOCAL VARIABLES
+    retVal = -1
+    supportedOS = supportedOSGlobal
+    selection = 0  # Index into saveGameFileList
+    page = 1  # Set of 10 save game files to display
+    numFiles = 0  # Number of save games in list
+
+    # GLOBAL VARIABLES
+    global numBadAnswers
+
+    # INPUT VALIDATION
+    if not isinstance(operSys, int):
+        raise TypeError('Operating system is of type "{}" instead of integer'.format(type(operSys)))
+    elif operSys not in supportedOS:
+        raise ValueError("Operating system value is unknown")
+    elif not isinstance(saveGamePath, str):
+        raise TypeError('Save game path is of type "{}" instead of string'.format(type(saveGamePath)))
+    elif len(saveGamePath) <= 0:
+        raise ValueError("Invalid directory length")
+    elif not isinstance(saveGameFileList, list):
+        raise TypeError('Save game file list is of type "{}" instead of list'.format(type(saveGameFileList)))
+    elif len(saveGameFileList) <= 0:
+        raise ValueError("Invalid file name list length")
+    else:
+        numFiles = len(saveGameFileList)
+
+    # CLEAR SCREEN
+    clear_screen(operSys)
+
+    while numBadAnswers <= MAX_ERRS:
+        # CLEAR SCREEN
+        # clear_screen(operSys)
+
+        print("")  # Blank line
+        # print("Num files:\t{}".format(numFiles))  # DEBUGGING
+        # print("Save Game #0:\t{}".format(saveGameFileList[0]))  # DEBUGGING
+
+        # PRINT SAVE FILES
+        # Verify files exist
+        if numFiles > ((page - 1) * 10):
+            # There's files
+            for fileNum in range((page - 1) * 10, page * 10):
+                if fileNum < numFiles:
+                    print("#{}:\t{}".format(fileNum + 1, saveGameFileList[fileNum]))
+                else:
+                    print("")  # Print a blank line as a placeholder for missing files
+            # break  # DEBUGGING
+        else:
+            # Not enough files
+            # Print no more files to view
+            pass
+            # break  # DEBUGGING
+
+        # NOTE: Print "end of list" or something similar when printing the last section
+        if numFiles - (page * 10) <= numFiles % 10:
+            # Last page
+            print("<<< END OF LIST >>>")
+        else:
+            print("")  # Print a blank line to maintain vertical spacing
+
+        # PRINT MENU
+        print("")  # Blank line
+
+        # Print options
+        print("SAVE GAME SELECTION")
+        print("Enter the number of the save game you want to edit")
+        print("-or-")
+        print('Type "top" to see the first page of files')
+        print('Type "up" to see the previous page of files')
+        print('Type "down" to see the next page of files')
+        print('Type "bottom" to see the last page of files')
+        print('Type "quit" to exit this program')
+
+        # Take input
+        selection = input("Make your selection [Down]: ")
+
+        # Modify input
+        if len(selection) == 0:
+            selection = "down"
+        else:
+            selection = selection.lower()
+
+        # Execute selection
+        if "top" == selection:
+            page = 1
+            numBadAnswers = 0
+            clear_screen(operSys)
+        elif "up" == selection:
+            if 1 == page:
+                print("\n<<< TOP OF LIST >>>")
+                print("Invalid selection.  Try again.")
+                numBadAnswers += 1
+            else:
+                page -= 1
+                numBadAnswers = 0
+                clear_screen(operSys)
+        elif "down" == selection:
+            if numFiles - (page * 10) <= numFiles % 10:
+                print("\n<<< END OF LIST >>>")
+                print("Invalid selection.  Try again.")
+                numBadAnswers += 1
+            else:
+                page += 1
+                numBadAnswers = 0
+                clear_screen(operSys)
+        elif "bottom" == selection:
+            if 0 == numFiles % 10:
+                page = int(((numFiles - (numFiles % 10)) / 10))
+            else:
+                page = int(((numFiles - (numFiles % 10)) / 10) + 1)
+            numBadAnswers = 0
+            clear_screen(operSys)
+        elif "quit" == selection:
+            numBadAnswers = 0
+            retVal = -1
+            break
+        else:
+            try:
+                retVal = int(selection)
+            except Exception as err:
+                print(repr(err))  # DEBUGGING
+                print("\nInvalid selection.  Try again.")
+                numBadAnswers += 1
+            else:
+                if retVal < 0 or retVal >= numFiles:
+                    print("\nInvalid selection.  Try again.")
+                    numBadAnswers += 1
+                else:
+                    break
+
+    # DONE
+    return retVal
+
+
+def user_mod_menu(operSys, saveGamePath, saveGameFileList):
+    '''
+        PURPOSE - Allow a user to decide how to edit a given save game
         INPUT
             operSys - See OPERATAING SYSTEM macros
             saveGamePath - Relative or absolute path to check for save games
@@ -430,6 +583,7 @@ def main():
     operSys = OS_UNKNOWS   # Operating system macro
     saveGamePath = ""      # Absolute path to save games
     saveGameFileList = []  # List of save game files
+    fileNum = None         # Index into saveGameFileList the user selected
 
     # WORK
     # Verify Python Version
@@ -442,6 +596,7 @@ def main():
         else:
             if not retVal:
                 print("Incorrect version of Python.\nWritten for Python {}.{}.{}.".format(minMajNum, minMinNum, minMicNum))
+                retVal = False
 
     # Check OS
     if retVal:
@@ -453,6 +608,7 @@ def main():
         else:
             if operSys == OS_UNKNOWS:
                 print("Unable to identify the current operating system.")
+                retVal = False
             else:
                 # print("Current OS:\t{}".format(operSys))  # DEBUGGING
                 pass
@@ -467,24 +623,61 @@ def main():
         else:
             if len(saveGamePath) <= 0:
                 print("Unable to locate the save game directory.")
+                retVal = False
 
     # Parse Save Games
     if retVal:
         try:
-            saveGameFileList = list_save_games(saveGamePath, operSys)
+            saveGameFileList = list_save_games(operSys, saveGamePath)
         except Exception as err:
             print('list_save_games() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
             retVal = False
         else:
             if len(saveGameFileList) <= 0:
                 print("Unable to locate any save game files in directory.")
+                retVal = False
+
+    # Choose Save Game
+    if retVal:
+        try:
+            fileNum = user_file_menu(operSys, saveGamePath, saveGameFileList)
+        except Exception as err:
+            print('user_file_menu() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
+            retVal = False
+            pass
+        else:
+            if fileNum < 0:
+                print("A save game was not selected.")
+                retVal = False
+
+    # Unarchive Save File
+    if retVal:
+        try:
+            pass
+        except Exception as err:
+            # print('_____() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
+            # retVal = False
+            pass
+        else:
+            pass
+
+    # Instantiate Save File Object
+    if retVal:
+        try:
+            pass
+        except Exception as err:
+            # print('_____() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
+            # retVal = False
+            pass
+        else:
+            pass
 
     # Print Menu
     if retVal:
         try:
-            retVal = user_menu(operSys, saveGamePath, saveGameFileList)
+            retVal = user_mod_menu(operSys, saveGamePath, saveGameFileList)
         except Exception as err:
-            print('user_menu() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
+            print('user_mod_menu() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
             retVal = False
         else:
             pass
