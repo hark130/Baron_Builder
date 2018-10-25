@@ -15,7 +15,7 @@ class JsonFile():
         NOTES
             [X] saveGame = JsonFile("save_game_42.zks")  # Instantiates a JsonFile object
             [X] saveGame.read_json_file()                # Read the raw file contents
-            [/] saveGame.parse_json_contents()           # Translate the raw json-format a dictionary
+            [X] saveGame.parse_json_contents()           # Translate the raw json-format a dictionary
             [ ] value1 = saveGame.get_data(key1)         # Get the value of an existing key
             [ ] saveGame.mod_data(key1, value2)          # Modify the value of an existing key
             [ ] saveGame.add_data(key1337, value1337)    # Add a key/value pair to the dictionary
@@ -40,6 +40,7 @@ class JsonFile():
             self.fCont = None     # Raw contents of filename
             self.fDict = None     # Dictionary parsed from self.fCont
             self.success = False  # Set this to False if anything fails
+            self.changed = False  # Set this to True contents are modified
            
         # INPUT VALIDATION
         if not isinstance(filename, str):
@@ -110,7 +111,13 @@ class JsonFile():
         if self.success:
             # PARSE RAW FILE CONTENTS
             if self.fCont and len(self.fCont) > 0:
-                pass  # IMPLEMENT THIS LATER
+                try:
+                    self.fDict = json.dumps(self.fCont)
+                except Exception as err:
+                    print(repr(err))  # DEBUGGING
+                    self.success = False
+                else:
+                    retVal = True
         
         # DONE
         return retVal
@@ -121,7 +128,9 @@ class JsonFile():
             PURPOSE - Write the json content to the file
             OUTPUT
                 On success, True
-                On failure, False            
+                On failure, False
+            NOTES
+                No file I/O will take place unless data has been modified
         '''
         # LOCAL VARIABLES
         retVal = False
@@ -129,14 +138,17 @@ class JsonFile():
         # INPUT VALIDATION
         if self.success:
             # OVERWRITE FILE
-            try:
-                with open(os.path.join(self.fPath, self.fName), 'w') as outFile:
-                    json.dump(self.fDict, outFile)
-            except Exception as err:
-                print(repr(err))  # DEBUGGING
-                self.success = False
+            if self.changed:
+                try:
+                    with open(os.path.join(self.fPath, self.fName), 'w') as outFile:
+                        json.dump(self.fDict, outFile)
+                except Exception as err:
+                    print(repr(err))  # DEBUGGING
+                    self.success = False
+                else:
+                    retVal = True
             else:
-                retVal = True
+                retVal = True  # No change made but everything is good
                 
         # DONE
         return retVal        
