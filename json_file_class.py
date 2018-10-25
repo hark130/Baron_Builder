@@ -1,4 +1,6 @@
+import json
 import os
+
 
 class JsonFile():
     '''
@@ -18,17 +20,26 @@ class JsonFile():
             [ ] saveGame.mod_data(key1, value2)          # Modify the value of an existing key
             [ ] saveGame.add_data(key1337, value1337)    # Add a key/value pair to the dictionary
             [ ] saveGame.del_data(key2)                  # Delete a key from the dictionary
-            [ ] saveGame.write_json_file()               # Overwrites existing file with changes
-            [ ] saveGame.close_json_file()               # Zeroizes all data (file is technically already closed)
+            [X] saveGame.write_json_file()               # Overwrites existing file with changes
+            [X] saveGame.close_json_file()               # Zeroizes all data (file is technically already closed)
     '''
     
     
     def __init__(self, filename):
+        '''
+            PURPOSE - Class ctor
+            INPUT
+                filename - String representation of a relative or absolute filename
+            OUTPUT - None
+            NOTES
+                New class attributes must be zeroed in close_json_file()
+        '''
         # CLASS ATTRIBUTES
-            self.fPath = None  # Path to the filename
-            self.fName = None  # Filename
-            self.fCont = None  # Raw contents of filename
-            self.fDict = None  # Dictionary parsed from self.fCont
+            self.fPath = None     # Path to the filename
+            self.fName = None     # Filename
+            self.fCont = None     # Raw contents of filename
+            self.fDict = None     # Dictionary parsed from self.fCont
+            self.success = False  # Set this to False if anything fails
            
         # INPUT VALIDATION
         if not isinstance(filename, str):
@@ -43,7 +54,8 @@ class JsonFile():
         elif not os.path.isfile(filename):
             # print("JsonFile ctor:\t{} is not a file".format(filename))  # DEBUGGING
             pass
-        else:            
+        else:
+            self.success = True
             self.fPath = os.path.dirname(filename)
             self.fName = os.path.basename(filename)
         
@@ -61,18 +73,24 @@ class JsonFile():
         # LOCAL VARIABLES
         retVal = False
         
-        # READ FILE CONTENTS
-        # Is the file already open?
-        if not self.fCont:
-            # Is there a path and filename?
-            if self.fPath and self.fName:
-                # Open the file and read the contents
-                with open(os.path.join(self.fPath, self.fName), "r") as inFile:
-                    self.fCont = inFile.read()
-                
-                # Verify the read
-                if self.fCont:
-                    retVal = True
+        # INPUT VALIDATION
+        if self.success:
+            # READ FILE CONTENTS
+            # Is the file already open?
+            if not self.fCont:
+                # Is there a path and filename?
+                if self.fPath and self.fName:
+                    # Open the file and read the contents
+                    try:
+                        with open(os.path.join(self.fPath, self.fName), "r") as inFile:
+                            self.fCont = inFile.read()
+                    except Exception as err:
+                        print(repr(err))  # DEBUGGING
+                        self.success = False
+                    else:
+                        # Verify the read
+                        if self.fCont:
+                            retVal = True
 
         # DONE
         return retVal
@@ -88,11 +106,64 @@ class JsonFile():
         # LOCAL VARIABLES
         retVal = False
         
-        # PARSE RAW FILE CONTENTS
-        if self.fCont and len(self.fCont) > 0:
-            pass  # IMPLEMENT THIS LATER
+        # INPUT VALIDATION
+        if self.success:
+            # PARSE RAW FILE CONTENTS
+            if self.fCont and len(self.fCont) > 0:
+                pass  # IMPLEMENT THIS LATER
         
         # DONE
         return retVal
-                
+    
+    
+    def write_json_file(self):
+        '''
+            PURPOSE - Write the json content to the file
+            OUTPUT
+                On success, True
+                On failure, False            
+        '''
+        # LOCAL VARIABLES
+        retVal = False
         
+        # INPUT VALIDATION
+        if self.success:
+            # OVERWRITE FILE
+            try:
+                with open(os.path.join(self.fPath, self.fName), 'w') as outFile:
+                    json.dump(self.fDict, outFile)
+            except Exception as err:
+                print(repr(err))  # DEBUGGING
+                self.success = False
+            else:
+                retVal = True
+                
+        # DONE
+        return retVal        
+
+    
+    def close_json_file(self):
+        '''
+            PURPOSE - Clear out all class attributes without saving
+            OUTPUT
+                On success, True
+                On failure, False
+        '''
+        # LOCAL VARIABLES
+        retVal = False
+        
+        # RESET
+        try:
+            self.fPath = None
+            self.fName = None
+            self.fCont = None
+            self.fDict = None
+            self.success = True
+        except Exception as err:
+            print(repr(err))  # DEBUGGING
+            retVal = False
+        else:
+            retVal = True
+            
+        # DONE
+        return retVal
