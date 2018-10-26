@@ -18,7 +18,7 @@ class JsonFile():
             [X] saveGame.parse_json_contents()           # Translate the raw json-format a dictionary
             [X] value1 = saveGame.get_data(key1)         # Get the value of an existing key
             [X] saveGame.key_present(key1)               # Determine if a key exists
-            [ ] saveGame.mod_data(key1, value2)          # Modify the value of an existing key
+            [X] saveGame.mod_data(key1, value2)          # Modify the value of an existing key
             [ ] saveGame.add_data(key1337, value1337)    # Add a key/value pair to the dictionary
             [ ] saveGame.del_data(key2)                  # Delete a key from the dictionary
             [X] saveGame.write_json_file()               # Overwrites existing file with changes
@@ -163,6 +163,35 @@ class JsonFile():
         if isinstance(key, str) and len(key) > 0 and self.success:
             if self.get_data(key) is not None:
                 retVal = True
+
+        # DONE
+        return retVal
+
+
+    def mod_data(self, key, newData):
+        '''
+            PURPOSE - Modify existing data in the json dictionary
+            INPUT
+                key - string representation of a key
+                newData - string representation of key's new data
+            OUTPUT
+                On succcess, True
+                On failure, False
+            NOTES
+                This function will fail if the key does not exist
+        '''
+        # LOCAL VARIABLES
+        retVal = False
+
+        # INPUT VALIDATION
+        if isinstance(key, str) and len(key) > 0 and isinstance(newData, str) and self.success:
+            # Does the key exist?
+            if self.key_present(key):
+                self.fDict[key] = newData
+                self.changed = True
+                retVal = True
+            else:
+                retVal = False
 
         # DONE
         return retVal
