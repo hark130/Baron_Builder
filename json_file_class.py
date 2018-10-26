@@ -190,13 +190,38 @@ class JsonFile():
                 self.fDict[key] = newData
                 self.changed = True
                 retVal = True
-            else:
-                retVal = False
 
         # DONE
         return retVal
 
-    
+
+    def add_data(self, newKey, newData):
+        '''
+            PURPOSE - Add a new key to the json dictionary
+            INPUT
+                newKey - string representation of a new key to add
+                newData - string representation of newKey's new data
+            OUTPUT
+                On success, True
+                On failure, False
+            NOTES
+                If the key already exists, this function will fail
+        '''
+        # LOCAL VARIABLES
+        retVal = False
+
+        # INPUT VALIDATION
+        if isinstance(newKey, str) and len(newKey) > 0 and isinstance(newData, str) and self.success:
+            # Does the key exist?
+            if not self.key_present(newKey):
+                self.fDict[newKey] = newData
+                self.changed = True
+                retVal = True
+
+        # DONE
+        return retVal
+
+
     def write_json_file(self):
         '''
             PURPOSE - Write the json content to the file
