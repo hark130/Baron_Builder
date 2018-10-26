@@ -1,3 +1,5 @@
+# from codecs import BOM_UTF8
+import codecs
 import json
 import os
 
@@ -36,12 +38,12 @@ class JsonFile():
                 New class attributes must be zeroed in close_json_file()
         '''
         # CLASS ATTRIBUTES
-            self.fPath = None     # Path to the filename
-            self.fName = None     # Filename
-            self.fCont = None     # Raw contents of filename
-            self.fDict = None     # Dictionary parsed from self.fCont
-            self.success = False  # Set this to False if anything fails
-            self.changed = False  # Set this to True contents are modified
+        self.fPath = None     # Path to the filename
+        self.fName = None     # Filename
+        self.fCont = None     # Raw contents of filename
+        self.fDict = None     # Dictionary parsed from self.fCont
+        self.success = False  # Set this to False if anything fails
+        self.changed = False  # Set this to True contents are modified
            
         # INPUT VALIDATION
         if not isinstance(filename, str):
@@ -84,8 +86,14 @@ class JsonFile():
                 if self.fPath and self.fName:
                     # Open the file and read the contents
                     try:
-                        with open(os.path.join(self.fPath, self.fName), "r") as inFile:
+                        with codecs.open(os.path.join(self.fPath, self.fName), "r", "utf-8-sig") as inFile:
+                        # with open(os.path.join(self.fPath, self.fName), "r") as inFile:
                             self.fCont = inFile.read()
+                            # print("\n{}".format(self.fCont))  # DEBUGGING
+                            # Strip off the UTF-8 header
+                            # if self.fCont.startswith(str(BOM_UTF8)):
+                            #     self.fCont = self.fCont[len(str(BOM_UTF8)):]
+                            # print("\n{}".format(self.fCont))  # DEBUGGING
                     except Exception as err:
                         print(repr(err))  # DEBUGGING
                         self.success = False
@@ -113,7 +121,11 @@ class JsonFile():
             # PARSE RAW FILE CONTENTS
             if self.fCont and len(self.fCont) > 0:
                 try:
-                    self.fDict = json.dumps(self.fCont)
+                    self.fDict = json.loads(self.fCont)
+                    # data = json.load(codecs.decode(r.text, 'utf-8-sig'))
+                    # self.fDict = json.loads(codecs.decode(self.fCont, "utf-8-sig"))
+                    # self.fDict = json.loads(codecs.decode(self.fCont, "utf-8-sig", errors = "ignore"))
+
                 except Exception as err:
                     print(repr(err))  # DEBUGGING
                     self.success = False
@@ -140,8 +152,18 @@ class JsonFile():
         # INPUT VALIDATION
         if isinstance(key, str) and len(key) > 0 and self.success:
             if self.fDict:
-                if key in self.fDict.keys():
-                    retVal = self.fDict[key]
+                try:
+                    if key in self.fDict.keys():
+                        try:
+                            retVal = self.fDict[key]
+                        except Exception as err:
+                            print(repr(err))
+                            print("key == {}".format(key))  # DEBUGGING
+                            print("self.fDict == {}".format(self.fDict))  # DEBUGGING
+                except Exception as err:
+                    print(repr(err))
+                    print("key == {}".format(key))  # DEBUGGING
+                    print("self.fDict == {}".format(self.fDict))  # DEBUGGING
 
         # DONE
         return retVal
@@ -173,7 +195,7 @@ class JsonFile():
             PURPOSE - Modify existing data in the json dictionary
             INPUT
                 key - string representation of a key
-                newData - string representation of key's new data
+                newData - Key's new data
             OUTPUT
                 On succcess, True
                 On failure, False
@@ -184,7 +206,7 @@ class JsonFile():
         retVal = False
 
         # INPUT VALIDATION
-        if isinstance(key, str) and len(key) > 0 and isinstance(newData, str) and self.success:
+        if isinstance(key, str) and len(key) > 0 and self.success:
             # Does the key exist?
             if self.key_present(key):
                 self.fDict[key] = newData
@@ -200,7 +222,7 @@ class JsonFile():
             PURPOSE - Add a new key to the json dictionary
             INPUT
                 newKey - string representation of a new key to add
-                newData - string representation of newKey's new data
+                newData - newKey's new data
             OUTPUT
                 On success, True
                 On failure, False
@@ -212,7 +234,7 @@ class JsonFile():
         retVal = False
 
         # INPUT VALIDATION
-        if isinstance(newKey, str) and len(newKey) > 0 and isinstance(newData, str) and self.success:
+        if isinstance(newKey, str) and len(newKey) > 0 and self.success:
             # Does the key exist?
             if not self.key_present(newKey):
                 self.fDict[newKey] = newData
@@ -241,7 +263,7 @@ class JsonFile():
         # INPUT VALIDATION
         if isinstance(oldKey, str) and len(oldKey) > 0 and self.success:
             tempVal = self.fDict.pop(oldKey, None)
-            if tempVal:
+            if tempVal is not None:
                 self.changed = True
                 retVal = True
 
@@ -266,6 +288,7 @@ class JsonFile():
             # OVERWRITE FILE
             if self.changed:
                 try:
+                    ######## DO I NEED MORE ENCODING HERE?!?! ########
                     with open(os.path.join(self.fPath, self.fName), 'w') as outFile:
                         json.dump(self.fDict, outFile)
                 except Exception as err:
