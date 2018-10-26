@@ -19,8 +19,8 @@ class JsonFile():
             [X] value1 = saveGame.get_data(key1)         # Get the value of an existing key
             [X] saveGame.key_present(key1)               # Determine if a key exists
             [X] saveGame.mod_data(key1, value2)          # Modify the value of an existing key
-            [ ] saveGame.add_data(key1337, value1337)    # Add a key/value pair to the dictionary
-            [ ] saveGame.del_data(key2)                  # Delete a key from the dictionary
+            [X] saveGame.add_data(key1337, value1337)    # Add a key/value pair to the dictionary
+            [X] saveGame.del_data(key2)                  # Delete a key from the dictionary
             [X] saveGame.write_json_file()               # Overwrites existing file with changes
             [X] saveGame.close_json_file()               # Zeroizes all data (file is technically already closed)
     '''
@@ -178,7 +178,7 @@ class JsonFile():
                 On succcess, True
                 On failure, False
             NOTES
-                This function will fail if the key does not exist
+                This method will fail if the key does not exist
         '''
         # LOCAL VARIABLES
         retVal = False
@@ -205,7 +205,8 @@ class JsonFile():
                 On success, True
                 On failure, False
             NOTES
-                If the key already exists, this function will fail
+                If the key already exists, this method will fail
+                This method permits empty strings as data
         '''
         # LOCAL VARIABLES
         retVal = False
@@ -215,6 +216,32 @@ class JsonFile():
             # Does the key exist?
             if not self.key_present(newKey):
                 self.fDict[newKey] = newData
+                self.changed = True
+                retVal = True
+
+        # DONE
+        return retVal
+
+
+    def del_data(self, oldKey):
+        '''
+            PURPOSE - Remove a key/data pair from the json dictionary
+            INPUT
+                oldKey - string representation of the key to remove
+            OUTPUT
+                On success, True
+                On failure, False
+            NOTES
+                This method will fail if the key does not exist
+        '''
+        # LOCAL VARIABLES
+        retVal = False
+        tempVal = None  # Store the return value from pop here
+
+        # INPUT VALIDATION
+        if isinstance(oldKey, str) and len(oldKey) > 0 and self.success:
+            tempVal = self.fDict.pop(oldKey, None)
+            if tempVal:
                 self.changed = True
                 retVal = True
 
