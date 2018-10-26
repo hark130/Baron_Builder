@@ -17,6 +17,7 @@ class JsonFile():
             [X] saveGame.read_json_file()                # Read the raw file contents
             [X] saveGame.parse_json_contents()           # Translate the raw json-format a dictionary
             [X] value1 = saveGame.get_data(key1)         # Get the value of an existing key
+            [X] saveGame.key_present(key1)               # Determine if a key exists
             [ ] saveGame.mod_data(key1, value2)          # Modify the value of an existing key
             [ ] saveGame.add_data(key1337, value1337)    # Add a key/value pair to the dictionary
             [ ] saveGame.del_data(key2)                  # Delete a key from the dictionary
@@ -144,7 +145,28 @@ class JsonFile():
 
         # DONE
         return retVal
-    
+
+
+    def key_present(self, key):
+        '''
+            PURPOSE - Determine if a key exists in the json dictionary
+            INPUT
+                key - string representation of a key
+            OUTPUT
+                If key is present, True
+                If key is missing, False
+        '''
+        # LOCAL VARIABLES
+        retVal = False
+
+        # INPUT VALIDATION
+        if isinstance(key, str) and len(key) > 0 and self.success:
+            if self.get_data(key) is not None:
+                retVal = True
+
+        # DONE
+        return retVal
+
     
     def write_json_file(self):
         '''
