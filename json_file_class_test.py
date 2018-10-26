@@ -215,8 +215,25 @@ class Json_File_Class_Test_Normal(Json_File_Class_Tests):
 class Json_File_Class_Test_Error(Json_File_Class_Tests):
 
 
-    def test_Error_01(self):
-        self.assertTrue(True)
+    def test_Error_01_Read(self):
+        inFilename = os.path.join("Test_Files", "Json_File_Class_Test_Error01.json")
+        test = JsonFile(inFilename)
+        self.assertFalse(test.read_json_file())
+        self.assertFalse(test.fCont)
+
+
+    def test_Error_02_Parse(self):
+        inFilename = os.path.join("Test_Files", "Json_File_Class_Test_Error02.json")
+        self.create_file(inFilename, "This is not a JSON formatted file")
+        test = JsonFile(inFilename)
+        self.assertTrue(test.read_json_file())
+        try:
+            self.assertFalse(test.parse_json_contents())
+        except JSONDecodeError as err:
+            self.assertTrue(True)  # More fidelilty
+        except Exception as err:
+            self.fail("Raised wrong exception")
+        self.assertFalse(test.fCont)
 
 
     def test_Error_03_Mod(self):
