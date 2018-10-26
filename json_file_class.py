@@ -16,7 +16,7 @@ class JsonFile():
             [X] saveGame = JsonFile("save_game_42.zks")  # Instantiates a JsonFile object
             [X] saveGame.read_json_file()                # Read the raw file contents
             [X] saveGame.parse_json_contents()           # Translate the raw json-format a dictionary
-            [ ] value1 = saveGame.get_data(key1)         # Get the value of an existing key
+            [X] value1 = saveGame.get_data(key1)         # Get the value of an existing key
             [ ] saveGame.mod_data(key1, value2)          # Modify the value of an existing key
             [ ] saveGame.add_data(key1337, value1337)    # Add a key/value pair to the dictionary
             [ ] saveGame.del_data(key2)                  # Delete a key from the dictionary
@@ -119,6 +119,29 @@ class JsonFile():
                 else:
                     retVal = True
         
+        # DONE
+        return retVal
+
+
+    def get_data(self, key):
+        '''
+            PURPOSE - Resolve a key to its data in the json dictionary
+            INPUT
+                key - string representation of a key
+            OUTPUT
+                On success, the key's value
+                None if the key does not exist
+                On error, None
+        '''
+        # LOCAL VARIABLES
+        retVal = None
+
+        # INPUT VALIDATION
+        if isinstance(key, str) and len(key) > 0 and self.success:
+            if self.fDict:
+                if key in self.fDict.keys():
+                    retVal = self.fDict[key]
+
         # DONE
         return retVal
     
