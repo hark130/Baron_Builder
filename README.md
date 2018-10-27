@@ -22,7 +22,7 @@ My end goal is to create a save game editor that works on all operating systems 
 | Parse save games | ✓ | ? | ? |
 | Print file open menu | ✓ | ? | ? |
 | Print user selection menu | ✓ | ? | ? |
-| Write json-parsing class | | | |
+| Write json-parsing class | ✓ | ? | ? |
 | Write save-file-parsing class | | | |
 | Release wheel | | | |
 | Write wiki | | | |
