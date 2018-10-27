@@ -55,3 +55,8 @@ My end goal is to create a save game editor that works on all operating systems 
 		* "Archive" (Move old save game files here)
 		* "Backup" (Back up save game files here)
 		* "Working" (Working directory to unarchive save files into)
+	* Implement JsonFile and ZksFile classes to be directory-independent
+		* AKA Don't 'hard code' directories
+		* Make Baron_Builder pass in the necessary directories (e.g., Archive, Backup, Working)
+		* This design will facilitate easy relocation of files in the future
+
