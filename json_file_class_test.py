@@ -62,7 +62,7 @@ class Json_File_Class_Test_Normal(Json_File_Class_Tests):
         test = JsonFile(inFilename)
         self.assertTrue(test.read_json_file())
         # Use .find() to avoid BOM headers
-        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        self.assertTrue(self.defFileContent.find(test.jCont) >= 0)
 
 
     def test_Normal_02_Parse(self):
@@ -73,10 +73,10 @@ class Json_File_Class_Test_Normal(Json_File_Class_Tests):
         self.assertTrue(test.read_json_file())
         self.assertTrue(test.parse_json_contents())
         # Use .find() to avoid BOM headers
-        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        self.assertTrue(self.defFileContent.find(test.jCont) >= 0)
         for key in expectResults.keys():
             try:
-                self.assertTrue(test.fDict[key] == expectResults[key])
+                self.assertTrue(test.jDict[key] == expectResults[key])
             except KeyError as err:
                 self.fail()
             except Exception as err:
@@ -93,19 +93,19 @@ class Json_File_Class_Test_Normal(Json_File_Class_Tests):
         self.assertTrue(test.parse_json_contents())
         # Modify existing data
         for key in changes.keys():
-            test.changed = False
+            test.jChanged = False
             try:
                 self.assertTrue(test.mod_data(key, changes[key]))
             except Except as err:
                 print(repr(err))
                 raise(err)
             else:
-                self.assertTrue(test.changed)
+                self.assertTrue(test.jChanged)
         # Use .find() to avoid BOM headers
-        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        self.assertTrue(self.defFileContent.find(test.jCont) >= 0)
         for key in expectResults.keys():
             try:
-                self.assertTrue(test.fDict[key] == expectResults[key])
+                self.assertTrue(test.jDict[key] == expectResults[key])
             except KeyError as err:
                 self.fail()
             except Exception as err:
@@ -127,19 +127,19 @@ class Json_File_Class_Test_Normal(Json_File_Class_Tests):
         self.assertTrue(test.parse_json_contents())
         # Modify existing data
         for key in expectResults.keys():
-            test.changed = False
+            test.jChanged = False
             try:
                 self.assertTrue(test.add_data(key, expectResults[key]))
             except Except as err:
                 print(repr(err))
                 raise(err)
             else:
-                self.assertTrue(test.changed)
+                self.assertTrue(test.jChanged)
         # Use .find() to avoid BOM headers
-        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        self.assertTrue(self.defFileContent.find(test.jCont) >= 0)
         for key in expectResults.keys():
             try:
-                self.assertTrue(test.fDict[key] == expectResults[key])
+                self.assertTrue(test.jDict[key] == expectResults[key])
             except KeyError as err:
                 self.fail()
             except Exception as err:
@@ -155,19 +155,19 @@ class Json_File_Class_Test_Normal(Json_File_Class_Tests):
         self.assertTrue(test.parse_json_contents())
         # Modify existing data
         for key in expectResults.keys():
-            test.changed = False
+            test.jChanged = False
             try:
                 self.assertTrue(test.del_data(key))
             except Except as err:
                 print(repr(err))
                 raise(err)
             else:
-                self.assertTrue(test.changed)
+                self.assertTrue(test.jChanged)
         # Use .find() to avoid BOM headers
-        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        self.assertTrue(self.defFileContent.find(test.jCont) >= 0)
         for key in expectResults.keys():
             try:
-                self.assertTrue(key not in test.fDict.keys())
+                self.assertTrue(key not in test.jDict.keys())
             except KeyError as err:
                 self.fail()
             except Exception as err:
@@ -183,19 +183,19 @@ class Json_File_Class_Test_Normal(Json_File_Class_Tests):
         self.assertTrue(test.parse_json_contents())
         # Modify existing data
         for key in expectResults.keys():
-            test.changed = False
+            test.jChanged = False
             try:
                 self.assertTrue(test.del_data(key))
             except Except as err:
                 print(repr(err))
                 raise(err)
             else:
-                self.assertTrue(test.changed)
+                self.assertTrue(test.jChanged)
         # Use .find() to avoid BOM headers
-        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        self.assertTrue(self.defFileContent.find(test.jCont) >= 0)
         for key in expectResults.keys():
             try:
-                self.assertTrue(key not in test.fDict.keys())
+                self.assertTrue(key not in test.jDict.keys())
             except KeyError as err:
                 self.fail()
             except Exception as err:
@@ -207,9 +207,9 @@ class Json_File_Class_Test_Normal(Json_File_Class_Tests):
         self.assertTrue(results.parse_json_contents())
         # Verify data is missing
         for key in expectResults.keys():
-            self.assertFalse(results.changed)
+            self.assertFalse(results.jChanged)
             self.assertFalse(results.key_present(key))
-            self.assertFalse(results.changed)
+            self.assertFalse(results.jChanged)
 
 
 class Json_File_Class_Test_Error(Json_File_Class_Tests):
@@ -219,7 +219,7 @@ class Json_File_Class_Test_Error(Json_File_Class_Tests):
         inFilename = os.path.join("Test_Files", "Json_File_Class_Test_Error01.json")
         test = JsonFile(inFilename)
         self.assertFalse(test.read_json_file())
-        self.assertFalse(test.fCont)
+        self.assertFalse(test.jCont)
 
 
     def test_Error_02_Parse(self):
@@ -233,7 +233,7 @@ class Json_File_Class_Test_Error(Json_File_Class_Tests):
             self.assertTrue(True)  # More fidelilty
         except Exception as err:
             self.fail("Raised wrong exception")
-        self.assertFalse(test.fDict)
+        self.assertFalse(test.jDict)
 
 
     def test_Error_03_Mod(self):
@@ -249,10 +249,10 @@ class Json_File_Class_Test_Error(Json_File_Class_Tests):
         self.assertFalse(test.mod_data("Is4utoLevelupSave", True))
         self.assertFalse(test.mod_data("Quick_Save_Number", 1))
         # Use .find() to avoid BOM headers
-        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        self.assertTrue(self.defFileContent.find(test.jCont) >= 0)
         for key in expectResults.keys():
             try:
-                self.assertTrue(test.fDict[key] == expectResults[key])
+                self.assertTrue(test.jDict[key] == expectResults[key])
             except KeyError as err:
                 self.fail()
             except Exception as err:
@@ -273,7 +273,7 @@ class Json_File_Class_Test_Error(Json_File_Class_Tests):
         self.assertFalse(test.add_data("QuickSaveNumber", 1))
 
         # Use .find() to avoid BOM headers
-        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        self.assertTrue(self.defFileContent.find(test.jCont) >= 0)
 
 
     def test_Error_05_Del(self):
@@ -285,16 +285,16 @@ class Json_File_Class_Test_Error(Json_File_Class_Tests):
         self.assertTrue(test.parse_json_contents())
         # Modify existing data
         for key in expectResults.keys():
-            test.changed = False
+            test.jChanged = False
             try:
                 self.assertFalse(test.del_data(key))
             except Except as err:
                 print(repr(err))
                 raise(err)
             else:
-                self.assertFalse(test.changed)
+                self.assertFalse(test.jChanged)
         # Use .find() to avoid BOM headers
-        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        self.assertTrue(self.defFileContent.find(test.jCont) >= 0)
 
 
 class Json_File_Class_Test_Boundary(Json_File_Class_Tests):
@@ -313,7 +313,7 @@ class Json_File_Class_Test_Special(Json_File_Class_Tests):
         test = JsonFile(inFilename)
         self.assertTrue(test.read_json_file())
         # Use .find() to avoid BOM headers
-        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        self.assertTrue(self.defFileContent.find(test.jCont) >= 0)
         # Write the file
         self.assertTrue(test.write_json_file())
         self.assertTrue(test.close_json_file())
@@ -326,7 +326,7 @@ class Json_File_Class_Test_Special(Json_File_Class_Tests):
         self.assertTrue(test.read_json_file())
         self.assertTrue(test.parse_json_contents())
         # Use .find() to avoid BOM headers
-        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        self.assertTrue(self.defFileContent.find(test.jCont) >= 0)
         # Write the file
         self.assertTrue(test.write_json_file())
         self.assertTrue(test.close_json_file())
@@ -338,7 +338,7 @@ class Json_File_Class_Test_Special(Json_File_Class_Tests):
         test = JsonFile(inFilename)
         self.assertTrue(test.parse_json_contents())
         # Use .find() to avoid BOM headers
-        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        self.assertTrue(self.defFileContent.find(test.jCont) >= 0)
 
 
     def test_Special_04_Add_Without_Parse(self):
@@ -350,7 +350,7 @@ class Json_File_Class_Test_Special(Json_File_Class_Tests):
         for key in addThese.keys():
             self.assertTrue(test.add_data(key, addThese[key]))
         # Use .find() to avoid BOM headers
-        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        self.assertTrue(self.defFileContent.find(test.jCont) >= 0)
         for key in addThese.keys():
             self.assertTrue(test.key_present(key))
             self.assertTrue(test.get_data(key) == addThese[key])
@@ -365,7 +365,7 @@ class Json_File_Class_Test_Special(Json_File_Class_Tests):
         for key in delThese.keys():
             self.assertTrue(test.del_data(key))
         # Use .find() to avoid BOM headers
-        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        self.assertTrue(self.defFileContent.find(test.jCont) >= 0)
         for key in delThese.keys():
             self.assertFalse(test.key_present(key))
 
@@ -379,7 +379,7 @@ class Json_File_Class_Test_Special(Json_File_Class_Tests):
         for key in modThese.keys():
             self.assertTrue(test.mod_data(key, modThese[key]))
         # Use .find() to avoid BOM headers
-        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        self.assertTrue(self.defFileContent.find(test.jCont) >= 0)
         for key in modThese.keys():
             self.assertTrue(test.key_present(key))
             self.assertTrue(test.get_data(key) == modThese[key])

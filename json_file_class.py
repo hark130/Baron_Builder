@@ -36,12 +36,12 @@ class JsonFile():
                 New class attributes must be zeroed in close_json_file()
         '''
         # CLASS ATTRIBUTES
-        self.fPath = None     # Path to the filename
-        self.fName = None     # Filename
-        self.fCont = None     # Raw contents of filename
-        self.fDict = None     # Dictionary parsed from self.fCont
-        self.success = False  # Set this to False if anything fails
-        self.changed = False  # Set this to True contents are modified
+        self.jPath = None     # Path to the filename
+        self.jName = None     # Filename
+        self.jCont = None     # Raw contents of filename
+        self.jDict = None     # Dictionary parsed from self.jCont
+        self.jSuccess = False  # Set this to False if anything fails
+        self.jChanged = False  # Set this to True contents are modified
            
         # INPUT VALIDATION
         if not isinstance(filename, str):
@@ -57,9 +57,9 @@ class JsonFile():
             # print("JsonFile ctor:\t{} is not a file".format(filename))  # DEBUGGING
             pass
         else:
-            self.success = True
-            self.fPath = os.path.dirname(filename)
-            self.fName = os.path.basename(filename)
+            self.jSuccess = True
+            self.jPath = os.path.dirname(filename)
+            self.jName = os.path.basename(filename)
         
         
     def read_json_file(self):
@@ -76,28 +76,28 @@ class JsonFile():
         retVal = False
         
         # INPUT VALIDATION
-        if self.success:
+        if self.jSuccess:
             # READ FILE CONTENTS
             # Is the file already open?
-            if not self.fCont:
+            if not self.jCont:
                 # Is there a path and filename?
-                if self.fPath and self.fName:
+                if self.jPath and self.jName:
                     # Open the file and read the contents
                     try:
-                        with codecs.open(os.path.join(self.fPath, self.fName), "r", "utf-8-sig") as inFile:
-                        # with open(os.path.join(self.fPath, self.fName), "r") as inFile:
-                            self.fCont = inFile.read()
-                            # print("\n{}".format(self.fCont))  # DEBUGGING
+                        with codecs.open(os.path.join(self.jPath, self.jName), "r", "utf-8-sig") as inFile:
+                        # with open(os.path.join(self.jPath, self.jName), "r") as inFile:
+                            self.jCont = inFile.read()
+                            # print("\n{}".format(self.jCont))  # DEBUGGING
                             # Strip off the UTF-8 header
-                            # if self.fCont.startswith(str(BOM_UTF8)):
-                            #     self.fCont = self.fCont[len(str(BOM_UTF8)):]
-                            # print("\n{}".format(self.fCont))  # DEBUGGING
+                            # if self.jCont.startswith(str(BOM_UTF8)):
+                            #     self.jCont = self.jCont[len(str(BOM_UTF8)):]
+                            # print("\n{}".format(self.jCont))  # DEBUGGING
                     except Exception as err:
                         print(repr(err))  # DEBUGGING
-                        self.success = False
+                        self.jSuccess = False
                     else:
                         # Verify the read
-                        if self.fCont:
+                        if self.jCont:
                             retVal = True
 
         # DONE
@@ -117,22 +117,22 @@ class JsonFile():
         retVal = False
 
         # VERIFY FILE IS READ
-        if self.fCont is None:
+        if self.jCont is None:
             self.read_json_file()
         
         # INPUT VALIDATION
-        if self.success:
+        if self.jSuccess:
             # PARSE RAW FILE CONTENTS
-            if self.fCont and len(self.fCont) > 0:
+            if self.jCont and len(self.jCont) > 0:
                 try:
-                    self.fDict = json.loads(self.fCont)
+                    self.jDict = json.loads(self.jCont)
                     # data = json.load(codecs.decode(r.text, 'utf-8-sig'))
-                    # self.fDict = json.loads(codecs.decode(self.fCont, "utf-8-sig"))
-                    # self.fDict = json.loads(codecs.decode(self.fCont, "utf-8-sig", errors = "ignore"))
+                    # self.jDict = json.loads(codecs.decode(self.jCont, "utf-8-sig"))
+                    # self.jDict = json.loads(codecs.decode(self.jCont, "utf-8-sig", errors = "ignore"))
 
                 except Exception as err:
                     print(repr(err))  # DEBUGGING
-                    self.success = False
+                    self.jSuccess = False
                 else:
                     retVal = True
         
@@ -156,24 +156,24 @@ class JsonFile():
         retVal = None
 
         # VERIFY FILE IS PARSED
-        if self.fDict is None:
+        if self.jDict is None:
             self.parse_json_contents()
 
         # INPUT VALIDATION
-        if isinstance(key, str) and len(key) > 0 and self.success:
-            if self.fDict:
+        if isinstance(key, str) and len(key) > 0 and self.jSuccess:
+            if self.jDict:
                 try:
-                    if key in self.fDict.keys():
+                    if key in self.jDict.keys():
                         try:
-                            retVal = self.fDict[key]
+                            retVal = self.jDict[key]
                         except Exception as err:
                             print(repr(err))
                             print("key == {}".format(key))  # DEBUGGING
-                            print("self.fDict == {}".format(self.fDict))  # DEBUGGING
+                            print("self.jDict == {}".format(self.jDict))  # DEBUGGING
                 except Exception as err:
                     print(repr(err))
                     print("key == {}".format(key))  # DEBUGGING
-                    print("self.fDict == {}".format(self.fDict))  # DEBUGGING
+                    print("self.jDict == {}".format(self.jDict))  # DEBUGGING
 
         # DONE
         return retVal
@@ -194,11 +194,11 @@ class JsonFile():
         retVal = False
 
         # VERIFY FILE IS PARSED
-        if self.fDict is None:
+        if self.jDict is None:
             self.parse_json_contents()
 
         # INPUT VALIDATION
-        if isinstance(key, str) and len(key) > 0 and self.success:
+        if isinstance(key, str) and len(key) > 0 and self.jSuccess:
             if self.get_data(key) is not None:
                 retVal = True
 
@@ -223,15 +223,15 @@ class JsonFile():
         retVal = False
 
         # VERIFY FILE IS PARSED
-        if self.fDict is None:
+        if self.jDict is None:
             self.parse_json_contents()
 
         # INPUT VALIDATION
-        if isinstance(key, str) and len(key) > 0 and self.success:
+        if isinstance(key, str) and len(key) > 0 and self.jSuccess:
             # Does the key exist?
             if self.key_present(key):
-                self.fDict[key] = newData
-                self.changed = True
+                self.jDict[key] = newData
+                self.jChanged = True
                 retVal = True
 
         # DONE
@@ -256,15 +256,15 @@ class JsonFile():
         retVal = False
 
         # VERIFY FILE IS PARSED
-        if self.fDict is None:
+        if self.jDict is None:
             self.parse_json_contents()
 
         # INPUT VALIDATION
-        if isinstance(newKey, str) and len(newKey) > 0 and self.success:
+        if isinstance(newKey, str) and len(newKey) > 0 and self.jSuccess:
             # Does the key exist?
             if not self.key_present(newKey):
-                self.fDict[newKey] = newData
-                self.changed = True
+                self.jDict[newKey] = newData
+                self.jChanged = True
                 retVal = True
 
         # DONE
@@ -288,14 +288,14 @@ class JsonFile():
         tempVal = None  # Store the return value from pop here
 
         # VERIFY FILE IS PARSED
-        if self.fDict is None:
+        if self.jDict is None:
             self.parse_json_contents()
 
         # INPUT VALIDATION
-        if isinstance(oldKey, str) and len(oldKey) > 0 and self.success:
-            tempVal = self.fDict.pop(oldKey, None)
+        if isinstance(oldKey, str) and len(oldKey) > 0 and self.jSuccess:
+            tempVal = self.jDict.pop(oldKey, None)
             if tempVal is not None:
-                self.changed = True
+                self.jChanged = True
                 retVal = True
 
         # DONE
@@ -315,16 +315,16 @@ class JsonFile():
         retVal = False
         
         # INPUT VALIDATION
-        if self.success:
+        if self.jSuccess:
             # OVERWRITE FILE
-            if self.changed and self.fDict is not None:
+            if self.jChanged and self.jDict is not None:
                 try:
                     ######## DO I NEED MORE ENCODING HERE?!?! ########
-                    with open(os.path.join(self.fPath, self.fName), 'w') as outFile:
-                        json.dump(self.fDict, outFile)
+                    with open(os.path.join(self.jPath, self.jName), 'w') as outFile:
+                        json.dump(self.jDict, outFile)
                 except Exception as err:
                     print(repr(err))  # DEBUGGING
-                    self.success = False
+                    self.jSuccess = False
                 else:
                     retVal = True
             else:
@@ -346,11 +346,11 @@ class JsonFile():
         
         # RESET
         try:
-            self.fPath = None
-            self.fName = None
-            self.fCont = None
-            self.fDict = None
-            self.success = True
+            self.jPath = None
+            self.jName = None
+            self.jCont = None
+            self.jDict = None
+            self.jSuccess = True
         except Exception as err:
             print(repr(err))  # DEBUGGING
             retVal = False
