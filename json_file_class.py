@@ -36,10 +36,10 @@ class JsonFile():
                 New class attributes must be zeroed in close_json_file()
         '''
         # CLASS ATTRIBUTES
-        self.jPath = None     # Path to the filename
-        self.jName = None     # Filename
-        self.jCont = None     # Raw contents of filename
-        self.jDict = None     # Dictionary parsed from self.jCont
+        self.jPath = None      # Path to the filename
+        self.jName = None      # Filename
+        self.jCont = None      # Raw contents of filename
+        self.jDict = None      # Dictionary parsed from self.jCont
         self.jSuccess = False  # Set this to False if anything fails
         self.jChanged = False  # Set this to True contents are modified
            
@@ -57,9 +57,14 @@ class JsonFile():
             # print("JsonFile ctor:\t{} is not a file".format(filename))  # DEBUGGING
             pass
         else:
-            self.jSuccess = True
-            self.jPath = os.path.dirname(filename)
-            self.jName = os.path.basename(filename)
+            try:
+                self.jPath = os.path.dirname(filename)
+                self.jName = os.path.basename(filename)
+            except Exception as err:
+                print("\n{}".format(repr(err)))
+                self.jSuccess = False
+            else:
+                self.jSuccess = True
         
         
     def read_json_file(self):
