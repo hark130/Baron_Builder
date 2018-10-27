@@ -307,8 +307,82 @@ class Json_File_Class_Test_Boundary(Json_File_Class_Tests):
 class Json_File_Class_Test_Special(Json_File_Class_Tests):
 
 
-    def test_Special_01(self):
-        self.assertTrue(True)
+    def test_Special_01_Open_And_Close(self):
+        inFilename = os.path.join("Test_Files", "Json_File_Class_Test_Special01.json")
+        self.create_file(inFilename, self.defFileContent)
+        test = JsonFile(inFilename)
+        self.assertTrue(test.read_json_file())
+        # Use .find() to avoid BOM headers
+        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        # Write the file
+        self.assertTrue(test.write_json_file())
+        self.assertTrue(test.close_json_file())
+
+
+    def test_Special_02_Open_Parse_And_Close(self):
+        inFilename = os.path.join("Test_Files", "Json_File_Class_Test_Special02.json")
+        self.create_file(inFilename, self.defFileContent)
+        test = JsonFile(inFilename)
+        self.assertTrue(test.read_json_file())
+        self.assertTrue(test.parse_json_contents())
+        # Use .find() to avoid BOM headers
+        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        # Write the file
+        self.assertTrue(test.write_json_file())
+        self.assertTrue(test.close_json_file())
+
+
+    def test_Special_03_Parse_Without_Read(self):
+        inFilename = os.path.join("Test_Files", "Json_File_Class_Test_Special03.json")
+        self.create_file(inFilename, self.defFileContent)
+        test = JsonFile(inFilename)
+        self.assertTrue(test.parse_json_contents())
+        # Use .find() to avoid BOM headers
+        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+
+
+    def test_Special_04_Add_Without_Parse(self):
+        inFilename = os.path.join("Test_Files", "Json_File_Class_Test_Special04.json")
+        addThese = { "New Key" : "New Data" }
+        self.create_file(inFilename, self.defFileContent)
+        test = JsonFile(inFilename)
+        # Add without parse
+        for key in addThese.keys():
+            self.assertTrue(test.add_data(key, addThese[key]))
+        # Use .find() to avoid BOM headers
+        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        for key in addThese.keys():
+            self.assertTrue(test.key_present(key))
+            self.assertTrue(test.get_data(key) == addThese[key])
+
+
+    def test_Special_05_Del_Without_Parse(self):
+        inFilename = os.path.join("Test_Files", "Json_File_Class_Test_Special05.json")
+        delThese = { "$id" : "1" }
+        self.create_file(inFilename, self.defFileContent)
+        test = JsonFile(inFilename)
+        # Del without parse
+        for key in delThese.keys():
+            self.assertTrue(test.del_data(key))
+        # Use .find() to avoid BOM headers
+        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        for key in delThese.keys():
+            self.assertFalse(test.key_present(key))
+
+
+    def test_Special_06_Mod_Without_Parse(self):
+        inFilename = os.path.join("Test_Files", "Json_File_Class_Test_Special06.json")
+        modThese = { "IsAutoLevelupSave" : True }
+        self.create_file(inFilename, self.defFileContent)
+        test = JsonFile(inFilename)
+        # Mod without parse
+        for key in modThese.keys():
+            self.assertTrue(test.mod_data(key, modThese[key]))
+        # Use .find() to avoid BOM headers
+        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+        for key in modThese.keys():
+            self.assertTrue(test.key_present(key))
+            self.assertTrue(test.get_data(key) == modThese[key])
 
 
 if __name__ == "__main__":
