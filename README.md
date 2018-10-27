@@ -31,13 +31,13 @@ My end goal is to create a save game editor that works on all operating systems 
 
 ### Editor Features 
 
-| Task | Linux | Windows | Apple |
-| :--- | :---: | :-----: | :---: |
-| Add BPs | | | |
-| Change Kingdom Stability | | | |
-| Backup save games | | | |
-| Restore backed up save game | | | |
-| Archive (AKA backup/delete) old saves (speed up loads/saves?) | | | |
+| Feature # | Task | Linux | Windows | Apple |
+| :-------- | :--- | :---: | :-----: | :---: |
+| F01 | Add BPs | | | |
+| F02 | Change Kingdom Stability | | | |
+| F03 | Backup save games | | | |
+| F04 | Restore backed up save game | | | |
+| F05 | Archive (AKA backup/delete) old saves (speed up loads/saves?) | | | |
 
 ### Legend
 
