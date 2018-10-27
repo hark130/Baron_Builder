@@ -23,7 +23,7 @@ My end goal is to create a save game editor that works on all operating systems 
 | Print file open menu | ✓ | ? | ? |
 | Print user selection menu | ✓ | ? | ? |
 | Write json-parsing class | ✓ | ? | ? |
-| Write save-file-parsing class | | | |
+| Write save-file-parsing class | / | / | / |
 | Release wheel | | | |
 | Write wiki | | | |
 | Python command not required to run | | | |
@@ -43,7 +43,8 @@ My end goal is to create a save game editor that works on all operating systems 
 
 | Symbol | Meaning |
 | :----: | :------ |
-| | Not implemented |
+| | Not yet begun |
+| / | Work has begun |
 | ? | Implemented but not tested |
 | ✓ | Implemented and tested |
 
