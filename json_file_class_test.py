@@ -233,7 +233,7 @@ class Json_File_Class_Test_Error(Json_File_Class_Tests):
             self.assertTrue(True)  # More fidelilty
         except Exception as err:
             self.fail("Raised wrong exception")
-        self.assertFalse(test.fCont)
+        self.assertFalse(test.fDict)
 
 
     def test_Error_03_Mod(self):
@@ -257,6 +257,45 @@ class Json_File_Class_Test_Error(Json_File_Class_Tests):
                 self.fail()
             except Exception as err:
                 print(repr(err))
+
+
+    def test_Error_04_Add(self):
+        inFilename = os.path.join("Test_Files", "Json_File_Class_Test_Error04.json")
+        self.create_file(inFilename, self.defFileContent)
+        test = JsonFile(inFilename)
+        self.assertTrue(test.read_json_file())
+        self.assertTrue(test.parse_json_contents())
+
+        # Attempt to add existing data
+        self.assertFalse(test.add_data("$id", "2"))
+        self.assertFalse(test.add_data("Description", "Yuhra is awesome!"))
+        self.assertFalse(test.add_data("IsAutoLevelupSave", True))
+        self.assertFalse(test.add_data("QuickSaveNumber", 1))
+
+        # Use .find() to avoid BOM headers
+        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+
+
+    def test_Error_05_Del(self):
+        inFilename = os.path.join("Test_Files", "Json_File_Class_Test_Error05.json")
+        expectResults = {"delete":"this", "This key":["does", "not", "exist"], "key here":False, "How many keys named this?":0}
+        self.create_file(inFilename, self.defFileContent)
+        test = JsonFile(inFilename)
+        self.assertTrue(test.read_json_file())
+        self.assertTrue(test.parse_json_contents())
+        # Modify existing data
+        for key in expectResults.keys():
+            test.changed = False
+            try:
+                self.assertFalse(test.del_data(key))
+            except Except as err:
+                print(repr(err))
+                raise(err)
+            else:
+                self.assertFalse(test.changed)
+        # Use .find() to avoid BOM headers
+        self.assertTrue(self.defFileContent.find(test.fCont) >= 0)
+
 
 class Json_File_Class_Test_Boundary(Json_File_Class_Tests):
 
