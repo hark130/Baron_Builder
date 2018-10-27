@@ -8,23 +8,23 @@ class JsonFile():
     '''
         PURPOSE - Open, modify, save, and close json files
         USAGE
-            1. saveGame = JsonFile("save_game_42.zks")
-            2. saveGame.read_json_file()
-            3. saveGame.parse_json_contents()
+            1. jsonSave = JsonFile("player.json")
+            2. jsonSave.read_json_file()
+            3. jsonSave.parse_json_contents()
             4. [modify json contents using mod, add, or del]
-            5. saveGame.write_json_file()
-            6. saveGame.close_json_file()
+            5. jsonSave.write_json_file()
+            6. jsonSave.close_json_file()
         NOTES
-            [X] saveGame = JsonFile("save_game_42.zks")  # Instantiates a JsonFile object
-            [X] saveGame.read_json_file()                # Read the raw file contents
-            [X] saveGame.parse_json_contents()           # Translate the raw json-format a dictionary
-            [X] value1 = saveGame.get_data(key1)         # Get the value of an existing key
-            [X] saveGame.key_present(key1)               # Determine if a key exists
-            [X] saveGame.mod_data(key1, value2)          # Modify the value of an existing key
-            [X] saveGame.add_data(key1337, value1337)    # Add a key/value pair to the dictionary
-            [X] saveGame.del_data(key2)                  # Delete a key from the dictionary
-            [X] saveGame.write_json_file()               # Overwrites existing file with changes
-            [X] saveGame.close_json_file()               # Zeroizes all data (file is technically already closed)
+            [X] jsonSave = JsonFile("player.json")       # Instantiates a JsonFile object
+            [X] jsonSave.read_json_file()                # Read the raw file contents
+            [X] jsonSave.parse_json_contents()           # Translate the raw json-format a dictionary
+            [X] value1 = jsonSave.get_data(key1)         # Get the value of an existing key
+            [X] jsonSave.key_present(key1)               # Determine if a key exists
+            [X] jsonSave.mod_data(key1, value2)          # Modify the value of an existing key
+            [X] jsonSave.add_data(key1337, value1337)    # Add a key/value pair to the dictionary
+            [X] jsonSave.del_data(key2)                  # Delete a key from the dictionary
+            [X] jsonSave.write_json_file()               # Overwrites existing file with changes
+            [X] jsonSave.close_json_file()               # Zeroizes all data (file is technically already closed)
     '''
     
     
@@ -115,6 +115,10 @@ class JsonFile():
         '''
         # LOCAL VARIABLES
         retVal = False
+
+        # VERIFY FILE IS READ
+        if self.fCont is None:
+            self.read_json_file()
         
         # INPUT VALIDATION
         if self.success:
@@ -149,6 +153,10 @@ class JsonFile():
         # LOCAL VARIABLES
         retVal = None
 
+        # VERIFY FILE IS PARSED
+        if self.fDict is None:
+            self.parse_json_contents()
+
         # INPUT VALIDATION
         if isinstance(key, str) and len(key) > 0 and self.success:
             if self.fDict:
@@ -181,6 +189,10 @@ class JsonFile():
         # LOCAL VARIABLES
         retVal = False
 
+        # VERIFY FILE IS PARSED
+        if self.fDict is None:
+            self.parse_json_contents()
+
         # INPUT VALIDATION
         if isinstance(key, str) and len(key) > 0 and self.success:
             if self.get_data(key) is not None:
@@ -204,6 +216,10 @@ class JsonFile():
         '''
         # LOCAL VARIABLES
         retVal = False
+
+        # VERIFY FILE IS PARSED
+        if self.fDict is None:
+            self.parse_json_contents()
 
         # INPUT VALIDATION
         if isinstance(key, str) and len(key) > 0 and self.success:
@@ -233,6 +249,10 @@ class JsonFile():
         # LOCAL VARIABLES
         retVal = False
 
+        # VERIFY FILE IS PARSED
+        if self.fDict is None:
+            self.parse_json_contents()
+
         # INPUT VALIDATION
         if isinstance(newKey, str) and len(newKey) > 0 and self.success:
             # Does the key exist?
@@ -260,6 +280,10 @@ class JsonFile():
         retVal = False
         tempVal = None  # Store the return value from pop here
 
+        # VERIFY FILE IS PARSED
+        if self.fDict is None:
+            self.parse_json_contents()
+
         # INPUT VALIDATION
         if isinstance(oldKey, str) and len(oldKey) > 0 and self.success:
             tempVal = self.fDict.pop(oldKey, None)
@@ -286,7 +310,7 @@ class JsonFile():
         # INPUT VALIDATION
         if self.success:
             # OVERWRITE FILE
-            if self.changed:
+            if self.changed and self.fDict is not None:
                 try:
                     ######## DO I NEED MORE ENCODING HERE?!?! ########
                     with open(os.path.join(self.fPath, self.fName), 'w') as outFile:
