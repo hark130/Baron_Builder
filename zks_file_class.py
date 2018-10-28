@@ -40,7 +40,6 @@ class ZksFile():
             PURPOSE - Class ctor
             INPUT
                 filename - String representation of a relative or absolute filename
-                topDir - Top level directory to organize all of the unpacked and modified files
             OUTPUT - None
             NOTES
                 New class attributes must be zeroed in close_zks()
@@ -208,9 +207,3 @@ class ZksFile():
 
         # DONE
         return retVal
-
-
-
-
-# with zipfile.ZipFile("file.zip","r") as zip_ref:
-#     zip_ref.extractall("targetdir")
