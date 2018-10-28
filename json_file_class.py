@@ -131,6 +131,7 @@ class JsonFile():
             if self.jCont and len(self.jCont) > 0:
                 try:
                     self.jDict = json.loads(self.jCont)
+                    # print("ENTIRE DICTIONARY:\n{}".format(self.jDict))  # DEBUGGING
                     # data = json.load(codecs.decode(r.text, 'utf-8-sig'))
                     # self.jDict = json.loads(codecs.decode(self.jCont, "utf-8-sig"))
                     # self.jDict = json.loads(codecs.decode(self.jCont, "utf-8-sig", errors = "ignore"))
@@ -168,13 +169,18 @@ class JsonFile():
         if isinstance(key, str) and len(key) > 0 and self.jSuccess:
             if self.jDict:
                 try:
+                    # print("ALL KEYS:\n{}".format(self.jDict.keys()))  # DEBUGGING
                     if key in self.jDict.keys():
                         try:
                             retVal = self.jDict[key]
+                            # print("Key {} holds value:\t{}".format(key, retVal))  # DEBUGGING
                         except Exception as err:
                             print(repr(err))
                             print("key == {}".format(key))  # DEBUGGING
                             print("self.jDict == {}".format(self.jDict))  # DEBUGGING
+                    else:
+                        # print("Key {} doesn't exist".format(key))  # DEBUGGING
+                        pass
                 except Exception as err:
                     print(repr(err))
                     print("key == {}".format(key))  # DEBUGGING
