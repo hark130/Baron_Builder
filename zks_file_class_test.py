@@ -2,6 +2,7 @@ from baron_builder import TOP_DIR as TOP_DIR          # Store everything in ther
 from baron_builder import ARCHIVE_DIR as ARCHIVE_DIR  # Move archived save files here
 from baron_builder import BACKUP_DIR as BACKUP_DIR    # Backup save files here
 from baron_builder import WORKING_DIR as WORKING_DIR  # Use this directory to unarchive and modify save games
+from shutil import copyfile
 from zks_file_class import ZksFile
 import os
 
@@ -10,14 +11,33 @@ def main():
     # START
     print("")
     funcTestSuccess = True
+    # Is this save file missing key elements because it's too early in the game?
+    # testFilename = "ZksFile_Test_Smallest_Save_Game.zks"
+    # testFilename = "ZksFile_Test_Medium_Save_Game.zks"
+    testFilename = "ZksFile_Test_Recent_Save_Game.zks"
+    testAbsFilename = os.path.join(os.getcwd(), "Test_Files", testFilename)
+
+    # 0. Backup File
+    if funcTestSuccess:
+        # A. Remove any existing back up of the file
+        try:
+            os.remove(testAbsFilename + ".bak")
+        except Exception as err:
+            pass  # It's ok if it's not there
+
+        # B. Rename the original to back up
+        try:
+            copyfile(testAbsFilename, testAbsFilename + ".bak")
+        except Exception as err:
+            print("[ ] Failed to backup {}".format(testAbsFilename))
+            print("\n{}".format(repr(err)))
+            funcTestSuccess = False
+        else:
+            print("[X] Backed up {} to {}".format(testAbsFilename, testFilename + ".bak"))
 
     # 1. Open File
     if funcTestSuccess:
         try:
-            # Is this save file missing key elements because it's too early in the game?
-            # testFilename = "ZksFile_Test_Smallest_Save_Game.zks"
-            testFilename = "ZksFile_Test_Medium_Save_Game.zks"
-            testAbsFilename = os.path.join(os.getcwd(), "Test_Files", testFilename)
             testObj = ZksFile(testAbsFilename)
         except Exception as err:
             print("[ ] Failed to open {}".format(testAbsFilename))
@@ -131,6 +151,18 @@ def main():
                 print("[X] Game data saved")
         except Exception as err:
             print("[ ] Failed to save game data")
+            print("\n{}".format(repr(err)))
+            funcTestSuccess = False
+
+    # 7. Update Old Save Game With New Data
+    if funcTestSuccess:
+        try:
+            if testObj.update_zks() is not True:
+                print("[ ] Failed to create new save game")
+            else:
+                print('[X] New save game "{}" created'.format(testFilename))
+        except Exception as err:
+            print("[ ] Failed to create new save game")
             print("\n{}".format(repr(err)))
             funcTestSuccess = False
 
