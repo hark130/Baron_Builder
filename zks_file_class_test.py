@@ -134,6 +134,18 @@ def main():
             print("\n{}".format(repr(err)))
             funcTestSuccess = False
 
+    # X. Close ZksFile Object
+    # Accomplish this step last regardless of funcTestSuccess
+    try:
+        if testObj is not None and testObj.close_zks() is not True:
+            print("[ ] Failed to close")
+        else:
+            print("[X] Successfully closed")
+    except Exception as err:
+        print("[ ] Failed to close")
+        print("\n{}".format(repr(err)))
+        funcTestSuccess = False
+
     # FINISH
     print("")
 
