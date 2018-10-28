@@ -24,15 +24,14 @@ class ZksFile():
             [X] saveGame.load_json_file(jsonName)       # Instantiates a specific json object
             [X] saveGame.load_json_files()              # Instantiates all supported json objects
             [X] saveGame.save_json_files()              # Saves all supported json objects
-            [ ] saveGame.close_json_file(jsonName)      # Closes a specific json object
-            [ ] saveGame.close_json_files()             # Closes all supported json objects
+            [X] saveGame.close_json_files()             # Closes all supported json objects
             ### FEATURES ###
 
 
 
             ### TEAR DOWN ###
             [ ] saveGame.update_zks()                   # Updates .zks file with modified json files
-            [ ] saveGame.close_zks()                    # Closes the .zks file
+            [X] saveGame.close_zks()                    # Closes the .zks file
         JSON FILES SUPPORTED
             - header.json
             - party.json
@@ -41,6 +40,7 @@ class ZksFile():
             New json files to be supported must be added to the following locations:
                 - ZksFile.self.zSupportedJson
                 - ZksFile.self.save_json_files()
+                - ZksFile.self.close_json_files()
     '''
 
 
@@ -390,6 +390,90 @@ class ZksFile():
             if retVal and self.zStatFile is not None:
                 retVal = self.zStatFile.write_json_file()
 
+        # DONE
+        return retVal
+
+
+    def close_json_files(self):
+        '''
+            PURPOSE - Close all supported json filenames
+            INPUT - None
+            OUTPUT
+                On success, True
+                On failure, False
+            NOTE
+                This method will attempt to close all JsonFile objs regardless of self.zSuccess
+                    and self.fullWorkPath.  If the obj exists, it's getting closed.
+                This method will take care to silence Exceptions
+        '''
+        # LOCAL VARIABLES
+        retVal = True
+
+        # INPUT VALIDATION
+        # We're shutting it down, regardless
+
+        # CLOSE JSON OBJECTS
+        # header.json
+        if self.zHeadFile is not None:
+            try:
+                self.zHeadFile.close_json_file()
+            except Exception as err:
+                print("\n{}".format(repr(err)))  # DEBUGGING
+                retVal = False
+        # party.json
+        if self.zPartFile is not None:
+            try:
+                self.zPartFile.close_json_file()
+            except Exception as err:
+                print("\n{}".format(repr(err)))  # DEBUGGING
+                retVal = False
+        # player.json
+        if self.zPlayFile is not None:
+            try:
+                self.zPlayFile.close_json_file()
+            except Exception as err:
+                print("\n{}".format(repr(err)))  # DEBUGGING
+                retVal = False
+        # statistic.json
+        if self.zStatFile is not None:
+            try:
+                self.zStatFile.close_json_file()
+            except Exception as err:
+                print("\n{}".format(repr(err)))  # DEBUGGING
+                retVal = False
+
+        # DONE
+        return retVal
+
+
+    def close_zks(self):
+        '''
+            PURPOSE - Clear out all class attributes without saving
+            OUTPUT
+                On success, True
+                On failure, False
+        '''
+        # LOCAL VARIABLES
+        retVal = False
+
+        # RESET
+        try:
+            self.zPath = None         # Path to the filename
+            self.zName = None         # Filename
+            self.origFileName = None  # Raw filename originally passed in
+            self.zModDir = None       # Save game-specific working directory name
+            self.fullWorkPath = None  # Full directory to the unpacked file's directory in the working dir
+            self.zSuccess = False     # Set this to False if anything fails
+            self.zChanged = False     # Set this to True if any json contents are modified
+            retVal = self.close_json_files()
+            self.zHeadFile = None     # header.json JsonFile object
+            self.zPartFile = None     # party.json JsonFile object
+            self.zPlayFile = None     # player.json JsonFile object
+            self.zStatFile = None     # statistic.json JsonFile object
+        except Exception as err:
+            print("\n{}".format(repr(err)))  # DEBUGGING
+            retVal = False
+            
         # DONE
         return retVal
 
