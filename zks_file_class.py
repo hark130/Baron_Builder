@@ -473,7 +473,7 @@ class ZksFile():
         except Exception as err:
             print("\n{}".format(repr(err)))  # DEBUGGING
             retVal = False
-            
+
         # DONE
         return retVal
 
