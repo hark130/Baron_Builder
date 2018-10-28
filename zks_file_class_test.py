@@ -84,12 +84,55 @@ def main():
                 if val1 is not None:
                     print("\tYou appear to have {} gold".format(val1))
                 if isinstance(val0, dict):
-                    # print("\nKingdom keys:\t{}".format(val0.keys()))
-                    print("\tYou appear to be earning {} BP per turn".format(val0["BPPerTurn"]))
-                    print("\tYou appear to have {} BP".format(val0["BP"]))
                     print("\tYour unrest level is:\t{}".format(val0["Unrest"]))
                 else:
-                    print("\nThe 'Kingdom' key is not a dict.  It's a {}.".format(type(val0)))
+                    print("\nThis is not a dict.  It's a {}.".format(type(val0)))
+
+    # 5. Modify Actual Data
+    if funcTestSuccess:
+        kingKey = "Kingdom"
+        kingDict = {}
+        newKingDict = {}
+        moneyKey = "Money"
+        moneyVal = 0
+        newMoneyVal = 0
+
+        try:
+            # "Kingdom"
+            kingDict = testObj.zPlayFile.get_data(kingKey)
+            kingDict["Unrest"] = "Worried"
+            testObj.zPlayFile.mod_data(kingKey, kingDict)
+            # "Money"
+            moneyVal = testObj.zPlayFile.get_data(moneyKey)
+            moneyVal = moneyVal * 2
+            testObj.zPlayFile.mod_data(moneyKey, moneyVal)
+        except Exception as err:
+            print("[ ] Failed to write game data")
+            print("\n{}".format(repr(err)))
+            funcTestSuccess = False
+        else:
+            if testObj.zSuccess and testObj.zPlayFile.jSuccess:
+                newKingDict = testObj.zPlayFile.get_data(kingKey)
+                newMoneyVal = testObj.zPlayFile.get_data(moneyKey)
+                if newKingDict["Unrest"] == kingDict["Unrest"] and newMoneyVal == moneyVal:
+                    print("[X] Game data modified")
+                    print("\tYou NOW have {} gold".format(newMoneyVal))
+                    print("\tYour unrest level is NOW:\t{}".format(newKingDict["Unrest"]))
+                else:
+                    print("[ ] Failed to write game data")
+                    funcTestSuccess = False
+
+    # 6. Save New Game Data
+    if funcTestSuccess:
+        try:
+            if testObj.save_json_files() is not True:
+                print("[ ] Game data failed to save")
+            else:
+                print("[X] Game data saved")
+        except Exception as err:
+            print("[ ] Failed to save game data")
+            print("\n{}".format(repr(err)))
+            funcTestSuccess = False
 
     # FINISH
     print("")
