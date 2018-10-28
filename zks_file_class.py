@@ -1,5 +1,6 @@
 from json_file_class import JsonFile
 import os
+import shutil
 import zipfile
 
 
@@ -30,7 +31,7 @@ class ZksFile():
 
 
             ### TEAR DOWN ###
-            [ ] saveGame.update_zks()                   # Updates .zks file with modified json files
+            [X] saveGame.update_zks()                   # Updates .zks file with modified json files
             [X] saveGame.close_zks()                    # Closes the .zks file
         JSON FILES SUPPORTED
             - header.json
@@ -446,9 +447,54 @@ class ZksFile():
         return retVal
 
 
+    def update_zks(self):
+        '''
+            PURPOSE - Rewrite all of the working files back into the original save game .zks
+            INPUT - None
+            OUTPUT
+                On success, True
+                On failure, False
+        '''
+        # LOCAL VARIABLES
+        retVal = False
+        rootDir = ""     # Root directory for os.walk(self.fullWorkPath)
+        dirsFound = []   # Directory list for os.walk(self.fullWorkPath)
+        filesFound = []  # List of all the files in this save game's specific working directory
+
+        # INPUT VALIDATION
+        if not self.zSuccess:
+            retVal = self.zSuccess
+        else:
+            # REWRITE ORIGINAL SAVE GAME
+            try:
+                # 1. Get file list
+                for root, dirs, files in os.walk(self.fullWorkPath):
+                    rootDir = root
+                    dirsFound = dirs
+                    filesFound = files
+
+                # 2. Add those files
+                with zipfile.ZipFile(os.path.join(self.fullWorkPath, self.zName), "w") as outZipFile:
+                    for file in filesFound:
+                        outZipFile.write(os.path.join(rootDir, file), os.path.basename(file), zipfile.ZIP_DEFLATED)
+
+                # 3. Replace the old save game with the new
+                os.remove(self.origFileName)
+                shutil.move(os.path.join(self.fullWorkPath, self.zName), self.origFileName)
+            except Exception as err:
+                print("\n{}".format(repr(err)))  # DEBUGGING
+                retVal = False
+            else:
+                retVal = True
+
+        # DONE
+        return retVal
+
+
     def close_zks(self):
         '''
             PURPOSE - Clear out all class attributes without saving
+            INPUT - None
             OUTPUT
                 On success, True
                 On failure, False
