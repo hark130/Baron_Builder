@@ -23,7 +23,7 @@ class ZksFile():
             [X] saveGame.load_data()                    # Loads all of the supported json files into JsonFile objects
             [X] saveGame.load_json_file(jsonName)       # Instantiates a specific json object
             [X] saveGame.load_json_files()              # Instantiates all supported json objects
-            [ ] saveGame.save_json_files()              # Saves all supported json objects
+            [X] saveGame.save_json_files()              # Saves all supported json objects
             [ ] saveGame.close_json_file(jsonName)      # Closes a specific json object
             [ ] saveGame.close_json_files()             # Closes all supported json objects
             ### FEATURES ###
@@ -356,8 +356,46 @@ class ZksFile():
         return retVal
 
 
+    def save_json_files(self):
+        '''
+            PURPOSE - Save changes for all supported json filenames
+            INPUT - None
+            OUTPUT
+                On success, True
+                On failure, False
+                On bad input, None
+            NOTES
+                The JsonFile class won't actually save anything unless changes were made
+        '''
+        # LOCAL VARIABLES
+        retVal = None
+
+        # INPUT VALIDATION
+        if not self.zSuccess:
+            retVal = self.zSuccess
+        elif not os.path.isdir(self.fullWorkPath):
+            print("\nThe save game does not appear to have been unpacked.")
+            retVal = False
+        else:
+            # header.json
+            if self.zHeadFile is not None:
+                retVal = self.zHeadFile.write_json_file()
+            # party.json
+            if retVal and self.zPartFile is not None:
+                retVal = self.zPartFile.write_json_file()
+            # player.json
+            if retVal and self.zPlayFile is not None:
+                retVal = self.zPlayFile.write_json_file()
+            # statistic.json
+            if retVal and self.zStatFile is not None:
+                retVal = self.zStatFile.write_json_file()
+
+        # DONE
+        return retVal
+
+
 '''
-    player.json
+    player.json top-level dictionary keys
         CompanionStories
         VisitedAreasData
         PartyCharacters
