@@ -1,4 +1,9 @@
 from json_file_class import JsonFile
+# ZipFile compress_type macros
+from zipfile import ZIP_STORED    # (no compression)
+from zipfile import ZIP_DEFLATED  # (requires zlib)
+from zipfile import ZIP_BZIP2     # (requires bz2)
+from zipfile import ZIP_LZMA      # (requires lzma)
 import os
 import shutil
 import zipfile
@@ -70,6 +75,7 @@ class ZksFile():
         self.zPartFile = None     # party.json JsonFile object
         self.zPlayFile = None     # player.json JsonFile object
         self.zStatFile = None     # statistic.json JsonFile object
+        self.zFileDict = None     # Store the { filename : ZipInfo.compress_type } here during unpacking
 
         # LOCAL VARIABLES
         zNameSplit = []  # Store the result of os.path.splitext(self.zName) here
@@ -219,7 +225,26 @@ class ZksFile():
                 try:
                     # print("Original File Name:\t{}".format(self.origFileName))  # DEBUGGING
                     with zipfile.ZipFile(self.origFileName, "r") as inZipFile:
-                        inZipFile.extractall(self.fullWorkPath)
+                        # STORE THE FILE INFO
+                        self.zFileDict = {}
+                        for zFileInfo in inZipFile.infolist():
+                            if ZIP_STORED == zFileInfo.compress_type:
+                                self.zFileDict[zFileInfo.filename] = ZIP_STORED
+                            elif ZIP_DEFLATED == zFileInfo.compress_type:
+                                self.zFileDict[zFileInfo.filename] = ZIP_DEFLATED
+                            elif ZIP_BZIP2 == zFileInfo.compress_type:
+                                self.zFileDict[zFileInfo.filename] = ZIP_BZIP2
+                            elif ZIP_LZMA == zFileInfo.compress_type:
+                                self.zFileDict[zFileInfo.filename] = ZIP_LZMA
+                            else:
+                                print("Detected unknown ZipInfo.compress_type for {}".format(zFileInfo.filename))  # DEBUGGING
+                                retVal = False
+                                self.zSuccess = False
+                                break
+
+                        # EXTRACT THE FILES
+                        if retVal is True and self.zSuccess is True:
+                            inZipFile.extractall(self.fullWorkPath)
                 except Exception as err:
                     print("\n{}".format(repr(err)))
                     retVal = False
@@ -476,7 +501,8 @@ class ZksFile():
                 # 2. Add those files
                 with zipfile.ZipFile(os.path.join(self.fullWorkPath, self.zName), "w") as outZipFile:
                     for file in filesFound:
-                        outZipFile.write(os.path.join(rootDir, file), os.path.basename(file), zipfile.ZIP_DEFLATED)
+                        # outZipFile.write(os.path.join(rootDir, file), os.path.basename(file), zipfile.ZIP_DEFLATED)
+                        outZipFile.write(os.path.join(rootDir, file), os.path.basename(file), self.zFileDict[file])
 
                 # 3. Replace the old save game with the new
                 os.remove(self.origFileName)
