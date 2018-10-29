@@ -4,6 +4,7 @@ from zipfile import ZIP_STORED    # (no compression)
 from zipfile import ZIP_DEFLATED  # (requires zlib)
 from zipfile import ZIP_BZIP2     # (requires bz2)
 from zipfile import ZIP_LZMA      # (requires lzma)
+import json
 import os
 import shutil
 import zipfile
@@ -499,10 +500,16 @@ class ZksFile():
                     filesFound = files
 
                 # 2. Add those files
+
+                # Attempt #1... here, at least
                 with zipfile.ZipFile(os.path.join(self.fullWorkPath, self.zName), "w") as outZipFile:
                     for file in filesFound:
-                        # outZipFile.write(os.path.join(rootDir, file), os.path.basename(file), zipfile.ZIP_DEFLATED)
                         outZipFile.write(os.path.join(rootDir, file), os.path.basename(file), self.zFileDict[file])
+
+                # Attempt #2... Just update
+                # with zipfile.ZipFile(os.path.join(self.origFileName), "a") as outZipFile:
+                #     self.zPlayFile.jCont = json.dumps(self.zPlayFile.jDict, separators=(',', ':'), ensure_ascii=False)
+                #     outZipFile.writestr(self.zPlayFile.jName, self.zPlayFile.jCont)
 
                 # 3. Replace the old save game with the new
                 os.remove(self.origFileName)
