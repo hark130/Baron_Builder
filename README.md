@@ -60,4 +60,4 @@ My end goal is to create a save game editor that works on all operating systems 
 		* AKA Don't 'hard code' directories
 		* Make Baron_Builder pass in the necessary directories (e.g., Archive, Backup, Working)
 		* This design will facilitate easy relocation of files in the future
-
+* Consider a [new approach](https://stackoverflow.com/questions/25738523/how-to-update-one-file-inside-zip-file-using-python) to modifying an existing save game
