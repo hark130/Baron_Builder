@@ -332,7 +332,8 @@ class JsonFile():
                 try:
                     ######## DO I NEED MORE ENCODING HERE?!?! ########
                     with open(os.path.join(self.jPath, self.jName), 'w') as outFile:
-                        json.dump(self.jDict, outFile)
+                        # json.dump(self.jDict, outFile)
+                        json.dump(self.jDict, outFile, separators=(',', ':'))
                 except Exception as err:
                     print(repr(err))  # DEBUGGING
                     self.jSuccess = False
