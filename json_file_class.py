@@ -1,6 +1,7 @@
 # from codecs import BOM_UTF8
 import codecs
 import json
+import io
 import os
 
 
@@ -89,6 +90,7 @@ class JsonFile():
                 if self.jPath and self.jName:
                     # Open the file and read the contents
                     try:
+                        # with codecs.open(os.path.join(self.jPath, self.jName), "r", "utf-8") as inFile:
                         with codecs.open(os.path.join(self.jPath, self.jName), "r", "utf-8-sig") as inFile:
                         # with open(os.path.join(self.jPath, self.jName), "r") as inFile:
                             self.jCont = inFile.read()
@@ -331,9 +333,23 @@ class JsonFile():
             if self.jChanged and self.jDict is not None:
                 try:
                     ######## DO I NEED MORE ENCODING HERE?!?! ########
-                    with open(os.path.join(self.jPath, self.jName), 'w') as outFile:
+                    # with io.open(os.path.join(self.jPath, self.jName), "w") as outFile:
+                    # with io.open(os.path.join(self.jPath, self.jName), "w", encoding="utf8") as outFile:
+                    with io.open(os.path.join(self.jPath, self.jName), "w", encoding="utf-8-sig") as outFile:
+                    # with open(os.path.join(self.jPath, self.jName), 'w') as outFile:
                         # json.dump(self.jDict, outFile)
-                        json.dump(self.jDict, outFile, separators=(',', ':'))
+                        # json.dump(self.jDict, outFile, separators=(',', ':'))
+                        # json.dump(self.jDict, outFile, separators=(',', ':'), ensure_ascii=False)
+                        # json.dump(self.jDict, outFile, separators=(',', ':'))
+
+                        # Attempt number... let's call it 4
+                        # data = json.dumps(self.jDict, separators=(',', ':'), ensure_ascii=False)
+                        # outFile.write(unicode(data))  # ERROR: unicode is not defined
+                        # outFile.write(data)  # unicode is not defined
+
+                        # Attempt number 5
+                        json.dump(self.jDict, outFile, separators=(',', ':'), ensure_ascii=False)
+
                 except Exception as err:
                     print(repr(err))  # DEBUGGING
                     self.jSuccess = False
