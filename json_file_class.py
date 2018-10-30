@@ -348,7 +348,11 @@ class JsonFile():
                         # outFile.write(data)  # unicode is not defined
 
                         # Attempt number 5
-                        json.dump(self.jDict, outFile, separators=(',', ':'), ensure_ascii=False)
+                        # json.dump(self.jDict, outFile, separators=(',', ':'), ensure_ascii=False)
+
+                        # Attempt number 6
+                        self.jCont = json.dumps(self.jDict, separators=(',', ':'), ensure_ascii=False)
+                        outFile.write(self.jCont)
 
                 except Exception as err:
                     print(repr(err))  # DEBUGGING
