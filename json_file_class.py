@@ -1,4 +1,5 @@
 # from codecs import BOM_UTF8
+from collections import OrderedDict
 import codecs
 import json
 import io
@@ -132,11 +133,15 @@ class JsonFile():
             # PARSE RAW FILE CONTENTS
             if self.jCont and len(self.jCont) > 0:
                 try:
-                    self.jDict = json.loads(self.jCont)
+                    # self.jDict = json.loads(self.jCont)
+
                     # print("ENTIRE DICTIONARY:\n{}".format(self.jDict))  # DEBUGGING
                     # data = json.load(codecs.decode(r.text, 'utf-8-sig'))
                     # self.jDict = json.loads(codecs.decode(self.jCont, "utf-8-sig"))
                     # self.jDict = json.loads(codecs.decode(self.jCont, "utf-8-sig", errors = "ignore"))
+
+                    # Attempt #? - Ordered Dictionary
+                    self.jDict = json.loads(self.jCont, object_pairs_hook = OrderedDict)
 
                 except Exception as err:
                     print(repr(err))  # DEBUGGING
@@ -351,8 +356,11 @@ class JsonFile():
                         # json.dump(self.jDict, outFile, separators=(',', ':'), ensure_ascii=False)
 
                         # Attempt number 6
-                        self.jCont = json.dumps(self.jDict, separators=(',', ':'), ensure_ascii=False)
-                        outFile.write(self.jCont)
+                        # self.jCont = json.dumps(self.jDict, separators=(',', ':'), ensure_ascii=False)
+                        # outFile.write(self.jCont)
+
+                        # Attempt #? - Ordered Dictionary
+                        json.dump(self.jDict, outFile, separators=(',', ':'))
 
                 except Exception as err:
                     print(repr(err))  # DEBUGGING
