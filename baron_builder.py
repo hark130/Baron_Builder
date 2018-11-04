@@ -2,9 +2,10 @@
 #################### IMPORTS ####################
 #################################################
 
-from baron_builder_features import bbf01_BP_sub_menu
-from baron_builder_features import bbf02_STAB_sub_menu
-from baron_builder_features import bbf06_GOLD_sub_menu
+from baron_builder_features import bbf01_BP_sub_menu, bbf01_BP_available
+from baron_builder_features import bbf02_STAB_sub_menu, bbf02_STAB_available
+from baron_builder_features import bbf06_GOLD_sub_menu, bbf06_GOLD_available
+from collections import OrderedDict
 from stat import S_ISREG, ST_CTIME, ST_MODE, ST_MTIME
 from zks_file_class import ZksFile              # ZksFile class
 import os                                       # environ, path.join, getuid, path.isdir, system
@@ -451,6 +452,12 @@ def user_mod_menu(operSys, saveGameObj):
     userSave = False  # User indication they want to save
     userExit = False  # User indication they want to exit/quit
     curSaveGame = ""  # Current save game being edited
+    f01Exists = False  # Set to True if saveGameObj.zPlayFile.jDict["Kingdom"]["BP"] exists
+    f02Exists = False  # Set to True if saveGameObj.zPlayFile.jDict["Kingdom"]["Unrest"] exists
+    f06Exists = False  # Set to True if saveGameObj.zPlayFile.jDict["Money"] exists
+    userMenuDict = OrderedDict()  # Ordered dict of menu choices to build when determining save game maturity
+    menuChoiceOrd = 97  # Ordinal for the first menu choice
+
 
     # GLOBAL VARIABLES
     global numBadAnswers
@@ -464,6 +471,28 @@ def user_mod_menu(operSys, saveGameObj):
         raise TypeError('Save game object is of type "{}" instead of ZksFile'.format(type(saveGameObj)))
     else:
         curSaveGame = saveGameObj.zName
+
+    # DETERMINE SAVE GAME MATURITY
+    # Feature 1
+    f01Exists = bbf01_BP_available(saveGameObj)
+    # Feature 2
+    f02Exists = bbf02_STAB_available(saveGameObj)
+    # Feature 6
+    f06Exists = bbf06_GOLD_available(saveGameObj)
+
+    # BUILD FEATURE DICTIONARY
+    # Feature 1
+    if f01Exists is True:
+        userMenuDict[chr(menuChoiceOrd)] = tuple(("Change Build Points (BPs)", "Feature01"))
+        menuChoiceOrd += 1
+    # Feature 2
+    if f02Exists is True:
+        userMenuDict[chr(menuChoiceOrd)] = tuple(("Set Kingdom Unrest", "Feature02"))
+        menuChoiceOrd += 1
+    # Feature 6
+    if f06Exists is True:
+        userMenuDict[chr(menuChoiceOrd)] = tuple(("Change gold", "Feature06"))
+        menuChoiceOrd += 1
     
     # CLEAR SCREEN
     clear_screen(operSys)
@@ -474,9 +503,11 @@ def user_mod_menu(operSys, saveGameObj):
         # Print options
         print("SAVE GAME FILE MODIFICATIONS")
         print("Editing:\t{}\n".format(curSaveGame))
-        print("(a) Change Build Points (BPs)")
-        print("(b) Change Kingdom Stability")
-        print("(c) Change gold")
+        # print("(c) Change Build Points (BPs)")  # Feature 1
+        # print("(b) Change Kingdom Stability")  # Feature 2
+        # print("(a) Change gold")  # Feature 6
+        for key in userMenuDict.keys():
+            print("({}) {}".format(key, userMenuDict[key][0]))
         print("")
         print('Type "clear" to clear the screen')
         print('Type "open" to open a new file')
@@ -493,6 +524,8 @@ def user_mod_menu(operSys, saveGameObj):
             selection = "quit"
         else:
             selection = selection.lower()
+            if selection in userMenuDict.keys():
+                selection = userMenuDict[selection][1]
 
         # Execute selection
         if "clear" == selection:
@@ -513,7 +546,7 @@ def user_mod_menu(operSys, saveGameObj):
             numBadAnswers = 0
             userSave = True
             userExit = True
-        elif "a" == selection:
+        elif "Feature01" == selection:
             numBadAnswers = 0
             if isinstance(saveGameObj, ZksFile) is True:
                 try:
@@ -528,7 +561,7 @@ def user_mod_menu(operSys, saveGameObj):
             else:
                 print("Save game has already been closed")
                 numBadAnswers += 1
-        elif "b" == selection:
+        elif "Feature02" == selection:
             numBadAnswers = 0
             if isinstance(saveGameObj, ZksFile) is True:
                 try:
@@ -543,7 +576,7 @@ def user_mod_menu(operSys, saveGameObj):
             else:
                 print("Save game has already been closed")
                 numBadAnswers += 1
-        elif "c" == selection:
+        elif "Feature06" == selection:
             numBadAnswers = 0
             if isinstance(saveGameObj, ZksFile) is True:
                 try:
