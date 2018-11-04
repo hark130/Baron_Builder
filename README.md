@@ -18,7 +18,7 @@ My end goal is to create a save game editor that works on all operating systems 
 | :--- | :---: | :-----: | :---: |
 | Verify Python version | ✓ | ✓ | ✓ |
 | Check OS | ✓ | ✓ | ✓ |
-| Locate save games dir | ✓ | ? | ? |
+| Locate save games dir | ✓ | ✓ | ? |
 | Parse save games | ✓ | ? | ? |
 | Print file open menu | ✓ | ? | ? |
 | Print user selection menu | ✓ | ? | ? |
