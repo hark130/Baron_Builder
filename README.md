@@ -24,11 +24,11 @@ My end goal is to create a save game editor that works on all operating systems 
 | Print user selection menu | ✓ | ? | ? |
 | Write json-parsing class | ✓ | ? | ? |
 | Write save-file-parsing class | ✓ | ? | ? |
+| Store compression_type for each file in .zks for ZksFile.update_zks() | ✓ | ? | ? |
 | Release wheel | | | |
 | Write wiki | | | |
 | Python command not required to run | | | |
 | Search _all_ home dirs for save games(?) | | | |
-| Store compression_type for each file in .zks for ZksFile.update_zks() | ✓ | ✓ | ✓ |
 
 ### Editor Features 
 
@@ -39,6 +39,7 @@ My end goal is to create a save game editor that works on all operating systems 
 | F03 | Backup save games | | | |
 | F04 | Restore backed up save game | | | |
 | F05 | Archive (AKA backup/delete) old saves (speed up loads/saves?) | | | |
+| F06 | Change gold | ✓ | ? | ? |
 
 ### Legend
 
@@ -60,4 +61,3 @@ My end goal is to create a save game editor that works on all operating systems 
 		* AKA Don't 'hard code' directories
 		* Make Baron_Builder pass in the necessary directories (e.g., Archive, Backup, Working)
 		* This design will facilitate easy relocation of files in the future
-* Consider a [new approach](https://stackoverflow.com/questions/25738523/how-to-update-one-file-inside-zip-file-using-python) to modifying an existing save game
