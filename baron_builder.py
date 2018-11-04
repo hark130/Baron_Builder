@@ -2,6 +2,7 @@
 #################### IMPORTS ####################
 #################################################
 
+from baron_builder_features import bbf01_BP_sub_menu
 from baron_builder_features import bbf06_GOLD_sub_menu
 from stat import S_ISREG, ST_CTIME, ST_MODE, ST_MTIME
 from zks_file_class import ZksFile              # ZksFile class
@@ -508,8 +509,15 @@ def user_mod_menu(operSys, saveGameObj):
             userExit = True
         elif "a" == selection:
             numBadAnswers = 0
-            print("\nAdding BPs")  # Placeholder
-            pass
+            try:
+                retVal = bbf01_BP_sub_menu(saveGameObj, numBadAnswers, MAX_ERRS)
+            except Exception as err:
+                print("\nUnable to modify current build points")
+                print(repr(err))
+                retVal = False
+            else:
+                if retVal is True:
+                    numBadAnswers = 0
         elif "b" == selection:
             numBadAnswers = 0
             print("\nChanging stability")  # Placeholder
@@ -519,7 +527,7 @@ def user_mod_menu(operSys, saveGameObj):
             try:
                 retVal = bbf06_GOLD_sub_menu(saveGameObj, numBadAnswers, MAX_ERRS)
             except Exception as err:
-                print("\nUnable to determine current gold amount")
+                print("\nUnable to modify gold amount")
                 print(repr(err))
                 retVal = False
             else:
