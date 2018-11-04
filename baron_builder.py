@@ -2,9 +2,11 @@
 #################### IMPORTS ####################
 #################################################
 
+from baron_builder_features import bbf06_GOLD_sub_menu
+from stat import S_ISREG, ST_CTIME, ST_MODE, ST_MTIME
+from zks_file_class import ZksFile              # ZksFile class
 import pwd                                      # getpwuid
 import os                                       # path.join, getuid, path.isdir, system
-from stat import S_ISREG, ST_CTIME, ST_MODE, ST_MTIME
 import sys                                      # version_info
 
 #################################################
@@ -365,7 +367,7 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList):
         print('Type "quit" to exit this program')
 
         # Take input
-        selection = input("Make your selection [Down]: ")
+        selection = input("Make your selection [Down]:  ")
 
         # Modify input
         if len(selection) == 0:
@@ -410,6 +412,7 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList):
         else:
             try:
                 retVal = int(selection)
+                retVal -= 1
             except Exception as err:
                 print(repr(err))  # DEBUGGING
                 print("\nInvalid selection.  Try again.")
@@ -425,13 +428,12 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList):
     return retVal
 
 
-def user_mod_menu(operSys, saveGamePath, saveGameFileList):
+def user_mod_menu(operSys, saveGameObj):
     '''
         PURPOSE - Allow a user to decide how to edit a given save game
         INPUT
             operSys - See OPERATAING SYSTEM macros
-            saveGamePath - Relative or absolute path to check for save games
-            saveGameFileList - Sorted list of save games found in saveGamePath
+            saveGameObj - ZksFile object for a selected save game
         OUTPUT
             On success, True
             On failure, False
@@ -440,7 +442,10 @@ def user_mod_menu(operSys, saveGamePath, saveGameFileList):
     # LOCAL VARIABLES
     retVal = True
     supportedOS = supportedOSGlobal
-    selection = 0
+    selection = 0  # Main menu selection
+    tempInt = 0  # Temporary integer
+    userSave = False  # User indication they want to save
+    userExit = False  # User indication they want to exit/quit
 
     # GLOBAL VARIABLES
     global numBadAnswers
@@ -450,14 +455,8 @@ def user_mod_menu(operSys, saveGamePath, saveGameFileList):
         raise TypeError('Operating system is of type "{}" instead of integer'.format(type(operSys)))
     elif operSys not in supportedOS:
         raise ValueError("Operating system value is unknown")
-    elif not isinstance(saveGamePath, str):
-        raise TypeError('Save game path is of type "{}" instead of string'.format(type(saveGamePath)))
-    elif len(saveGamePath) <= 0:
-        raise ValueError("Invalid directory length")
-    elif not isinstance(saveGameFileList, list):
-        raise TypeError('Save game file list is of type "{}" instead of list'.format(type(saveGameFileList)))
-    elif len(saveGameFileList) <= 0:
-        raise ValueError("Invalid file name list length")
+    elif not isinstance(saveGameObj, ZksFile):
+        raise TypeError('Save game object is of type "{}" instead of ZksFile'.format(type(saveGameObj)))
     
     # CLEAR SCREEN
     clear_screen(operSys)
@@ -467,8 +466,10 @@ def user_mod_menu(operSys, saveGamePath, saveGameFileList):
         # PRINT MENU
         # Print options
         print("SAVE GAME FILE MODIFICATIONS")
+        print("Editing:\t{}\n".format(saveGameObj.zName))
         print("(a) Add Build Points (BPs)")
         print("(b) Change Kingdom Stability")
+        print("(c) Add gold")
         print("")
         print('Type "clear" to clear the screen')
         print('Type "open" to open a new file')
@@ -477,7 +478,7 @@ def user_mod_menu(operSys, saveGamePath, saveGameFileList):
         print('Type "quit" to save and exit this program')
 
         # Take input
-        selection = input("Make your selection [Quit]: ")
+        selection = input("Make your selection [Quit]:  ")
 
         # Modify input
         if len(selection) == 0:
@@ -495,8 +496,7 @@ def user_mod_menu(operSys, saveGamePath, saveGameFileList):
             pass
         elif "save" == selection:
             numBadAnswers = 0
-            print("\nSaving file contents")  # Placeholder
-            pass
+            userSave = True
         elif "close" == selection:
             numBadAnswers = 0
             print("\nClosing file")  # Placeholder
@@ -504,8 +504,8 @@ def user_mod_menu(operSys, saveGamePath, saveGameFileList):
             pass
         elif "quit" == selection:
             numBadAnswers = 0
-            print("\nSaving file")  # Placeholder
-            break
+            userSave = True
+            userExit = True
         elif "a" == selection:
             numBadAnswers = 0
             print("\nAdding BPs")  # Placeholder
@@ -514,9 +514,30 @@ def user_mod_menu(operSys, saveGamePath, saveGameFileList):
             numBadAnswers = 0
             print("\nChanging stability")  # Placeholder
             pass
+        elif "c" == selection:
+            numBadAnswers = 0
+            try:
+                retVal = bbf06_GOLD_sub_menu(saveGameObj, numBadAnswers, MAX_ERRS)
+            except Exception as err:
+                print("\nUnable to determine current gold amount")
+                print(repr(err))
+                retVal = False
+            else:
+                if retVal is True:
+                    numBadAnswers = 0
         else:
             print("\nInvalid selection.  Try again.")
             numBadAnswers += 1
+
+        # Save
+        if userSave is True:
+            print("\nSaving any changes to {}".format(saveGameObj.zName))
+            saveGameObj.update_zks()
+
+        # Quit
+        if userExit is True:
+            print("\nExiting Baron Builder")
+            break
 
     # DONE
     print("")  # Blank line
@@ -554,7 +575,7 @@ def are_you_sure(actionStr=""):
 
     while numBadAnswers <= MAX_ERRS:
         # Take input
-        selection = input("Enter Y or [N]\t")
+        selection = input("Enter Y or [N]  ")
 
         # Modify input
         if len(selection) == 0:
@@ -584,6 +605,8 @@ def main():
     saveGamePath = ""      # Absolute path to save games
     saveGameFileList = []  # List of save game files
     fileNum = None         # Index into saveGameFileList the user selected
+    absSaveGameFile = ""   # Absolute filename for the chosen save game
+    saveGameObj = None     # Store the ZksFile object here
 
     # WORK
     # Verify Python Version
@@ -649,36 +672,57 @@ def main():
             if fileNum < 0:
                 print("A save game was not selected.")
                 retVal = False
-
-    # Unarchive Save File
-    if retVal:
-        try:
-            pass
-        except Exception as err:
-            # print('_____() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
-            # retVal = False
-            pass
-        else:
-            pass
+            else:
+                absSaveGameFile = os.path.join(saveGamePath, saveGameFileList[fileNum])
 
     # Instantiate Save File Object
     if retVal:
         try:
-            pass
+            saveGameObj = ZksFile(absSaveGameFile)
         except Exception as err:
-            # print('_____() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
-            # retVal = False
+            print('ZksFile() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
+            retVal = False
+        else:
             pass
+
+    # Unarchive Save File
+    if retVal:
+        try:
+            saveGameObj.unpack_file(os.path.join(saveGamePath, TOP_DIR, WORKING_DIR))
+        except Exception as err:
+            print('ZksFile.unpack_file() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
+            retVal = False
+        else:
+            pass
+
+    # Load Unarchived Json Files
+    if retVal:
+        try:
+            saveGameObj.load_data()
+        except Exception as err:
+            print('ZksFile.load_data() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
+            retVal = False
         else:
             pass
 
     # Print Menu
     if retVal:
         try:
-            retVal = user_mod_menu(operSys, saveGamePath, saveGameFileList)
+            retVal = user_mod_menu(operSys, saveGameObj)
         except Exception as err:
             print('user_mod_menu() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
             retVal = False
+        else:
+            pass
+
+    # Template Code Block
+    if retVal:
+        try:
+            pass
+        except Exception as err:
+            # print('_____() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
+            # retVal = False
+            pass
         else:
             pass
 
