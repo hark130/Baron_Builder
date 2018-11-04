@@ -350,7 +350,8 @@ class ZksFile():
         if retVal is False:
             print("Failed to load json file:\t{}".format(jsonName))  # DEBUGGING
         else:
-            print("Loaded json file:\t{}".format(jsonName))  # DEBUGGING
+            # print("Loaded json file:\t{}".format(jsonName))  # DEBUGGING
+            pass
         return retVal
 
 

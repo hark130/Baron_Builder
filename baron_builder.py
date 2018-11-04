@@ -2,13 +2,13 @@
 #################### IMPORTS ####################
 #################################################
 
-from baron_builder_features import bbf01_BP_sub_menu
-from baron_builder_features import bbf02_STAB_sub_menu
-from baron_builder_features import bbf06_GOLD_sub_menu
+from baron_builder_features import bbf01_BP_sub_menu, bbf01_BP_available
+from baron_builder_features import bbf02_STAB_sub_menu, bbf02_STAB_available
+from baron_builder_features import bbf06_GOLD_sub_menu, bbf06_GOLD_available
+from collections import OrderedDict
 from stat import S_ISREG, ST_CTIME, ST_MODE, ST_MTIME
 from zks_file_class import ZksFile              # ZksFile class
-import pwd                                      # getpwuid
-import os                                       # path.join, getuid, path.isdir, system
+import os                                       # environ, path.join, getuid, path.isdir, system
 import sys                                      # version_info
 
 #################################################
@@ -163,20 +163,24 @@ def locate_save_games(operSys):
         raise ValueError("Operating system value is unknown")
 
     # DETERMINE USER NAME
-    if OS_LINUX == operSys:
-        userName = pwd.getpwuid(os.getuid()).pw_name
-        homeDir = pwd.getpwuid(os.getuid()).pw_dir
-        relDir = nixSaveGamePath
-    elif OS_WINDOWS == operSys:
-        userName = pwd.getpwuid(os.getuid()).pw_name
-        homeDir = pwd.getpwuid(os.getuid()).pw_dir
-        relDir = winSaveGamePath
-    elif OS_APPLE == operSys:
-        userName = pwd.getpwuid(os.getuid()).pw_name
-        homeDir = pwd.getpwuid(os.getuid()).pw_dir
-        relDir = macSaveGamePath
-    else:
-        raise RuntimeError("Consider updating supportedOS list or control flow in locate_save_games()")
+    try:
+        if OS_LINUX == operSys:
+            userName = os.environ["USER"]
+            homeDir = os.environ["HOME"]
+            relDir = nixSaveGamePath
+        elif OS_WINDOWS == operSys:
+            userName = os.environ["USERNAME"]
+            homeDir = os.path.join(os.environ["HOMEDRIVE"], os.environ["HOMEPATH"])
+            relDir = winSaveGamePath
+        elif OS_APPLE == operSys:
+            userName = os.environ["USER"]
+            homeDir = os.environ["HOME"]
+            relDir = macSaveGamePath
+    except Exception as err:
+        print(repr(err))  # DEBUGGING
+        userName = ""
+        homeDir = ""
+        relDir = ""
 
     # CONSTRUCT HOME DIRECTORY
     if len(homeDir) == 0 and isinstance(userName, str) and len(userName) > 0:
@@ -328,12 +332,8 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList):
     clear_screen(operSys)
 
     while numBadAnswers <= MAX_ERRS:
-        # CLEAR SCREEN
-        # clear_screen(operSys)
 
         print("")  # Blank line
-        # print("Num files:\t{}".format(numFiles))  # DEBUGGING
-        # print("Save Game #0:\t{}".format(saveGameFileList[0]))  # DEBUGGING
 
         # PRINT SAVE FILES
         # Verify files exist
@@ -349,7 +349,6 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList):
             # Not enough files
             # Print no more files to view
             pass
-            # break  # DEBUGGING
 
         # NOTE: Print "end of list" or something similar when printing the last section
         if numFiles - (page * 10) <= numFiles % 10:
@@ -453,6 +452,12 @@ def user_mod_menu(operSys, saveGameObj):
     userSave = False  # User indication they want to save
     userExit = False  # User indication they want to exit/quit
     curSaveGame = ""  # Current save game being edited
+    f01Exists = False  # Set to True if saveGameObj.zPlayFile.jDict["Kingdom"]["BP"] exists
+    f02Exists = False  # Set to True if saveGameObj.zPlayFile.jDict["Kingdom"]["Unrest"] exists
+    f06Exists = False  # Set to True if saveGameObj.zPlayFile.jDict["Money"] exists
+    userMenuDict = OrderedDict()  # Ordered dict of menu choices to build when determining save game maturity
+    menuChoiceOrd = 97  # Ordinal for the first menu choice
+
 
     # GLOBAL VARIABLES
     global numBadAnswers
@@ -466,6 +471,28 @@ def user_mod_menu(operSys, saveGameObj):
         raise TypeError('Save game object is of type "{}" instead of ZksFile'.format(type(saveGameObj)))
     else:
         curSaveGame = saveGameObj.zName
+
+    # DETERMINE SAVE GAME MATURITY
+    # Feature 1
+    f01Exists = bbf01_BP_available(saveGameObj)
+    # Feature 2
+    f02Exists = bbf02_STAB_available(saveGameObj)
+    # Feature 6
+    f06Exists = bbf06_GOLD_available(saveGameObj)
+
+    # BUILD FEATURE DICTIONARY
+    # Feature 1
+    if f01Exists is True:
+        userMenuDict[chr(menuChoiceOrd)] = tuple(("Change Build Points (BPs)", "Feature01"))
+        menuChoiceOrd += 1
+    # Feature 2
+    if f02Exists is True:
+        userMenuDict[chr(menuChoiceOrd)] = tuple(("Set Kingdom Unrest", "Feature02"))
+        menuChoiceOrd += 1
+    # Feature 6
+    if f06Exists is True:
+        userMenuDict[chr(menuChoiceOrd)] = tuple(("Change gold", "Feature06"))
+        menuChoiceOrd += 1
     
     # CLEAR SCREEN
     clear_screen(operSys)
@@ -476,9 +503,11 @@ def user_mod_menu(operSys, saveGameObj):
         # Print options
         print("SAVE GAME FILE MODIFICATIONS")
         print("Editing:\t{}\n".format(curSaveGame))
-        print("(a) Change Build Points (BPs)")
-        print("(b) Change Kingdom Stability")
-        print("(c) Change gold")
+        # print("(c) Change Build Points (BPs)")  # Feature 1
+        # print("(b) Change Kingdom Stability")  # Feature 2
+        # print("(a) Change gold")  # Feature 6
+        for key in userMenuDict.keys():
+            print("({}) {}".format(key, userMenuDict[key][0]))
         print("")
         print('Type "clear" to clear the screen')
         print('Type "open" to open a new file')
@@ -495,6 +524,8 @@ def user_mod_menu(operSys, saveGameObj):
             selection = "quit"
         else:
             selection = selection.lower()
+            if selection in userMenuDict.keys():
+                selection = userMenuDict[selection][1]
 
         # Execute selection
         if "clear" == selection:
@@ -515,7 +546,7 @@ def user_mod_menu(operSys, saveGameObj):
             numBadAnswers = 0
             userSave = True
             userExit = True
-        elif "a" == selection:
+        elif "Feature01" == selection:
             numBadAnswers = 0
             if isinstance(saveGameObj, ZksFile) is True:
                 try:
@@ -530,7 +561,7 @@ def user_mod_menu(operSys, saveGameObj):
             else:
                 print("Save game has already been closed")
                 numBadAnswers += 1
-        elif "b" == selection:
+        elif "Feature02" == selection:
             numBadAnswers = 0
             if isinstance(saveGameObj, ZksFile) is True:
                 try:
@@ -545,7 +576,7 @@ def user_mod_menu(operSys, saveGameObj):
             else:
                 print("Save game has already been closed")
                 numBadAnswers += 1
-        elif "c" == selection:
+        elif "Feature06" == selection:
             numBadAnswers = 0
             if isinstance(saveGameObj, ZksFile) is True:
                 try:
@@ -688,7 +719,6 @@ def main():
                 print("Unable to identify the current operating system.")
                 retVal = False
             else:
-                # print("Current OS:\t{}".format(operSys))  # DEBUGGING
                 pass
 
     # Locate Save Games
@@ -770,23 +800,10 @@ def main():
         else:
             pass
 
-    # Template Code Block
-    if retVal:
-        try:
-            pass
-        except Exception as err:
-            # print('_____() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
-            # retVal = False
-            pass
-        else:
-            pass
-
     # DEBUGGING
-    print("retVal:             \t{}".format(retVal))
-    print("Operating system:   \t{}".format(operSys))
-    print("Save game directory:\t{}".format(saveGamePath))
-    # for file in saveGameFileList:
-    #     print(file)
+    # print("retVal:             \t{}".format(retVal))
+    # print("Operating system:   \t{}".format(operSys))
+    # print("Save game directory:\t{}".format(saveGamePath))
 
     # DONE
     return retVal

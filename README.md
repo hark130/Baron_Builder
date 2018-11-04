@@ -18,13 +18,13 @@ My end goal is to create a save game editor that works on all operating systems 
 | :--- | :---: | :-----: | :---: |
 | Verify Python version | ✓ | ✓ | ✓ |
 | Check OS | ✓ | ✓ | ✓ |
-| Locate save games dir | ✓ | ? | ? |
-| Parse save games | ✓ | ? | ? |
-| Print file open menu | ✓ | ? | ? |
-| Print user selection menu | ✓ | ? | ? |
-| Write json-parsing class | ✓ | ? | ? |
-| Write save-file-parsing class | ✓ | ? | ? |
-| Store compression_type for each file in .zks for ZksFile.update_zks() | ✓ | ? | ? |
+| Locate save games dir | ✓ | ✓ | ? |
+| Parse save games | ✓ | ✓ | ? |
+| Print file open menu | ✓ | ✓ | ? |
+| Print user selection menu | ✓ | ✓ | ? |
+| Write json-parsing class | ✓ | ✓ | ? |
+| Write save-file-parsing class | ✓ | ✓ | ? |
+| Store compression_type for each file in .zks for ZksFile.update_zks() | ✓ | ✓ | ? |
 | Release wheel | | | |
 | Write wiki | | | |
 | Python command not required to run | | | |
@@ -39,7 +39,7 @@ My end goal is to create a save game editor that works on all operating systems 
 | F03 | Backup save games | | | |
 | F04 | Restore backed up save game | | | |
 | F05 | Archive (AKA backup/delete) old saves (speed up loads/saves?) | | | |
-| F06 | Change gold | ✓ | ? | ? |
+| F06 | Change gold | ✓ | ✓ | ? |
 
 ### Legend
 
