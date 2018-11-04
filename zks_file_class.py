@@ -19,8 +19,8 @@ class ZksFile():
             2. saveGame.unpack_file(os.path.join("Baron_Builder", "Working"))
             3. saveGame.load_data()
             4. [modify save game contents]
-            5. jsonSave.update_zks()
-            6. jsonSave.close_zks()
+            5. saveGame.update_zks()
+            6. saveGame.close_zks()
         NOTES
             ### SETUP ###
             [X] saveGame = ZksFile("save_game_42.zks")  # Instantiates a ZksFile object
@@ -349,6 +349,8 @@ class ZksFile():
         # DONE
         if retVal is False:
             print("Failed to load json file:\t{}".format(jsonName))  # DEBUGGING
+        else:
+            print("Loaded json file:\t{}".format(jsonName))  # DEBUGGING
         return retVal
 
 
@@ -493,34 +495,37 @@ class ZksFile():
         else:
             # REWRITE ORIGINAL SAVE GAME
             try:
-                # 1. Get file list
-                for root, dirs, files in os.walk(self.fullWorkPath):
-                    rootDir = root
-                    dirsFound = dirs
-                    filesFound = files
-
-                # 2. Add those files
-
-                # Attempt #1... here, at least
-                with zipfile.ZipFile(os.path.join(self.fullWorkPath, self.zName), "w") as outZipFile:
-                    for file in filesFound:
-                        outZipFile.write(os.path.join(rootDir, file), os.path.basename(file), self.zFileDict[file])
-
-                # Attempt #2... Just update
-                # with zipfile.ZipFile(os.path.join(self.origFileName), "a") as outZipFile:
-                #     self.zPlayFile.jCont = json.dumps(self.zPlayFile.jDict, separators=(',', ':'), ensure_ascii=False)
-                #     outZipFile.writestr(self.zPlayFile.jName, self.zPlayFile.jCont)
-
-                # 3. Replace the old save game with the new
-                os.remove(self.origFileName)
-                shutil.move(os.path.join(self.fullWorkPath, self.zName), self.origFileName)
+                # 1. Update the json files
+                retVal = self.save_json_files()
             except Exception as err:
                 print("\n{}".format(repr(err)))  # DEBUGGING
                 retVal = False
             else:
-                retVal = True
+                try:
+                    # 2. Get file list
+                    for root, dirs, files in os.walk(self.fullWorkPath):
+                        rootDir = root
+                        dirsFound = dirs
+                        filesFound = files
+
+                    # 3. Add those files to the working archive
+                    with zipfile.ZipFile(os.path.join(self.fullWorkPath, self.zName), "w") as outZipFile:
+                        for file in filesFound:
+                            outZipFile.write(os.path.join(rootDir, file), os.path.basename(file), self.zFileDict[file])
+
+                    # 4. Replace the old save game with the new
+                    os.remove(self.origFileName)
+                    shutil.move(os.path.join(self.fullWorkPath, self.zName), self.origFileName)
+                except Exception as err:
+                    print("\n{}".format(repr(err)))  # DEBUGGING
+                    retVal = False
+                else:
+                    retVal = True
 
         # DONE
+        if retVal is False:
+            self.zSuccess = False
+
         return retVal
 
 
