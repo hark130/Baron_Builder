@@ -3,6 +3,7 @@
 #################################################
 
 from baron_builder_features import bbf01_BP_sub_menu
+from baron_builder_features import bbf02_STAB_sub_menu
 from baron_builder_features import bbf06_GOLD_sub_menu
 from stat import S_ISREG, ST_CTIME, ST_MODE, ST_MTIME
 from zks_file_class import ZksFile              # ZksFile class
@@ -27,9 +28,11 @@ ARCHIVE_DIR = "Archive"    # Move archived save files here
 BACKUP_DIR = "Backup"      # Backup save files here
 WORKING_DIR = "Working"    # Use this directory to unarchive and modify save games
 
+
 #################################################
 #################### GLOBALS ####################
 #################################################
+
 # SUPPORTED OPERATING SYSTEMS
 supportedOSGlobal = [ OS_LINUX, OS_WINDOWS, OS_APPLE ]
 # PYTHON MINIMUM VERSION REQUIRED
@@ -44,6 +47,7 @@ winSaveGamePath = os.path.join("AppData", "LocalLow", "Owlcat Games", "Pathfinde
 # Apple - /home/user/Library/Application\ Support/unity.Owlcat\ Games.Pathfinder\ Kingmaker/Saved\ Games 
 macSaveGamePath = os.path.join("Library", "Application Support", "unity.Owlcat Games.Pathfinder Kingmaker", "Saved Games")
 numBadAnswers = 0  # Current number of bad answers
+
 
 #################################################
 ################### FUNCTIONS ###################
@@ -445,8 +449,10 @@ def user_mod_menu(operSys, saveGameObj):
     supportedOS = supportedOSGlobal
     selection = 0  # Main menu selection
     tempInt = 0  # Temporary integer
+    userClose = False  # User indicate to close the current save game
     userSave = False  # User indication they want to save
     userExit = False  # User indication they want to exit/quit
+    curSaveGame = ""  # Current save game being edited
 
     # GLOBAL VARIABLES
     global numBadAnswers
@@ -458,6 +464,8 @@ def user_mod_menu(operSys, saveGameObj):
         raise ValueError("Operating system value is unknown")
     elif not isinstance(saveGameObj, ZksFile):
         raise TypeError('Save game object is of type "{}" instead of ZksFile'.format(type(saveGameObj)))
+    else:
+        curSaveGame = saveGameObj.zName
     
     # CLEAR SCREEN
     clear_screen(operSys)
@@ -467,10 +475,10 @@ def user_mod_menu(operSys, saveGameObj):
         # PRINT MENU
         # Print options
         print("SAVE GAME FILE MODIFICATIONS")
-        print("Editing:\t{}\n".format(saveGameObj.zName))
-        print("(a) Add Build Points (BPs)")
+        print("Editing:\t{}\n".format(curSaveGame))
+        print("(a) Change Build Points (BPs)")
         print("(b) Change Kingdom Stability")
-        print("(c) Add gold")
+        print("(c) Change gold")
         print("")
         print('Type "clear" to clear the screen')
         print('Type "open" to open a new file')
@@ -480,6 +488,7 @@ def user_mod_menu(operSys, saveGameObj):
 
         # Take input
         selection = input("Make your selection [Quit]:  ")
+        clear_screen(operSys)
 
         # Modify input
         if len(selection) == 0:
@@ -493,58 +502,93 @@ def user_mod_menu(operSys, saveGameObj):
             clear_screen(operSys)
         elif "open" == selection:
             numBadAnswers = 0
-            print("\nOpening a new file")  # Placeholder
+            print('\nNOT IMPLEMENTED\nChoose "close", then "quit", and start again instead')  # Placeholder
             pass
         elif "save" == selection:
             numBadAnswers = 0
             userSave = True
         elif "close" == selection:
             numBadAnswers = 0
-            print("\nClosing file")  # Placeholder
-            are_you_sure("close the file without saving")
-            pass
+            if are_you_sure("close the file without saving") is True:
+                userClose = True
         elif "quit" == selection:
             numBadAnswers = 0
             userSave = True
             userExit = True
         elif "a" == selection:
             numBadAnswers = 0
-            try:
-                retVal = bbf01_BP_sub_menu(saveGameObj, numBadAnswers, MAX_ERRS)
-            except Exception as err:
-                print("\nUnable to modify current build points")
-                print(repr(err))
-                retVal = False
+            if isinstance(saveGameObj, ZksFile) is True:
+                try:
+                    retVal = bbf01_BP_sub_menu(saveGameObj, numBadAnswers, MAX_ERRS)
+                except Exception as err:
+                    print("\nUnable to modify current build points")
+                    print(repr(err))
+                    retVal = False
+                else:
+                    if retVal is True:
+                        numBadAnswers = 0
             else:
-                if retVal is True:
-                    numBadAnswers = 0
+                print("Save game has already been closed")
+                numBadAnswers += 1
         elif "b" == selection:
             numBadAnswers = 0
-            print("\nChanging stability")  # Placeholder
-            pass
+            if isinstance(saveGameObj, ZksFile) is True:
+                try:
+                    retVal = bbf02_STAB_sub_menu(saveGameObj, numBadAnswers, MAX_ERRS)
+                except Exception as err:
+                    print("\nUnable to modify kingdom's unrest level")
+                    print(repr(err))
+                    retVal = False
+                else:
+                    if retVal is True:
+                        numBadAnswers = 0
+            else:
+                print("Save game has already been closed")
+                numBadAnswers += 1
         elif "c" == selection:
             numBadAnswers = 0
-            try:
-                retVal = bbf06_GOLD_sub_menu(saveGameObj, numBadAnswers, MAX_ERRS)
-            except Exception as err:
-                print("\nUnable to modify gold amount")
-                print(repr(err))
-                retVal = False
+            if isinstance(saveGameObj, ZksFile) is True:
+                try:
+                    retVal = bbf06_GOLD_sub_menu(saveGameObj, numBadAnswers, MAX_ERRS)
+                except Exception as err:
+                    print("\nUnable to modify gold amount")
+                    print(repr(err))
+                    retVal = False
+                else:
+                    if retVal is True:
+                        numBadAnswers = 0
             else:
-                if retVal is True:
-                    numBadAnswers = 0
+                print("Save game has already been closed")
+                numBadAnswers += 1
         else:
             print("\nInvalid selection.  Try again.")
             numBadAnswers += 1
 
+        # MENU ACTIONS
         # Save
-        if userSave is True:
+        if userSave is True and isinstance(saveGameObj, ZksFile) is True:
             print("\nSaving any changes to {}".format(saveGameObj.zName))
             saveGameObj.update_zks()
+            userSave = False
+        elif userSave is True and saveGameObj is None:
+            print("Save game has already been closed")
+            numBadAnswers += 1
+
+        # Close
+        if userClose is True and isinstance(saveGameObj, ZksFile) is True:
+            print("\nClosing {} without saving".format(saveGameObj.zName))
+            saveGameObj.close_zks()
+            saveGameObj = None
+            curSaveGame = "None"
+            userClose = False
+        elif userClose is True and saveGameObj is None:
+            print("Save game has already been closed")
+            numBadAnswers += 1
 
         # Quit
         if userExit is True:
             print("\nExiting Baron Builder")
+            userExit = False
             break
 
     # DONE
@@ -577,9 +621,9 @@ def are_you_sure(actionStr=""):
 
     # PROMPT USER
     if len(actionStr) > 0:
-        print('Are you sure you want to "{}"?'.format(actionStr))
+        print('\nAre you sure you want to "{}"?'.format(actionStr))
     else:
-        print("Are you sure?")
+        print("\nAre you sure?")
 
     while numBadAnswers <= MAX_ERRS:
         # Take input
@@ -615,6 +659,9 @@ def main():
     fileNum = None         # Index into saveGameFileList the user selected
     absSaveGameFile = ""   # Absolute filename for the chosen save game
     saveGameObj = None     # Store the ZksFile object here
+
+    # GLOBAL VARIABLES
+    global numBadAnswers
 
     # WORK
     # Verify Python Version
