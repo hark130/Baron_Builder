@@ -18,24 +18,46 @@ My end goal is to create a save game editor that works on all operating systems 
 | :--- | :---: | :-----: | :---: |
 | Verify Python version | ✓ | ✓ | ✓ |
 | Check OS | ✓ | ✓ | ✓ |
-| Locate save games | | | |
-| Parse save games | | | |
-| Print menu | | | |
+| Locate save games dir | ✓ | ? | ? |
+| Parse save games | ✓ | ? | ? |
+| Print file open menu | ✓ | ? | ? |
+| Print user selection menu | ✓ | ? | ? |
+| Write json-parsing class | ✓ | ? | ? |
+| Write save-file-parsing class | ✓ | ? | ? |
+| Store compression_type for each file in .zks for ZksFile.update_zks() | ✓ | ? | ? |
 | Release wheel | | | |
 | Write wiki | | | |
 | Python command not required to run | | | |
+| Search _all_ home dirs for save games(?) | | | |
 
 ### Editor Features 
 
-| Task | Linux | Windows | Apple |
-| :--- | :---: | :-----: | :---: |
-| Add BPs | | | |
-| Change Kingdom Stability | | | |
+| Feature # | Task | Linux | Windows | Apple |
+| :-------- | :--- | :---: | :-----: | :---: |
+| F01 | Add BPs | ✓ | ? | ? |
+| F02 | Change Kingdom Stability | ✓ | ? | ? |
+| F03 | Backup save games | | | |
+| F04 | Restore backed up save game | | | |
+| F05 | Archive (AKA backup/delete) old saves (speed up loads/saves?) | | | |
+| F06 | Change gold | ✓ | ? | ? |
 
 ### Legend
 
 | Symbol | Meaning |
-| :----- | :------ |
-| | Not implemented |
+| :----: | :------ |
+| | Not yet begun |
+| / | Work has begun |
 | ? | Implemented but not tested |
 | ✓ | Implemented and tested |
+
+### Design
+
+* Sub-directories created in save game directory
+	* "Baron_Builder" (Encapsulating directory for all work done)
+		* "Archive" (Move old save game files here)
+		* "Backup" (Back up save game files here)
+		* "Working" (Working directory to unarchive save files into)
+	* Implement JsonFile and ZksFile classes to be directory-independent
+		* AKA Don't 'hard code' directories
+		* Make Baron_Builder pass in the necessary directories (e.g., Archive, Backup, Working)
+		* This design will facilitate easy relocation of files in the future
