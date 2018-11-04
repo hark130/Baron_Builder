@@ -7,8 +7,8 @@ from baron_builder_features import bbf02_STAB_sub_menu
 from baron_builder_features import bbf06_GOLD_sub_menu
 from stat import S_ISREG, ST_CTIME, ST_MODE, ST_MTIME
 from zks_file_class import ZksFile              # ZksFile class
-import pwd                                      # getpwuid
-import os                                       # path.join, getuid, path.isdir, system
+# import pwd                                      # getpwuid
+import os                                       # environ, path.join, getuid, path.isdir, system
 import sys                                      # version_info
 
 #################################################
@@ -163,20 +163,30 @@ def locate_save_games(operSys):
         raise ValueError("Operating system value is unknown")
 
     # DETERMINE USER NAME
-    if OS_LINUX == operSys:
-        userName = pwd.getpwuid(os.getuid()).pw_name
-        homeDir = pwd.getpwuid(os.getuid()).pw_dir
-        relDir = nixSaveGamePath
-    elif OS_WINDOWS == operSys:
-        userName = pwd.getpwuid(os.getuid()).pw_name
-        homeDir = pwd.getpwuid(os.getuid()).pw_dir
-        relDir = winSaveGamePath
-    elif OS_APPLE == operSys:
-        userName = pwd.getpwuid(os.getuid()).pw_name
-        homeDir = pwd.getpwuid(os.getuid()).pw_dir
-        relDir = macSaveGamePath
-    else:
-        raise RuntimeError("Consider updating supportedOS list or control flow in locate_save_games()")
+    try:
+        if OS_LINUX == operSys:
+            # userName = pwd.getpwuid(os.getuid()).pw_name
+            # homeDir = pwd.getpwuid(os.getuid()).pw_dir
+            userName = os.environ["USER"]
+            homeDir = os.environ["HOME"]
+            relDir = nixSaveGamePath
+        elif OS_WINDOWS == operSys:
+            # userName = pwd.getpwuid(os.getuid()).pw_name
+            # homeDir = pwd.getpwuid(os.getuid()).pw_dir
+            userName = os.environ["USERNAME"]
+            homeDir = os.path.join(os.environ["HOMEDRIVE"], os.environ["HOMEPATH"])
+            relDir = winSaveGamePath
+        elif OS_APPLE == operSys:
+            # userName = pwd.getpwuid(os.getuid()).pw_name
+            # homeDir = pwd.getpwuid(os.getuid()).pw_dir
+            userName = os.environ["USER"]
+            homeDir = os.environ["HOME"]
+            relDir = macSaveGamePath
+    except Exception as err:
+        print(repr(err))  # DEBUGGING
+        userName = ""
+        homeDir = ""
+        relDir = ""
 
     # CONSTRUCT HOME DIRECTORY
     if len(homeDir) == 0 and isinstance(userName, str) and len(userName) > 0:
