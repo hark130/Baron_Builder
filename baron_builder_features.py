@@ -148,8 +148,11 @@ def bbf01_BP_get_bps(saveGameObj):
 
     # DETERMINE BUILD POINTS
     try:
-        tempOrdDict = saveGameObj.zPlayFile.get_data("Kingdom")
-        retVal = tempOrdDict["BP"]
+        if bbf01_BP_available(saveGameObj) is True:
+            tempOrdDict = saveGameObj.zPlayFile.get_data("Kingdom")
+            retVal = tempOrdDict["BP"]
+        else:
+            retVal = -1
     except KeyError as err:
         print(repr(err))  # DEBUGGING
         retVal = -1
@@ -193,7 +196,7 @@ def bbf01_BP_set_bps(saveGameObj, newBPAmnt):
 
     # DETERMINE AMOUNT OF GOLD
     try:
-        if saveGameObj.zPlayFile.key_present("Kingdom") is True:
+        if bbf01_BP_available(saveGameObj) is True:
             # 1. Get the Kingdom dictionary
             tempOrdDict = saveGameObj.zPlayFile.get_data("Kingdom")
             oldBPAmnt = tempOrdDict["BP"]
@@ -370,11 +373,14 @@ def bbf02_STAB_get_stability(saveGameObj):
 
     # DETERMINE BUILD POINTS
     try:
-        tempOrdDict = saveGameObj.zPlayFile.get_data("Kingdom")
-        retVal = tempOrdDict["Unrest"]
+        if bbf02_STAB_available(saveGameObj) is True:
+            tempOrdDict = saveGameObj.zPlayFile.get_data("Kingdom")
+            retVal = tempOrdDict["Unrest"]
+        else:
+            retVal = ""
     except KeyError as err:
         print(repr(err))  # DEBUGGING
-        retVal = -1
+        retVal = ""
 
     # VALIDATE DATA
     if not isinstance(retVal, str):
@@ -414,7 +420,7 @@ def bbf02_STAB_set_stability(saveGameObj, newStabStr):
 
     # DETERMINE AMOUNT OF GOLD
     try:
-        if saveGameObj.zPlayFile.key_present("Kingdom") is True:
+        if bbf02_STAB_available(saveGameObj) is True:
             # 1. Get the Kingdom dictionary
             tempOrdDict = saveGameObj.zPlayFile.get_data("Kingdom")
             # 2. Modify the Kingdom dictionary
@@ -564,8 +570,10 @@ def bbf06_GOLD_get_gold(saveGameObj):
 
     # DETERMINE AMOUNT OF GOLD
     try:
-        # print("player.json JsonFile success:\t{}".format(saveGameObj.zPlayFile.jSuccess))  # DEBUGGING
-        retVal = saveGameObj.zPlayFile.get_data("Money")
+        if bbf06_GOLD_available(saveGameObj) is True:
+            retVal = saveGameObj.zPlayFile.get_data("Money")
+        else:
+            retVal = -1
     except KeyError as err:
         print(repr(err))  # DEBUGGING
         retVal = -1
@@ -601,7 +609,7 @@ def bbf06_GOLD_set_gold(saveGameObj, newGoldAmnt):
 
     # DETERMINE AMOUNT OF GOLD
     try:
-        if saveGameObj.zPlayFile.key_present("Money") is True:
+        if bbf06_GOLD_available(saveGameObj) is True:
             retVal = saveGameObj.zPlayFile.mod_data("Money", newGoldAmnt)
     except KeyError as err:
         print(repr(err))  # DEBUGGING
