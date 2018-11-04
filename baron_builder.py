@@ -7,7 +7,6 @@ from baron_builder_features import bbf02_STAB_sub_menu
 from baron_builder_features import bbf06_GOLD_sub_menu
 from stat import S_ISREG, ST_CTIME, ST_MODE, ST_MTIME
 from zks_file_class import ZksFile              # ZksFile class
-# import pwd                                      # getpwuid
 import os                                       # environ, path.join, getuid, path.isdir, system
 import sys                                      # version_info
 
@@ -165,20 +164,14 @@ def locate_save_games(operSys):
     # DETERMINE USER NAME
     try:
         if OS_LINUX == operSys:
-            # userName = pwd.getpwuid(os.getuid()).pw_name
-            # homeDir = pwd.getpwuid(os.getuid()).pw_dir
             userName = os.environ["USER"]
             homeDir = os.environ["HOME"]
             relDir = nixSaveGamePath
         elif OS_WINDOWS == operSys:
-            # userName = pwd.getpwuid(os.getuid()).pw_name
-            # homeDir = pwd.getpwuid(os.getuid()).pw_dir
             userName = os.environ["USERNAME"]
             homeDir = os.path.join(os.environ["HOMEDRIVE"], os.environ["HOMEPATH"])
             relDir = winSaveGamePath
         elif OS_APPLE == operSys:
-            # userName = pwd.getpwuid(os.getuid()).pw_name
-            # homeDir = pwd.getpwuid(os.getuid()).pw_dir
             userName = os.environ["USER"]
             homeDir = os.environ["HOME"]
             relDir = macSaveGamePath
@@ -338,12 +331,8 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList):
     clear_screen(operSys)
 
     while numBadAnswers <= MAX_ERRS:
-        # CLEAR SCREEN
-        # clear_screen(operSys)
 
         print("")  # Blank line
-        # print("Num files:\t{}".format(numFiles))  # DEBUGGING
-        # print("Save Game #0:\t{}".format(saveGameFileList[0]))  # DEBUGGING
 
         # PRINT SAVE FILES
         # Verify files exist
@@ -359,7 +348,6 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList):
             # Not enough files
             # Print no more files to view
             pass
-            # break  # DEBUGGING
 
         # NOTE: Print "end of list" or something similar when printing the last section
         if numFiles - (page * 10) <= numFiles % 10:
@@ -698,7 +686,6 @@ def main():
                 print("Unable to identify the current operating system.")
                 retVal = False
             else:
-                # print("Current OS:\t{}".format(operSys))  # DEBUGGING
                 pass
 
     # Locate Save Games
@@ -780,23 +767,10 @@ def main():
         else:
             pass
 
-    # Template Code Block
-    if retVal:
-        try:
-            pass
-        except Exception as err:
-            # print('_____() raised "{}" exception'.format(err.__str__()))  # DEBUGGING
-            # retVal = False
-            pass
-        else:
-            pass
-
     # DEBUGGING
-    print("retVal:             \t{}".format(retVal))
-    print("Operating system:   \t{}".format(operSys))
-    print("Save game directory:\t{}".format(saveGamePath))
-    # for file in saveGameFileList:
-    #     print(file)
+    # print("retVal:             \t{}".format(retVal))
+    # print("Operating system:   \t{}".format(operSys))
+    # print("Save game directory:\t{}".format(saveGamePath))
 
     # DONE
     return retVal
