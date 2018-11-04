@@ -10,7 +10,6 @@
 '''
 
 
-
 #################################################
 #################### IMPORTS ####################
 #################################################
@@ -18,15 +17,22 @@
 from collections import OrderedDict
 from zks_file_class import ZksFile
 
+
 #################################################
 #################### MACROS #####################
 #################################################
+
 MAX_GOLD = 1000000                              # Upper end limit for modifying gold
 MAX_BPS = 25000                                 # Upper end limit for modifying build points
+
 
 #################################################
 #################### GLOBALS ####################
 #################################################
+
+# KINGDOM UNREST LEVELS
+fullStabListGlobal = [ "Serene", "Stable", "Worried", "Troubled", "Rioting", "Crumbling" ]
+
 
 #################################################
 ################### FEATURES ####################
@@ -203,6 +209,186 @@ def bbf01_BP_set_bps(saveGameObj, newBPAmnt):
 
 
 ############### F02 - STABILITY #################
+
+
+def bbf02_STAB_sub_menu(saveGameObj, curNumBadAns, maxNumBadAns):
+    '''
+        PURPOSE - Baron Builder Feature 02: Modify kingdom stability
+            This function serves as the sub-menu to modify the kingdom's stability
+        INPUT
+            saveGameObj - ZksFile object for a selected save game
+            curNumBadAns - Current number of incorrect answers to track error tolerance
+            maxNumBadAns - Maximum number of incorrect answers before giving up
+        OUTPUT
+            On success, True
+            On failure, False
+            On error, Exception
+        NOTES
+            This function makes no changes but calls functions that do
+            This function will not close anything
+    '''
+    # LOCAL VARIABLES
+    retVal = True
+    curStab = ""  # Current stability
+    newStab = ""  # New stability
+    newStabChoice = 0  # New stability user selection
+    numBadAnswers = curNumBadAns  # Number of bad answers given here
+    fullStabList = fullStabListGlobal  # Full list of stability strings
+    suppStabList = [ "Stable", "Worried", "Troubled", "Rioting", "Crumbling" ]  # Supported stabilities
+
+    # INPUT VALIDATION
+    if not isinstance(saveGameObj, ZksFile):
+        raise TypeError('Save game object is of type "{}" instead of ZksFile'.format(type(saveGameObj)))
+    elif not isinstance(curNumBadAns, int):
+        raise TypeError('Current number of bad answers is of type "{}" instead of integer'.format(type(curNumBadAns)))
+    elif not isinstance(maxNumBadAns, int):
+        raise TypeError('Maximum number of bad answers is of type "{}" instead of integer'.format(type(maxNumBadAns)))
+    elif curNumBadAns > maxNumBadAns:
+        retVal = False
+
+    # FEATURE 02 - STABILITY
+    if retVal:
+        try:
+            # PRINT MENU
+            print("")  # Blank line
+            curStab = bbf02_STAB_get_stability(saveGameObj)
+        except Exception as err:
+            print("\nUnable to determine kingdom's current stability")
+            print(repr(err))
+            retVal = False
+        else:
+            if -1 == curStab:
+                print("\nUnable to determine kingdom's current stability")
+            else:
+                while numBadAnswers <= maxNumBadAns:
+
+                    # Print options
+                    print('Your kingdom is currently "{}"'.format(curStab))
+                    print("\nKingdom Stability Choices:")
+                    for stab in fullStabList:
+                        print("{}. {}".format(fullStabList.index(stab) + 1, stab))
+
+                    # Take input
+                    print("\nEnter the number of the new stability level")
+                    print("-or-")
+                    print('Type "exit" to return to the previous menu')
+                    newStabChoice = input("Enter your selection [{}]:  ".format(fullStabList.index("Stable") + 1))
+
+                    # Modify input
+                    if 0 == len(newStabChoice):
+                        newStabChoice = fullStabList.index("Stable") + 1
+                        print("Settting default response to {}".format(fullStabList.index("Stable") + 1))
+                    else:
+                        newStabChoice = newStabChoice.lower()
+
+                    # Execute selection
+                    if "exit" == newStabChoice:
+                        retVal = True
+                        break
+                    else:
+                        try:
+                            newStabChoice = int(newStabChoice)
+                            newStab = fullStabList[newStabChoice - 1]
+                            if newStab in suppStabList:
+                                retVal = bbf02_STAB_set_stability(saveGameObj, newStab)
+                                numBadAnswers = 0
+                                break
+                            else:
+                                print('"{}" is not currently supported.'.format(fullStabList[newStabChoice - 1]))
+                                print('"{}" is currently the highest supported kingdom stability'.format(suppStabList[0]))
+                                numBadAnswers += 1
+                                if numBadAnswers <= maxNumBadAns:
+                                    print("Try again.")
+                        except Exception as err:
+                            print("Invalid selection.")
+                            numBadAnswers += 1
+                            if numBadAnswers <= maxNumBadAns:
+                                print("Try again.")
+                        else:
+                            pass
+
+    # DONE
+    return retVal
+
+
+def bbf02_STAB_get_stability(saveGameObj):
+    '''
+        PURPOSE - Baron Builder Feature 02: Modify kingdom stability
+            Determine the kingdom's stability in this save game
+        INPUT
+            saveGameObj - ZksFile object for a selected save game
+        OUTPUT
+            On success, String representing kingdom's current unrest level
+            On failure, Empty string
+            On error, Exception
+        NOTES
+            This function makes no changes
+            This function will not close anything
+    '''
+    # LOCAL VARIABLES
+    retVal = -1
+    tempOrdDict = OrderedDict()  # Temporary return value from JsonFile.get_data("Kingdom")
+
+    # DETERMINE BUILD POINTS
+    try:
+        tempOrdDict = saveGameObj.zPlayFile.get_data("Kingdom")
+        retVal = tempOrdDict["Unrest"]
+    except KeyError as err:
+        print(repr(err))  # DEBUGGING
+        retVal = -1
+
+    # VALIDATE DATA
+    if not isinstance(retVal, str):
+        retVal = ""
+    elif retVal not in fullStabListGlobal:
+        retVal = ""
+
+    # DONE
+    return retVal
+
+
+def bbf02_STAB_set_stability(saveGameObj, newStabStr):
+    '''
+        PURPOSE - Baron Builder Feature 02: Modify kingdom stability
+            Change the kingdom's stability for this save game
+        INPUT
+            saveGameObj - ZksFile object for a selected save game
+            newStabStr - String representation for the new kingdom unrest level
+        OUTPUT
+            On success, True
+            On failure, False
+            On error, Exception
+        NOTES
+            This function will not close anything
+    '''
+    # LOCAL VARIABLES
+    retVal = False
+    tempOrdDict = OrderedDict()  # Temporary return value from JsonFile.get_data("Kingdom")
+
+    # INPUT VALIDATION
+    if not isinstance(newStabStr, str):
+        raise TypeError('New build point amount is of type "{}" instead of string'.format(type(newStabStr)))
+    elif 1 > len(newStabStr):
+        raise ValueError("New stability string is empty")
+    elif newStabStr not in fullStabListGlobal:
+        raise ValueError("Invalid kingdom stability")
+
+    # DETERMINE AMOUNT OF GOLD
+    try:
+        if saveGameObj.zPlayFile.key_present("Kingdom") is True:
+            # 1. Get the Kingdom dictionary
+            tempOrdDict = saveGameObj.zPlayFile.get_data("Kingdom")
+            # 2. Modify the Kingdom dictionary
+            tempOrdDict["Unrest"] = newStabStr
+            tempOrdDict["UnrestOnLastRavenVisit"] = newStabStr
+            # 3. Replace the Kingdom dictionary
+            retVal = saveGameObj.zPlayFile.mod_data("Kingdom", tempOrdDict)
+    except KeyError as err:
+        print(repr(err))  # DEBUGGING
+        retVal = False
+
+    # DONE
+    return retVal
 
 
 ################## F06 - GOLD ###################
