@@ -4,6 +4,8 @@
         Each feature should have its own dedicated sub-menu defined here that follows
             the following general naming convention:
                 bbf<num>_<SHORT DESCR>_sub_menu(saveGameObj)
+        Each feature should also have a function dedicated to determining availability:
+            bbf<num>_<SHORT_DESCR>_available(saveGameObj)
         Each function will be named after the feature it directly supports
             e.g., The Baron Builder Feature 6 (change gold) function to change the gold should be named
             bbf06_GOLD_sub_menu()
@@ -208,6 +210,43 @@ def bbf01_BP_set_bps(saveGameObj, newBPAmnt):
     return retVal
 
 
+def bbf01_BP_available(saveGameObj):
+    '''
+        PURPOSE - Baron Builder Feature 01: Modify build points
+            Determine if this save game is 'mature' enough to support this feature
+        INPUT
+            saveGameObj - ZksFile object for a selected save game
+        OUTPUT
+            If available, True
+            If not, False
+            On error, Exception
+        NOTES
+            This function makes no changes
+            This function will not close anything
+    '''
+    # LOCAL VARIABLES
+    retVal = False
+    tempOrdDict = OrderedDict()  # Temporary return value from JsonFile.get_data("Kingdom")
+
+    # INPUT VALIDATION
+    if not isinstance(saveGameObj, ZksFile):
+        raise TypeError('Save game object is of type "{}" instead of ZksFile'.format(type(saveGameObj)))
+
+    # DETERMINE AVAILABILITY
+    try:
+        if saveGameObj.zPlayFile.key_present("Kingdom") is True:
+            # 1. Get the Kingdom dictionary
+            tempOrdDict = saveGameObj.zPlayFile.get_data("Kingdom")
+            if "BP" in tempOrdDict.keys():
+                retVal = True
+    except KeyError as err:
+        print(repr(err))  # DEBUGGING
+        retVal = False
+
+    # DONE
+    return retVal
+
+
 ############### F02 - STABILITY #################
 
 
@@ -391,6 +430,43 @@ def bbf02_STAB_set_stability(saveGameObj, newStabStr):
     return retVal
 
 
+def bbf02_STAB_available(saveGameObj):
+    '''
+        PURPOSE - Baron Builder Feature 02: Modify kingdom stability
+            Determine if this save game is 'mature' enough to support this feature
+        INPUT
+            saveGameObj - ZksFile object for a selected save game
+        OUTPUT
+            If available, True
+            If not, False
+            On error, Exception
+        NOTES
+            This function makes no changes
+            This function will not close anything
+    '''
+    # LOCAL VARIABLES
+    retVal = False
+    tempOrdDict = OrderedDict()  # Temporary return value from JsonFile.get_data("Kingdom")
+
+    # INPUT VALIDATION
+    if not isinstance(saveGameObj, ZksFile):
+        raise TypeError('Save game object is of type "{}" instead of ZksFile'.format(type(saveGameObj)))
+
+    # DETERMINE AVAILABILITY
+    try:
+        if saveGameObj.zPlayFile.key_present("Kingdom") is True:
+            # 1. Get the Kingdom dictionary
+            tempOrdDict = saveGameObj.zPlayFile.get_data("Kingdom")
+            if "Unrest" in tempOrdDict.keys():
+                retVal = True
+    except KeyError as err:
+        print(repr(err))  # DEBUGGING
+        retVal = False
+
+    # DONE
+    return retVal
+
+
 ################## F06 - GOLD ###################
 
 
@@ -527,6 +603,39 @@ def bbf06_GOLD_set_gold(saveGameObj, newGoldAmnt):
     try:
         if saveGameObj.zPlayFile.key_present("Money") is True:
             retVal = saveGameObj.zPlayFile.mod_data("Money", newGoldAmnt)
+    except KeyError as err:
+        print(repr(err))  # DEBUGGING
+        retVal = False
+
+    # DONE
+    return retVal
+
+
+def bbf06_GOLD_available(saveGameObj):
+    '''
+        PURPOSE - Baron Builder Feature 06: Modify gold
+            Determine if this save game is 'mature' enough to support this feature
+        INPUT
+            saveGameObj - ZksFile object for a selected save game
+        OUTPUT
+            If available, True
+            If not, False
+            On error, Exception
+        NOTES
+            This function makes no changes
+            This function will not close anything
+    '''
+    # LOCAL VARIABLES
+    retVal = False
+    tempOrdDict = OrderedDict()
+
+    # INPUT VALIDATION
+    if not isinstance(saveGameObj, ZksFile):
+        raise TypeError('Save game object is of type "{}" instead of ZksFile'.format(type(saveGameObj)))
+
+    # DETERMINE AVAILABILITY
+    try:
+        retVal = saveGameObj.zPlayFile.key_present("Money")
     except KeyError as err:
         print(repr(err))  # DEBUGGING
         retVal = False
