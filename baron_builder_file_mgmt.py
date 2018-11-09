@@ -14,8 +14,10 @@ from baron_builder_imports import TOP_DIR, ARCHIVE_DIR, BACKUP_DIR, WORKING_DIR
 from baron_builder_imports import supportedOSGlobal
 from baron_builder_utilities import clear_screen
 from stat import S_ISREG, ST_CTIME, ST_MODE, ST_MTIME
+from zks_file_class import ZksFile
 import os
 import shutil
+import sys
 
 
 #################################################
@@ -56,7 +58,11 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
     retVal = True
     supportedOS = supportedOSGlobal
     numBadAnswers = curNumBadAns  # Current number of bad answers
-    selection = 0  # User menu selection
+    selection = 0                 # User menu selection
+    tempRetVal = 0                # File index to backup/archive
+    backupZksFile = None          # ZksFile object to backup/archive
+    workDirExists = None          # Set this to true if a working directory already existed
+    zksWorkDir = ""               # Store the path of the full working directory here before ZksFile.close_zks()
 
     # GLOBAL VARIABLES
 
@@ -94,6 +100,7 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
         print("(c) Archive save game(s)")
         print("(d) Restore save game(s)")
         print("(e) Clean working directory")
+        print("(f) Help")
         print("")
         print('Type "clear" to clear the screen')
         print('Type "quit" to save and exit this program')
@@ -119,13 +126,47 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
             retVal = user_file_selection_menu(operSys, saveGamePath, saveGameFileList, numBadAnswers)
             break
         elif "b" == selection:
-            break
+            tempRetVal = user_file_selection_menu(operSys, saveGamePath, saveGameFileList, numBadAnswers)
+            try:
+                backupZksFile = ZksFile(os.path.join(saveGamePath, saveGameFileList[tempRetVal]))
+                if os.path.isdir(os.path.join(saveGamePath,TOP_DIR, WORKING_DIR, backupZksFile.zModDir)):
+                    print("{} exists".format(os.path.join(saveGamePath,TOP_DIR, WORKING_DIR, backupZksFile.zModDir)))  # DEBUGGING
+                    workDirExists = True
+                else:
+                    print("{} does not exist".format(os.path.join(saveGamePath,TOP_DIR, WORKING_DIR, backupZksFile.zModDir)))  # DEBUGGING
+                    workDirExists = False
+                backupZksFile.unpack_file(os.path.join(saveGamePath, TOP_DIR, WORKING_DIR))
+                backupZksFile.backup(os.path.join(saveGamePath, TOP_DIR, BACKUP_DIR))
+                zksWorkDir = backupZksFile.fullWorkPath
+                backupZksFile.close_zks()
+            except Exception as err:
+                print('ZksFile() raised "{}" exception'.format(str(err)))  # DEBUGGING
+                retVal = False
+                break
+            else:
+                if workDirExists is False:
+                    empty_a_dir(zksWorkDir)
+                    remove_a_dir(zksWorkDir)
+                    zksWorkDir = None
         elif "c" == selection:
+            # FUTURE NOTES
+            # 1. Does working directory already exist?  If yes, leave it.  If no, clean up afterwards
+            # 2. saveGame = ZksFile()
+            # 3. saveGame.unpack_file(os.path.join(TOP_DIR, WORKING_DIR))
+            # 4. saveGame.backup(os.path.join(TOP_DIR, ARCHIVE_DIR))
             break
         elif "d" == selection:
             break
         elif "e" == selection:
             empty_a_dir(os.path.join(saveGamePath, TOP_DIR, WORKING_DIR))
+        elif "f" == selection:
+            print("A - 'Editing a save game' will allow you to modify certain aspects of that save file.")
+            print("B - 'Backing up a save' will copy a save game file into a back up directory.  High speed but no compression.")
+            print("C - 'Archiving a save' will move a save game into an archive directory.\nSlow speed, some compression but this may speed up game load times.")
+            print("D - 'Restore save games' will allow you to recover backup and archive save games, overwriting your current save.")
+            print("E - 'Clean working directory' will manually clear the temporary files created during file manipulation.")
+            print("F - I just wanted to give the user some insight into what is happening without lengthy documentation.")
+            print("")
         else:
             print("\nInvalid selection.")
             numBadAnswers += 1
@@ -215,7 +256,7 @@ def user_file_selection_menu(operSys, saveGamePath, saveGameFileList, curNumBadA
 
         # Print options
         print("SAVE GAME SELECTION")
-        print("Enter the number of the save game you want to edit")
+        print("Enter the number of the save game you want")
         print("-or-")
         print('Type "top" to see the first page of files')
         print('Type "up" to see the previous page of files')
@@ -433,7 +474,8 @@ def empty_a_dir(oldPath):
         raise OSError("Path is not a path")
 
     # EMPTY DIRECTORY
-    print("Deleting Working Folders [", end = "")
+    print("Cleaning Up [", end = "")
+    sys.stdout.flush()
     for entry in os.listdir(oldPath):
         if retVal is False:
             break
@@ -443,17 +485,22 @@ def empty_a_dir(oldPath):
             retVal = remove_a_dir(os.path.join(oldPath, entry))
             if retVal is False:
                 print("X", end = "")
+                sys.stdout.flush()
                 break
             else:
                 print(".", end = "")
+                sys.stdout.flush()
         elif os.path.isfile(os.path.join(oldPath, entry)):
             # print("Removing file {}".format(os.path.join(oldPath, entry)))  # DEBUGGING
             os.remove(os.path.join(oldPath, entry))
             print(".", end = "")
+            sys.stdout.flush()
         else:
             print("X]")
+            sys.stdout.flush()
             raise OSError("Entry {} is not a file or directory".format(os.path.join(oldPath, entry)))
     print("]")
+    sys.stdout.flush()
 
     # DONE
     return retVal

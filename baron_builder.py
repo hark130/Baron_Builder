@@ -100,7 +100,7 @@ def main():
             retVal = False
         else:
             if isinstance(fileNum, bool) and fileNum is False:
-                retVal = False 
+                retVal = False
             elif isinstance(fileNum, int) and 0 > fileNum:
                 print("A save game was not selected.")
                 retVal = False
