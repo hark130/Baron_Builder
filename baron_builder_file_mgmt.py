@@ -537,3 +537,42 @@ def remove_a_dir(oldPath):
 
     # DONE
     return retVal
+
+
+def copy_a_file(srcFile, dstFile):
+    '''
+        PURPOSE - Copy srcFile to dstFile
+        INPUT
+            srcFile - Relative or absolute filename original file
+            dstFile - Relative or absolute filename of the copy
+        OUTPUT
+            On success, True
+            On failure, False
+            On error, Exception
+    '''
+    # LOCAL VARIABLES
+    retVal = False
+    
+    # INPUT VALIDATION
+    if not isinstance(srcFile, str):
+        raise TypeError('Source file is of type "{}" instead of string'.format(type(srcFile)))
+    elif len(srcFile) <= 0:
+        raise ValueError("Invalid source file name length")
+    elif not isinstance(dstFile, str):
+        raise TypeError('Source file is of type "{}" instead of string'.format(type(dstFile)))
+    elif len(dstFile) <= 0:
+        raise ValueError("Invalid destination file name length")
+    elif srcFile == dstFile:
+        raise ValueError("Source and destination can not be the same")
+    elif os.path.exists(srcFile) is False:
+        raise OSError("Source file does not exist")
+    elif os.path.isfile(srcFile) is False:
+        raise OSError("Source file is not a file")
+    elif os.path.exists(dstFile) is True:
+        raise OSError("Destination file already exists")
+    
+    # COPY
+    shutil.copy2(srcFile, dstFile)
+    
+    # DONE
+    return retVal
