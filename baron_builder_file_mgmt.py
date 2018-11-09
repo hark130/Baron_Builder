@@ -584,7 +584,7 @@ def copy_a_file(srcFile, dstFile):
     try:
         shutil.copy2(srcFile, dstFile)
     except Exception as err:
-        print("shutil.copy2() raised an exception")
+        print("shutil.copy2() raised an exception")  # DEBUGGING
         print(repr(err))  # DEBUGGING
         retVal = False
     else:
@@ -608,6 +608,9 @@ def backup_a_file(srcFile, dstDir, newFileExt):
     '''
     # LOCAL VARIABLES
     retVal = False
+    splitFile = ()    # Split the srcFile here
+    curFileExt = ""   # Store the current srcFile file extension, if any, here
+    dstFilename = ""  # Construct the destination file name, complete with new file extension, here
     
     # INPUT VALIDATION
     if not isinstance(srcFile, str):
@@ -618,6 +621,10 @@ def backup_a_file(srcFile, dstDir, newFileExt):
         raise TypeError('Source file is of type "{}" instead of string'.format(type(dstFile)))
     elif len(dstDir) <= 0:
         raise ValueError("Invalid destination file name length")
+    elif not isinstance(newFileExt, str):
+        raise TypeError('File extension is of type "{}" instead of string'.format(type(dstFile)))
+    elif len(newFileExt) <= 0:
+        raise ValueError("Invalid file extension length")
     elif os.path.exists(srcFile) is False:
         raise OSError("Source file does not exist")
     elif os.path.isfile(srcFile) is False:
@@ -628,10 +635,27 @@ def backup_a_file(srcFile, dstDir, newFileExt):
         raise OSError("Destination directory is not a directory")
     
     # DETERMINE FILE EXTENSION
+    splitFile = os.path.splitext(srcFile)
+    curFileExt = splitFile[len(splitFile) - 1]
     
     # JOIN DESTINATION FILENAME
-    
+    dstFilename = os.path.basename(srcFile)
+    if 0 < len(curFileExt):
+        dstFilename = dstFilename + newFileExt
+    else:
+        dstFilename = dstFilename.replace(curFileExt, newFileExt)
+        
     # COPY
+    try:
+        retVal = copy_a_file(srcFile, os.path.join(dstDir, dstFilename))
+    except Exception as err:
+        print("copy_a_file() raised an exception")  # DEBUGGING
+        print(repr(err))  # DEBUGGING
+        retVal = False
+    else:
+        if retVal is False:
+            print("copy_a_file() failed")  # DEBUGGING
+            pass        
     
     # DONE
     return retVal
