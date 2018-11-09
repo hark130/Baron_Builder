@@ -25,8 +25,8 @@ My end goal is to create a save game editor that works on all operating systems 
 | Write json-parsing class | ✓ | ✓ | ? |
 | Write save-file-parsing class | ✓ | ✓ | ? |
 | Store compression_type for each file in .zks for ZksFile.update_zks() | ✓ | ✓ | ? |
-| Release wheel | | | |
-| Write wiki | | | |
+| Release wheel | / | / | / |
+| Write wiki | / | / | / |
 | Python command not required to run | | | |
 | Search _all_ home dirs for save games(?) | | | |
 
