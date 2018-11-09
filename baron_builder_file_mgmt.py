@@ -136,7 +136,7 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
                     print("{} does not exist".format(os.path.join(saveGamePath,TOP_DIR, WORKING_DIR, backupZksFile.zModDir)))  # DEBUGGING
                     workDirExists = False
                 backupZksFile.unpack_file(os.path.join(saveGamePath, TOP_DIR, WORKING_DIR))
-                backupZksFile.backup(os.path.join(saveGamePath, TOP_DIR, BACKUP_DIR))
+                backupZksFile.archive(os.path.join(saveGamePath, TOP_DIR, BACKUP_DIR))
                 zksWorkDir = backupZksFile.fullWorkPath
                 backupZksFile.close_zks()
             except Exception as err:
@@ -153,7 +153,7 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
             # 1. Does working directory already exist?  If yes, leave it.  If no, clean up afterwards
             # 2. saveGame = ZksFile()
             # 3. saveGame.unpack_file(os.path.join(TOP_DIR, WORKING_DIR))
-            # 4. saveGame.backup(os.path.join(TOP_DIR, ARCHIVE_DIR))
+            # 4. saveGame.archive(os.path.join(TOP_DIR, ARCHIVE_DIR))
             break
         elif "d" == selection:
             break
