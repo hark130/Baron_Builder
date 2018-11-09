@@ -1,3 +1,4 @@
+from baron_build_imports import SAVE_GAME_EXT, BACKUP_EXT, ARCHIVE_EXT
 from json_file_class import JsonFile
 # ZipFile compress_type macros
 from zipfile import ZIP_STORED    # (no compression)
@@ -50,8 +51,9 @@ class ZksFile():
                 - ZksFile.self.close_json_files()
     '''
     # CLASS ATTRIBUTES
-    saveGameExt = ".zks"  # Pathfinder Kingmaker save game file extension
-    archiveExt = ".bbb"    # archive/Archive file extension
+    saveGameExt = SAVE_GAME_EXT  # Pathfinder Kingmaker save game file extension
+    backupExt = BACKUP_EXT       # Baron Builder file extension for backed up save games
+    archiveExt = ARCHIVE_EXT     # Baron Builder file extension for archived save games
 
 
     def __init__(self, filename):
