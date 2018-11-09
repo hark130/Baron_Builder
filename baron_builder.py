@@ -99,7 +99,9 @@ def main():
             print('user_file_menu() raised "{}" exception'.format(str(err)))  # DEBUGGING
             retVal = False
         else:
-            if fileNum < 0:
+            if isinstance(fileNum, bool) and fileNum is False:
+                retVal = False 
+            elif isinstance(fileNum, int) and 0 > fileNum:
                 print("A save game was not selected.")
                 retVal = False
             else:
