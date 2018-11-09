@@ -40,7 +40,15 @@ My end goal is to create a save game editor that works on all operating systems 
 | F04 | Restore backed up save game | | | |
 | F05 | Archive (AKA backup/delete) old saves (speed up loads/saves?) | | | |
 | F06 | Change gold | ✓ | ✓ | ? |
-| F07 | Clean up 'Working' directory | | | |
+| F07 | Clean up 'Working' directory | ✓ | ? | ? |
+
+### BUGS
+
+| BUG # | File | Function | Details |
+| :---- | :--- | :------- | :------ |
+| B01 | baron_builder_features | bbf06_GOLD_sub_menu | Menu allows default gold to exceed max macro |
+| B02 |  |  |  |
+
 
 ### Legend
 
