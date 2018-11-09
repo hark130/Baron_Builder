@@ -581,7 +581,58 @@ def copy_a_file(srcFile, dstFile):
         raise OSError("Destination file already exists")
     
     # COPY
-    shutil.copy2(srcFile, dstFile)
+    try:
+        shutil.copy2(srcFile, dstFile)
+    except Exception as err:
+        print("shutil.copy2() raised an exception")
+        print(repr(err))  # DEBUGGING
+        retVal = False
+    else:
+        retVal = True
     
     # DONE
     return retVal
+
+
+def backup_a_file(srcFile, dstDir, newFileExt):
+    '''
+        PURPOSE - Copy a file to a new destination directory while also modifying its file extension
+        INPUT
+            srcFile - Relative or absolute filename original file
+            dstDir - Relative or absolute directory to copy the file into
+            newFileExt - New file extension to replace the old file extension
+        OUTPUT
+            On success, True
+            on failure, False
+            on error, Exception
+    '''
+    # LOCAL VARIABLES
+    retVal = False
+    
+    # INPUT VALIDATION
+    if not isinstance(srcFile, str):
+        raise TypeError('Source file is of type "{}" instead of string'.format(type(srcFile)))
+    elif len(srcFile) <= 0:
+        raise ValueError("Invalid source file name length")
+    elif not isinstance(dstDir, str):
+        raise TypeError('Source file is of type "{}" instead of string'.format(type(dstFile)))
+    elif len(dstDir) <= 0:
+        raise ValueError("Invalid destination file name length")
+    elif os.path.exists(srcFile) is False:
+        raise OSError("Source file does not exist")
+    elif os.path.isfile(srcFile) is False:
+        raise OSError("Source file is not a file")
+    elif os.path.exists(dstFile) is False:
+        raise OSError("Destination directory does not exist")
+    elif os.path.isdir(dstDir) is False:
+        raise OSError("Destination directory is not a directory")
+    
+    # DETERMINE FILE EXTENSION
+    
+    # JOIN DESTINATION FILENAME
+    
+    # COPY
+    
+    # DONE
+    return retVal
+
