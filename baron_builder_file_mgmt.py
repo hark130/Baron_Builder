@@ -7,7 +7,15 @@
 #################### IMPORTS ####################
 #################################################
 
-
+from baron_builder_imports import MAX_ERRS
+from baron_builder_imports import nixSaveGamePath, winSaveGamePath, macSaveGamePath
+from baron_builder_imports import OS_UNKNOWS, OS_LINUX, OS_WINDOWS, OS_APPLE
+from baron_builder_imports import TOP_DIR, ARCHIVE_DIR, BACKUP_DIR, WORKING_DIR
+from baron_builder_imports import supportedOSGlobal
+from baron_builder_utilities import clear_screen
+from stat import S_ISREG, ST_CTIME, ST_MODE, ST_MTIME
+import os
+import shutil
 
 
 #################################################
@@ -22,33 +30,35 @@
 
 
 
-
 #################################################
 ################### FUNCTIONS ###################
 #################################################
 
 
-def user_file_menu(operSys, saveGamePath, saveGameFileList):
+def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
     '''
-        PURPOSE - Allow the user to choose a save game file to edit
+        PURPOSE - Top level menu leading to all file-related functionality
         INPUT
             operSys - See OPERATAING SYSTEM macros
             saveGamePath - Relative or absolute path to check for save games
             saveGameFileList - Sorted list of save games found in saveGamePath
+            curNumBadAns - Current number of incorrect answers to track error tolerance
         OUTPUT
-            On success, index of file selected from saveGameFileList
-            On failure, -1
+            On success...
+                Open save game - index of file selected from saveGameFileList
+                Backup save games - True
+                Restore save games - True
+                Archive save games - True
+                Clean working directory - True
             On error, Exception
     '''
     # LOCAL VARIABLES
-    retVal = -1
+    retVal = True
     supportedOS = supportedOSGlobal
-    selection = 0  # Index into saveGameFileList
-    page = 1  # Set of 10 save game files to display
-    numFiles = 0  # Number of save games in list
+    numBadAnswers = curNumBadAns  # Current number of bad answers
+    selection = 0  # User menu selection
 
     # GLOBAL VARIABLES
-    global numBadAnswers
 
     # INPUT VALIDATION
     if not isinstance(operSys, int):
@@ -63,6 +73,111 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList):
         raise TypeError('Save game file list is of type "{}" instead of list'.format(type(saveGameFileList)))
     elif len(saveGameFileList) <= 0:
         raise ValueError("Invalid file name list length")
+    elif not isinstance(curNumBadAns, int):
+        raise TypeError('Current number of bad answers is of type "{}" instead of integer'.format(type(curNumBadAns)))
+    elif curNumBadAns > MAX_ERRS:
+        raise RuntimeError("Exceeded maximum bad answers")
+    else:
+        pass
+
+    # CLEAR SCREEN
+    clear_screen(operSys)
+
+    # PRINT MENU
+    while numBadAnswers <= MAX_ERRS:
+        print("")  # Blank line
+        # PRINT MENU
+        # Print options
+        print("SAVE GAME FILE MANAGEMENT")
+        print("(a) Edit a save game")
+        print("(b) Backup save game(s)")
+        print("(c) Archive save game(s)")
+        print("(d) Restore save game(s)")
+        print("(e) Clean working directory")
+        print("")
+        print('Type "clear" to clear the screen')
+        print('Type "quit" to save and exit this program')
+
+        # Take input
+        selection = input("Make your selection [a]:  ")
+        clear_screen(operSys)
+
+        # Modify input
+        if len(selection) == 0:
+            selection = "a"
+        else:
+            selection = selection.lower()
+
+        # Execute selection
+        if "clear" == selection:
+            numBadAnswers = 0
+            clear_screen(operSys)
+        elif "quit" == selection:
+            numBadAnswers = 0
+            raise RuntimeError("Quit")
+        elif "a" == selection:
+            retVal = user_file_selection_menu(operSys, saveGamePath, saveGameFileList, numBadAnswers)
+            break
+        elif "b" == selection:
+            break
+        elif "c" == selection:
+            break
+        elif "d" == selection:
+            break
+        elif "e" == selection:
+            empty_a_dir(os.path.join(saveGamePath, TOP_DIR, WORKING_DIR))
+        else:
+            print("\nInvalid selection.")
+            numBadAnswers += 1
+            if numBadAnswers <= MAX_ERRS:
+                print("Try again.")
+
+    # DONE
+    if numBadAnswers > MAX_ERRS:
+        raise RuntimeError("Exceeded maximum bad answers")
+
+    return retVal
+
+
+def user_file_selection_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
+    '''
+        PURPOSE - Allow the user to choose a save game file to edit
+        INPUT
+            operSys - See OPERATAING SYSTEM macros
+            saveGamePath - Relative or absolute path to check for save games
+            saveGameFileList - Sorted list of save games found in saveGamePath
+            curNumBadAns - Current number of incorrect answers to track error tolerance
+        OUTPUT
+            On success, index of file selected from saveGameFileList
+            On error, Exception
+        EXCEPTIONS
+            Runtime("Quit") - User selects quit from menu without selecting a save game
+    '''
+    # LOCAL VARIABLES
+    retVal = -1
+    supportedOS = supportedOSGlobal
+    selection = 0  # Index into saveGameFileList
+    page = 1  # Set of 10 save game files to display
+    numFiles = 0  # Number of save games in list
+    numBadAnswers = curNumBadAns  # Current number of bad answers
+
+    # INPUT VALIDATION
+    if not isinstance(operSys, int):
+        raise TypeError('Operating system is of type "{}" instead of integer'.format(type(operSys)))
+    elif operSys not in supportedOS:
+        raise ValueError("Operating system value is unknown")
+    elif not isinstance(saveGamePath, str):
+        raise TypeError('Save game path is of type "{}" instead of string'.format(type(saveGamePath)))
+    elif len(saveGamePath) <= 0:
+        raise ValueError("Invalid directory length")
+    elif not isinstance(saveGameFileList, list):
+        raise TypeError('Save game file list is of type "{}" instead of list'.format(type(saveGameFileList)))
+    elif len(saveGameFileList) <= 0:
+        raise ValueError("Invalid file name list length")
+    elif not isinstance(curNumBadAns, int):
+        raise TypeError('Current number of bad answers is of type "{}" instead of integer'.format(type(curNumBadAns)))
+    elif curNumBadAns > MAX_ERRS:
+        raise RuntimeError("Exceeded maximum bad answers")
     else:
         numFiles = len(saveGameFileList)
 
@@ -149,8 +264,7 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList):
             clear_screen(operSys)
         elif "quit" == selection:
             numBadAnswers = 0
-            retVal = -1
-            break
+            raise RuntimeError("Quit")
         else:
             try:
                 retVal = int(selection)
@@ -167,6 +281,11 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList):
                     break
 
     # DONE
+    if numBadAnswers > MAX_ERRS:
+        raise RuntimeError("Exceeded maximum bad answers")
+    elif -1 == retVal:
+        raise RuntimeError("Quit")
+
     return retVal
 
 
@@ -287,3 +406,87 @@ def list_save_games(operSys, saveGamePath, fileExt="zks"):
     return retVal
 
 
+def empty_a_dir(oldPath):
+    '''
+        PURPOSE - Empty an old directory of all files and directories without deleting it
+        INPUT
+            oldPath - Directory to empty
+        OUTPUT
+            On success, True
+            On failure, False
+            On error, Exception
+        NOTE
+            This function is recursive.
+            It is also recursive.
+    '''
+    # LOCAL VARIABLES
+    retVal = True
+
+    # INPUT VALIDATION
+    if not isinstance(oldPath, str):
+        raise TypeError('Old path is of type "{}" instead of string'.format(type(oldPath)))
+    elif len(oldPath) <= 0:
+        raise ValueError("Invalid path length")
+    elif not os.path.exists(oldPath):
+        raise OSError("Path does not exist")
+    elif not os.path.isdir(oldPath):
+        raise OSError("Path is not a path")
+
+    # EMPTY DIRECTORY
+    print("Deleting Working Folders [", end = "")
+    for entry in os.listdir(oldPath):
+        if retVal is False:
+            break
+
+        if os.path.isdir(os.path.join(oldPath, entry)):
+            # print("Removing dir {}".format(os.path.join(oldPath, entry)))  # DEBUGGING
+            retVal = remove_a_dir(os.path.join(oldPath, entry))
+            if retVal is False:
+                print("X", end = "")
+                break
+            else:
+                print(".", end = "")
+        elif os.path.isfile(os.path.join(oldPath, entry)):
+            # print("Removing file {}".format(os.path.join(oldPath, entry)))  # DEBUGGING
+            os.remove(os.path.join(oldPath, entry))
+            print(".", end = "")
+        else:
+            print("X]")
+            raise OSError("Entry {} is not a file or directory".format(os.path.join(oldPath, entry)))
+    print("]")
+
+    # DONE
+    return retVal
+
+
+def remove_a_dir(oldPath):
+    '''
+        PURPOSE - Empty an old directory of all files and directories
+        INPUT
+            oldPath - Directory to empty
+        OUTPUT
+            On success, True
+            On failure, False
+            On error, Exception
+        NOTE
+            This function is recursive.
+            It is also recursive.
+    '''
+    # LOCAL VARIABLES
+    retVal = True
+
+    # INPUT VALIDATION
+    if not isinstance(oldPath, str):
+        raise TypeError('Old path is of type "{}" instead of string'.format(type(oldPath)))
+    elif len(oldPath) <= 0:
+        raise ValueError("Invalid path length")
+    elif not os.path.exists(oldPath):
+        raise OSError("Path does not exist")
+    elif not os.path.isdir(oldPath):
+        raise OSError("Path is not a path")
+    else:
+        # REMOVE DIRECTORY
+        shutil.rmtree(oldPath)
+
+    # DONE
+    return retVal
