@@ -57,6 +57,7 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
     # LOCAL VARIABLES
     retVal = True
     supportedOS = supportedOSGlobal
+    fileNum = None                # Index of the user-selected file
     numBadAnswers = curNumBadAns  # Current number of bad answers
     selection = 0                 # User menu selection
     tempRetVal = 0                # File index to backup/archive
@@ -123,10 +124,39 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
             numBadAnswers = 0
             raise RuntimeError("Quit")
         elif "a" == selection:
-            retVal = user_file_selection_menu(operSys, saveGamePath, saveGameFileList, numBadAnswers)
+            fileNum = user_file_selection_menu(operSys, saveGamePath, saveGameFileList, numBadAnswers)
             break
         elif "b" == selection:
-            pass
+            numBadAnswers = 0
+            # Choose file to backup
+            try:
+                fileNum = user_file_selection_menu(operSys, saveGamePath, saveGameFileList, numBadAnswers)
+            except Exception as err:
+                print('user_file_selection_menu() raised "{}" exception'.format(str(err)))  # DEBUGGING
+                retVal = False
+                break
+            else:
+                if 0 > fileNum or fileNum >= len(saveGameFileList)):
+                    print("user_file_selection_menu() failed to return a proper file index")  # DEBUGGING
+                    retVal = False
+                    break
+                else:
+                    print("Backing up file:\t{}".format(saveGameFileList[fileNum]))
+                    numBadAnswers = 0
+            # Backup file
+            try:
+                retVal = backup_a_file(os.path.join(saveGamePath, saveGameFileList[fileNum]),
+                                       os.path.join(saveGamePath, TOP_DIR, BACKUP_DIR), BACKUP_EXT)
+            except Exception as err:
+                print('backup_a_file() raised "{}" exception'.format(str(err)))  # DEBUGGING
+                retVal = False
+                break
+            else:
+                if retVal is False:
+                    print("backup_a_file() failed to backup the file")  # DEBUGGING
+                    break
+                else:
+                    print("Successfully backed up file")
         elif "c" == selection:
             print("Archive feature not yet implemented")  # PLACEHOLDER
             numBadAnswers += 1
