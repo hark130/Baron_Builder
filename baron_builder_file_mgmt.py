@@ -126,6 +126,20 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
             retVal = user_file_selection_menu(operSys, saveGamePath, saveGameFileList, numBadAnswers)
             break
         elif "b" == selection:
+            pass
+        elif "c" == selection:
+            print("Archive feature not yet implemented")  # PLACEHOLDER
+            numBadAnswers += 1
+            continue  # I don't want the half-implemented code (see below) executed yet
+            # FUTURE NOTES
+            # 1. Does working directory already exist?  If yes, leave it.  If no, clean up afterwards
+            # 2. saveGame = ZksFile()
+            # 3. saveGame.unpack_file(os.path.join(TOP_DIR, WORKING_DIR))
+            # 4. saveGame.archive(os.path.join(TOP_DIR, ARCHIVE_DIR))
+            # 5. Remove original save game from list of saves
+            # 6. Delete original save game
+            # The following code block was to be used for backup purposes until I decided to merely copy
+            # backups and REcompress archives.  It's a start towards Feature 05 but it's not everything.
             tempRetVal = user_file_selection_menu(operSys, saveGamePath, saveGameFileList, numBadAnswers)
             try:
                 backupZksFile = ZksFile(os.path.join(saveGamePath, saveGameFileList[tempRetVal]))
@@ -148,15 +162,10 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
                     empty_a_dir(zksWorkDir)
                     remove_a_dir(zksWorkDir)
                     zksWorkDir = None
-        elif "c" == selection:
-            # FUTURE NOTES
-            # 1. Does working directory already exist?  If yes, leave it.  If no, clean up afterwards
-            # 2. saveGame = ZksFile()
-            # 3. saveGame.unpack_file(os.path.join(TOP_DIR, WORKING_DIR))
-            # 4. saveGame.archive(os.path.join(TOP_DIR, ARCHIVE_DIR))
-            break
         elif "d" == selection:
-            break
+            print("Restore feature not yet implemented")  # PLACEHOLDER
+            numBadAnswers += 1
+            continue
         elif "e" == selection:
             empty_a_dir(os.path.join(saveGamePath, TOP_DIR, WORKING_DIR))
         elif "f" == selection:
