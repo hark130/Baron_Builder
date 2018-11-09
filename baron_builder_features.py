@@ -696,9 +696,10 @@ def bbf06_GOLD_sub_menu(saveGameObj, curNumBadAns, maxNumBadAns):
     '''
     # LOCAL VARIABLES
     retVal = True
-    curGold = 0  # Current amount of gold
-    newGold = 0  # New amount of gold input by user
+    curGold = 0                   # Current amount of gold
+    newGold = 0                   # New amount of gold input by user
     numBadAnswers = curNumBadAns  # Number of bad answers given here
+    defaultGold = 0               # Default amount of gold to set
 
     # INPUT VALIDATION
     if not isinstance(saveGameObj, ZksFile):
@@ -728,13 +729,19 @@ def bbf06_GOLD_sub_menu(saveGameObj, curNumBadAns, maxNumBadAns):
 
                     # Print options
                     print("You currently have {} gold.".format(curGold))
+                    
+                    # Determine max gold
+                    if curGold * 2 > MAX_GOLD:
+                        defaultGold = MAX_GOLD
+                    else:
+                        defaultGold = curGold * 2
 
                     # Take input
-                    newGold = input("Enter the amount of gold you want up to a maximum of {} [{}]?  ".format(MAX_GOLD, curGold * 2))
+                    newGold = input("Enter the amount of gold you want up to a maximum of {} [{}]?  ".format(MAX_GOLD, defaultGold))
 
                     # Modify input
                     if len(newGold) == 0:
-                        newGold = curGold * 2
+                        newGold = defaultGold
                     else:
                         try:
                             newGold = int(newGold)
