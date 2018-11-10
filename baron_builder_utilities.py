@@ -169,9 +169,6 @@ def are_you_sure(curNumBadAns, actionStr=""):
     selection = ""
     numBadAnswers = curNumBadAns  # Current number of bad answers
 
-    # GLOBAL VARIABLES
-    global numBadAnswers
-
     # INPUT VALIDATION
     if not isinstance(actionStr, str):
         raise TypeError('Action string is of type "{}" instead of string'.format(type(actionStr)))
