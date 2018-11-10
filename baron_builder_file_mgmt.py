@@ -10,7 +10,7 @@
 from baron_builder_imports import MAX_ERRS
 from baron_builder_imports import nixSaveGamePath, winSaveGamePath, macSaveGamePath
 from baron_builder_imports import OS_UNKNOWS, OS_LINUX, OS_WINDOWS, OS_APPLE
-from baron_builder_imports import TOP_DIR, ARCHIVE_DIR, BACKUP_DIR, WORKING_DIR
+from baron_builder_imports import TOP_DIR, ARCHIVE_DIR, BACKUP_DIR, WORKING_DIR, BACKUP_EXT
 from baron_builder_imports import supportedOSGlobal
 from baron_builder_utilities import clear_screen
 from stat import S_ISREG, ST_CTIME, ST_MODE, ST_MTIME
@@ -648,18 +648,18 @@ def backup_a_file(srcFile, dstDir, newFileExt):
     elif len(srcFile) <= 0:
         raise ValueError("Invalid source file name length")
     elif not isinstance(dstDir, str):
-        raise TypeError('Source file is of type "{}" instead of string'.format(type(dstFile)))
+        raise TypeError('Source file is of type "{}" instead of string'.format(type(dstDir)))
     elif len(dstDir) <= 0:
         raise ValueError("Invalid destination file name length")
     elif not isinstance(newFileExt, str):
-        raise TypeError('File extension is of type "{}" instead of string'.format(type(dstFile)))
+        raise TypeError('File extension is of type "{}" instead of string'.format(type(dstDir)))
     elif len(newFileExt) <= 0:
         raise ValueError("Invalid file extension length")
     elif os.path.exists(srcFile) is False:
         raise OSError("Source file does not exist")
     elif os.path.isfile(srcFile) is False:
         raise OSError("Source file is not a file")
-    elif os.path.exists(dstFile) is False:
+    elif os.path.exists(dstDir) is False:
         raise OSError("Destination directory does not exist")
     elif os.path.isdir(dstDir) is False:
         raise OSError("Destination directory is not a directory")
