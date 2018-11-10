@@ -1,3 +1,4 @@
+from baron_builder_imports import SAVE_GAME_EXT, BACKUP_EXT, ARCHIVE_EXT
 from json_file_class import JsonFile
 # ZipFile compress_type macros
 from zipfile import ZIP_STORED    # (no compression)
@@ -33,7 +34,7 @@ class ZksFile():
             [X] saveGame.save_json_files()              # Saves all supported json objects
             [X] saveGame.close_json_files()             # Closes all supported json objects
             ### FEATURES ###
-
+            [X] saveGame.archive(archiveDir)             # F03 - Unpacks the file and repacks using better compression in archiveDir
 
 
             ### TEAR DOWN ###
@@ -49,6 +50,10 @@ class ZksFile():
                 - ZksFile.self.save_json_files()
                 - ZksFile.self.close_json_files()
     '''
+    # CLASS ATTRIBUTES
+    saveGameExt = SAVE_GAME_EXT  # Pathfinder Kingmaker save game file extension
+    backupExt = BACKUP_EXT       # Baron Builder file extension for backed up save games
+    archiveExt = ARCHIVE_EXT     # Baron Builder file extension for archived save games
 
 
     def __init__(self, filename):
@@ -66,12 +71,13 @@ class ZksFile():
         self.origFileName = None  # Raw filename originally passed in
         self.zModDir = None       # Save game-specific working directory name
         self.fullWorkPath = None  # Full directory to the unpacked file's directory in the working dir
+        self.fullArchFile = None  # Full directory to the new archive file
         self.zSuccess = False     # Set this to False if anything fails
         self.zChanged = False     # Set this to True if any json contents are modified
         # JSON Files Supported by the ZksFile class
         self.zSupportedJson = [ "header.json", "party.json", "player.json", "statistic.json" ]
         # Save Game File Extensions supported by ZksFile class
-        self.zSaveGameExts = [ ".zks" ]  # Consider adding the backup file extension as well
+        self.zSaveGameExts = [ self.saveGameExt, self.archiveExt ]
         self.zHeadFile = None     # header.json JsonFile object
         self.zPartFile = None     # party.json JsonFile object
         self.zPlayFile = None     # player.json JsonFile object
@@ -218,7 +224,7 @@ class ZksFile():
             # UNPACK THE FILE
             # 1. Setup Directories
             self.fullWorkPath = os.path.join(workDir, self.zModDir)
-            # print("Full Work Path:\t{}".format(self.fullWorkPath))  # DEBUGGING
+            print("Full Work Path:\t{}".format(self.fullWorkPath))  # DEBUGGING
             retVal = self.make_dirs(self.fullWorkPath)
 
             # 2. Unpack File
@@ -231,12 +237,12 @@ class ZksFile():
                         for zFileInfo in inZipFile.infolist():
                             if ZIP_STORED == zFileInfo.compress_type:
                                 self.zFileDict[zFileInfo.filename] = ZIP_STORED
+                            elif ZIP_LZMA == zFileInfo.compress_type:
+                                self.zFileDict[zFileInfo.filename] = ZIP_LZMA
                             elif ZIP_DEFLATED == zFileInfo.compress_type:
                                 self.zFileDict[zFileInfo.filename] = ZIP_DEFLATED
                             elif ZIP_BZIP2 == zFileInfo.compress_type:
                                 self.zFileDict[zFileInfo.filename] = ZIP_BZIP2
-                            elif ZIP_LZMA == zFileInfo.compress_type:
-                                self.zFileDict[zFileInfo.filename] = ZIP_LZMA
                             else:
                                 print("Detected unknown ZipInfo.compress_type for {}".format(zFileInfo.filename))  # DEBUGGING
                                 retVal = False
@@ -255,6 +261,62 @@ class ZksFile():
 
         # DONE
         return retVal
+
+
+    def archive(self, archiveDir):
+        '''
+            PURPOSE - Repack a save game file into a archive directory using better compression
+            INPUT
+                archiveDir - Absolute or relative path to make a new archive
+            OUTPUT
+                On success, True
+                On failure, False
+                On bad input, None
+        '''
+        # LOCAL VARIABLES
+        retVal = None
+
+        # INPUT VALIDATION
+        if not self.zSuccess:
+            retVal = self.zSuccess
+        elif not isinstance(archiveDir, str):
+            pass
+        elif 0 >= len(archiveDir):
+            pass
+        elif self.fullWorkPath is None:
+            print("self.fullWorkPath is None")  # DEBUGGING
+            retVal = False
+        elif os.path.exists(self.fullWorkPath) is False:
+            print("{} does not exist".format(self.fullWorkPath))  # DEBUGGING
+            retVal = False
+        elif os.path.isdir(self.fullWorkPath) is False:
+            print("{} is not a directory".format(self.fullWorkPath))  # DEBUGGING
+            retVal = False
+        elif not os.listdir(self.fullWorkPath):
+            print("{} is empty".format(self.fullWorkPath))  # DEBUGGING
+            retVal = False
+        else:
+            # UNPACK THE FILE
+            # 1. Setup Directories and Attributes
+            retVal = self.make_dirs(archiveDir)
+            self.fullArchFile = self.zModDir + self.archiveExt
+
+            try:
+                # 2. Get file list
+                for root, dirs, files in os.walk(self.fullWorkPath):
+                    rootDir = root
+                    dirsFound = dirs
+                    filesFound = files
+
+                # 3. Add those files to the working archive
+                with zipfile.ZipFile(os.path.join(archiveDir, self.fullArchFile), "w", compression=zipfile.ZIP_LZMA) as outZipFile:
+                    for file in filesFound:
+                        outZipFile.write(os.path.join(rootDir, file), os.path.basename(file))
+            except Exception as err:
+                print("\n{}".format(repr(err)))  # DEBUGGING
+                retVal = False
+            else:
+                retVal = True
 
 
     def load_data(self):

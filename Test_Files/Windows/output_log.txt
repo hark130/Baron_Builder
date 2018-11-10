@@ -1,0 +1,122 @@
+Initialize engine version: 2018.1.0f2 (d4d99f31acba)
+GfxDevice: creating device client; threaded=1
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.1]
+    Renderer: NVIDIA GeForce GTX 1050 Ti (ID=0x1c8c)
+    Vendor:   
+    VRAM:     4029 MB
+    Driver:   23.21.13.8816
+Begin MonoManager ReloadAssembly
+- Completed reload, in  0.123 seconds
+<RI> Initializing input.
+<RI> Input initialized.
+<RI> Initialized touch support.
+UnloadTime: 0.494769 ms
+WwiseUnity: Initialize sound engine ...
+ 
+(Filename: C:\buildslave\unity\build\Runtime/Export/Debug.bindings.h Line: 43)
+
+WwiseUnity: Sound engine initialized.
+ 
+(Filename: C:\buildslave\unity\build\Runtime/Export/Debug.bindings.h Line: 43)
+
+Loading data opt-out preferences from PlayerPrefs
+Requesting data opt-out preferences from https://data-optout-service.uca.cloud.unity3d.com/player/opt_out?appid=2b02a6f4-4611-4ce0-b230-f9998567c3af&userid=1c673f5869c92a14a8c484ac80dc5b3b&deviceid=d2fbb8e8f1ba7bbcb2b78e9f19fc111371f5e5c6
+Setting up 2 worker threads for Enlighten.
+  Thread -> id: 3524 -> priority: 1 
+  Thread -> id: 3850 -> priority: 1 
+Opt-out preferences successfully retrieved, applied and saved:
+{"optOut":true,"analyticsEnabled":true,"deviceStatsEnabled":true,"limitUserTracking":true,"performanceReportingEnabled":true}
+1.0.15b
+The loaded level has a different lightmaps mode than the current one. Current: Directional. Loaded: Non-Directional. Will use: Directional.
+ 
+(Filename:  Line: 510)
+
+1920x1080 FullScreenWindow
+Show
+Jason
+Send custom event [report_load, Parameters: area: <not found>; point: 0_0; boss: <not found>_0; party: ; reason: load_from_main_menu; app_version: 2018-Oct-31 12:27 5dcae026db210ff47c7268a4c0a68b9fcea8d48a; app_level: 1; app_type: 0; ; Result: Ok; Flush result is Ok
+Set Areas Folder to C:/Users/Jason/AppData/LocalLow/Owlcat Games/Pathfinder Kingmaker\Areas
+Received stats and achievements from Steam
+Await event system
+1920x1080 FullScreenWindow
+Unloading 8 Unused Serialized files (Serialized files now loaded: 0)
+
+Unloading 558 unused Assets to reduce memory usage. Loaded Objects now: 407028.
+Total: 592.645910 ms (FindLiveObjects: 23.065426 ms CreateObjectMapping: 44.937007 ms MarkObjects: 523.209631 ms  DeleteObjects: 1.433845 ms)
+
+Await input module
+The loaded level has a different lightmaps mode than the current one. Current: Directional. Loaded: Non-Directional. Will use: Directional.
+ 
+(Filename:  Line: 510)
+
+The loaded level has a different lightmaps mode than the current one. Current: Directional. Loaded: Non-Directional. Will use: Directional.
+ 
+(Filename:  Line: 510)
+
+Unloading 41 Unused Serialized files (Serialized files now loaded: 2)
+
+Unloading 149 unused Assets to reduce memory usage. Loaded Objects now: 673936.
+Total: 722.806677 ms (FindLiveObjects: 35.443267 ms CreateObjectMapping: 68.034023 ms MarkObjects: 618.459643 ms  DeleteObjects: 0.869332 ms)
+
+FogOfWarStaticMaskHolder bounds is not completely placed inside in LocationMaskRenderer bounds [CapitalSquareVillage_Static]
+ 
+(Filename: C:\buildslave\unity\build\Runtime/Export/Debug.bindings.h Line: 43)
+
+Precision issue while prewarming particle system - 'Duration' or 'Start Lifetime' is likely a too large value.
+ 
+(Filename:  Line: 1317)
+
+Precision issue while prewarming particle system - 'Duration' or 'Start Lifetime' is likely a too large value.
+ 
+(Filename:  Line: 1317)
+
+Precision issue while prewarming particle system - 'Duration' or 'Start Lifetime' is likely a too large value.
+ 
+(Filename:  Line: 1317)
+
+Precision issue while prewarming particle system - 'Duration' or 'Start Lifetime' is likely a too large value.
+ 
+(Filename:  Line: 1317)
+
+The loaded level has a different lightmaps mode than the current one. Current: Directional. Loaded: Non-Directional. Will use: Directional.
+ 
+(Filename:  Line: 510)
+
+Unloading 4 Unused Serialized files (Serialized files now loaded: 4)
+
+Unloading 21 unused Assets to reduce memory usage. Loaded Objects now: 735820.
+Total: 917.570495 ms (FindLiveObjects: 36.921420 ms CreateObjectMapping: 70.581304 ms MarkObjects: 809.246847 ms  DeleteObjects: 0.820922 ms)
+
+Send custom event [report_location, Parameters: chapter: Chapter22; area: CapitalSquareVillage; combat: False; combat_count: 0_0; game_mode: Default; full_screen: Unknown; app_version: 2018-Oct-31 12:27 5dcae026db210ff47c7268a4c0a68b9fcea8d48a; app_level: 8; app_type: 0; ; Result: Ok; Flush result is Ok
+Send custom event [report_location, Parameters: chapter: Chapter22; area: CapitalSquareVillage; combat: False; combat_count: 0_0; game_mode: FullScreenUi; full_screen: Inventory; app_version: 2018-Oct-31 12:27 5dcae026db210ff47c7268a4c0a68b9fcea8d48a; app_level: 8; app_type: 0; ; Result: Ok; Flush result is Ok
+Send custom event [report_location, Parameters: chapter: Chapter22; area: CapitalSquareVillage; combat: False; combat_count: 0_0; game_mode: FullScreenUi; full_screen: Inventory; app_version: 2018-Oct-31 12:27 5dcae026db210ff47c7268a4c0a68b9fcea8d48a; app_level: 8; app_type: 0; ; Result: Ok; Flush result is Ok
+Send custom event [report_location, Parameters: chapter: Chapter22; area: CapitalSquareVillage; combat: False; combat_count: 0_0; game_mode: FullScreenUi; full_screen: Inventory; app_version: 2018-Oct-31 12:27 5dcae026db210ff47c7268a4c0a68b9fcea8d48a; app_level: 8; app_type: 0; ; Result: Ok; Flush result is Ok
+Send custom event [report_location, Parameters: chapter: Chapter22; area: CapitalSquareVillage; combat: False; combat_count: 0_0; game_mode: FullScreenUi; full_screen: Inventory; app_version: 2018-Oct-31 12:27 5dcae026db210ff47c7268a4c0a68b9fcea8d48a; app_level: 8; app_type: 0; ; Result: Ok; Flush result is Ok
+Send custom event [report_location, Parameters: chapter: Chapter22; area: CapitalSquareVillage; combat: False; combat_count: 0_0; game_mode: FullScreenUi; full_screen: Inventory; app_version: 2018-Oct-31 12:27 5dcae026db210ff47c7268a4c0a68b9fcea8d48a; app_level: 8; app_type: 0; ; Result: Ok; Flush result is Ok
+Send custom event [report_location, Parameters: chapter: Chapter22; area: CapitalSquareVillage; combat: False; combat_count: 0_0; game_mode: FullScreenUi; full_screen: Inventory; app_version: 2018-Oct-31 12:27 5dcae026db210ff47c7268a4c0a68b9fcea8d48a; app_level: 8; app_type: 0; ; Result: Ok; Flush result is Ok
+Send custom event [report_location, Parameters: chapter: Chapter22; area: CapitalSquareVillage; combat: False; combat_count: 0_0; game_mode: FullScreenUi; full_screen: Inventory; app_version: 2018-Oct-31 12:27 5dcae026db210ff47c7268a4c0a68b9fcea8d48a; app_level: 8; app_type: 0; ; Result: Ok; Flush result is Ok
+Send custom event [report_location, Parameters: chapter: Chapter22; area: CapitalSquareVillage; combat: False; combat_count: 0_0; game_mode: FullScreenUi; full_screen: Inventory; app_version: 2018-Oct-31 12:27 5dcae026db210ff47c7268a4c0a68b9fcea8d48a; app_level: 8; app_type: 0; ; Result: Ok; Flush result is Ok
+Send custom event [report_location, Parameters: chapter: Chapter22; area: CapitalSquareVillage; combat: False; combat_count: 0_0; game_mode: FullScreenUi; full_screen: Inventory; app_version: 2018-Oct-31 12:27 5dcae026db210ff47c7268a4c0a68b9fcea8d48a; app_level: 8; app_type: 0; ; Result: Ok; Flush result is Ok
+Send custom event [report_location, Parameters: chapter: Chapter22; area: CapitalSquareVillage; combat: False; combat_count: 0_0; game_mode: FullScreenUi; full_screen: Inventory; app_version: 2018-Oct-31 12:27 5dcae026db210ff47c7268a4c0a68b9fcea8d48a; app_level: 8; app_type: 0; ; Result: Ok; Flush result is Ok
+Send custom event [report_location, Parameters: chapter: Chapter22; area: CapitalSquareVillage; combat: False; combat_count: 0_0; game_mode: FullScreenUi; full_screen: Inventory; app_version: 2018-Oct-31 12:27 5dcae026db210ff47c7268a4c0a68b9fcea8d48a; app_level: 8; app_type: 0; ; Result: Ok; Flush result is Ok
+Send custom event [report_location, Parameters: chapter: Chapter22; area: CapitalSquareVillage; combat: False; combat_count: 0_0; game_mode: FullScreenUi; full_screen: Inventory; app_version: 2018-Oct-31 12:27 5dcae026db210ff47c7268a4c0a68b9fcea8d48a; app_level: 8; app_type: 0; ; Result: Ok; Flush result is Ok
+Send custom event [report_location, Parameters: chapter: Chapter22; area: CapitalSquareVillage; combat: False; combat_count: 0_0; game_mode: FullScreenUi; full_screen: Inventory; app_version: 2018-Oct-31 12:27 5dcae026db210ff47c7268a4c0a68b9fcea8d48a; app_level: 8; app_type: 0; ; Result: Ok; Flush result is Ok
+Send custom event [report_location, Parameters: chapter: Chapter22; area: CapitalSquareVillage; combat: False; combat_count: 0_0; game_mode: FullScreenUi; full_screen: Inventory; app_version: 2018-Oct-31 12:27 5dcae026db210ff47c7268a4c0a68b9fcea8d48a; app_level: 8; app_type: 0; ; Result: Ok; Flush result is Ok
+Send custom event [report_location, Parameters: chapter: Chapter22; area: CapitalSquareVillage; combat: False; combat_count: 0_0; game_mode: FullScreenUi; full_screen: Inventory; app_version: 2018-Oct-31 12:27 5dcae026db210ff47c7268a4c0a68b9fcea8d48a; app_level: 8; app_type: 0; ; Result: Ok; Flush result is Ok
+Precision issue while prewarming particle system - 'Duration' or 'Start Lifetime' is likely a too large value.
+ 
+(Filename:  Line: 1317)
+
+Precision issue while prewarming particle system - 'Duration' or 'Start Lifetime' is likely a too large value.
+ 
+(Filename:  Line: 1317)
+
+Precision issue while prewarming particle system - 'Duration' or 'Start Lifetime' is likely a too large value.
+ 
+(Filename:  Line: 1317)
+
+Precision issue while prewarming particle system - 'Duration' or 'Start Lifetime' is likely a too large value.
+ 
+(Filename:  Line: 1317)
+

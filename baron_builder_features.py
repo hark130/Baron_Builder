@@ -16,6 +16,9 @@
 #################### IMPORTS ####################
 #################################################
 
+from baron_builder_imports import supportedOSGlobal
+from baron_builder_imports import MAX_ERRS
+from baron_builder_utilities import clear_screen, are_you_sure
 from collections import OrderedDict
 from zks_file_class import ZksFile
 
@@ -24,7 +27,7 @@ from zks_file_class import ZksFile
 #################### MACROS #####################
 #################################################
 
-MAX_GOLD = 1000000                              # Upper end limit for modifying gold
+MAX_GOLD = 9999999                              # Upper end limit for modifying gold
 MAX_BPS = 25000                                 # Upper end limit for modifying build points
 
 
@@ -39,6 +42,205 @@ fullStabListGlobal = [ "Serene", "Stable", "Worried", "Troubled", "Rioting", "Cr
 #################################################
 ################### FEATURES ####################
 #################################################
+
+
+def user_feature_menu(operSys, saveGameObj, curNumBadAns):
+    '''
+        PURPOSE - Allow a user to decide how to edit a given save game
+        INPUT
+            operSys - See OPERATAING SYSTEM macros
+            saveGameObj - ZksFile object for a selected save game
+            curNumBadAns - Current number of incorrect answers to track error tolerance
+        OUTPUT
+            On success, True
+            On failure, False
+            On error, Exception
+    '''
+    # LOCAL VARIABLES
+    retVal = True
+    supportedOS = supportedOSGlobal
+    selection = 0  # Main menu selection
+    tempInt = 0  # Temporary integer
+    userClose = False  # User indicate to close the current save game
+    userSave = False  # User indication they want to save
+    userExit = False  # User indication they want to exit/quit
+    curSaveGame = ""  # Current save game being edited
+    f01Exists = False  # Set to True if saveGameObj.zPlayFile.jDict["Kingdom"]["BP"] exists
+    f02Exists = False  # Set to True if saveGameObj.zPlayFile.jDict["Kingdom"]["Unrest"] exists
+    f06Exists = False  # Set to True if saveGameObj.zPlayFile.jDict["Money"] exists
+    userMenuDict = OrderedDict()  # Ordered dict of menu choices to build when determining save game maturity
+    menuChoiceOrd = 97  # Ordinal for the first menu choice
+    numBadAnswers = curNumBadAns  # Current number of bad answers
+
+    # INPUT VALIDATION
+    if not isinstance(operSys, int):
+        raise TypeError('Operating system is of type "{}" instead of integer'.format(type(operSys)))
+    elif operSys not in supportedOS:
+        raise ValueError("Operating system value is unknown")
+    elif not isinstance(saveGameObj, ZksFile):
+        raise TypeError('Save game object is of type "{}" instead of ZksFile'.format(type(saveGameObj)))
+    elif not isinstance(curNumBadAns, int):
+        raise TypeError('Current number of bad answers is of type "{}" instead of integer'.format(type(curNumBadAns)))
+    elif curNumBadAns > MAX_ERRS:
+        raise RuntimeError("Exceeded maximum bad answers")
+    else:
+        curSaveGame = saveGameObj.zName
+
+    # DETERMINE SAVE GAME MATURITY
+    # Feature 1
+    f01Exists = bbf01_BP_available(saveGameObj)
+    # Feature 2
+    f02Exists = bbf02_STAB_available(saveGameObj)
+    # Feature 6
+    f06Exists = bbf06_GOLD_available(saveGameObj)
+
+    # BUILD FEATURE DICTIONARY
+    # Feature 1
+    if f01Exists is True:
+        userMenuDict[chr(menuChoiceOrd)] = tuple(("Change Build Points (BPs)", "Feature01"))
+        menuChoiceOrd += 1
+    # Feature 2
+    if f02Exists is True:
+        userMenuDict[chr(menuChoiceOrd)] = tuple(("Set Kingdom Unrest", "Feature02"))
+        menuChoiceOrd += 1
+    # Feature 6
+    if f06Exists is True:
+        userMenuDict[chr(menuChoiceOrd)] = tuple(("Change gold", "Feature06"))
+        menuChoiceOrd += 1
+
+    # CLEAR SCREEN
+    clear_screen(operSys)
+
+    # PRINT MENU
+    while retVal and numBadAnswers <= MAX_ERRS:
+        print("")  # Blank line
+        # Print options
+        print("SAVE GAME FILE MODIFICATIONS")
+        print("Editing:\t{}\n".format(curSaveGame))
+        # print("(c) Change Build Points (BPs)")  # Feature 1
+        # print("(b) Change Kingdom Stability")  # Feature 2
+        # print("(a) Change gold")  # Feature 6
+        for key in userMenuDict.keys():
+            print("({}) {}".format(key, userMenuDict[key][0]))
+        print("")
+        print('Type "clear" to clear the screen')
+        print('Type "open" to open a new file')
+        print('Type "save" to save the changes')
+        print('Type "close" to close the file without saving')
+        print('Type "quit" to save and exit this program')
+
+        # Take input
+        selection = input("Make your selection [Quit]:  ")
+        clear_screen(operSys)
+
+        # Modify input
+        if len(selection) == 0:
+            selection = "quit"
+        else:
+            selection = selection.lower()
+            if selection in userMenuDict.keys():
+                selection = userMenuDict[selection][1]
+
+        # Execute selection
+        if "clear" == selection:
+            numBadAnswers = 0
+            clear_screen(operSys)
+        elif "open" == selection:
+            numBadAnswers = 0
+            print('\nNOT IMPLEMENTED\nChoose "close", then "quit", and start again instead')  # Placeholder
+            pass
+        elif "save" == selection:
+            numBadAnswers = 0
+            userSave = True
+        elif "close" == selection:
+            numBadAnswers = 0
+            if are_you_sure(numBadAnswers, "close the file without saving") is True:
+                userClose = True
+        elif "quit" == selection:
+            numBadAnswers = 0
+            userSave = True
+            userExit = True
+        elif "Feature01" == selection:
+            numBadAnswers = 0
+            if isinstance(saveGameObj, ZksFile) is True:
+                try:
+                    retVal = bbf01_BP_sub_menu(saveGameObj, numBadAnswers, MAX_ERRS)
+                except Exception as err:
+                    print("\nUnable to modify current build points")
+                    print(repr(err))
+                    retVal = False
+                else:
+                    if retVal is True:
+                        numBadAnswers = 0
+            else:
+                print("Save game has already been closed")
+                numBadAnswers += 1
+        elif "Feature02" == selection:
+            numBadAnswers = 0
+            if isinstance(saveGameObj, ZksFile) is True:
+                try:
+                    retVal = bbf02_STAB_sub_menu(saveGameObj, numBadAnswers, MAX_ERRS)
+                except Exception as err:
+                    print("\nUnable to modify kingdom's unrest level")
+                    print(repr(err))
+                    retVal = False
+                else:
+                    if retVal is True:
+                        numBadAnswers = 0
+            else:
+                print("Save game has already been closed")
+                numBadAnswers += 1
+        elif "Feature06" == selection:
+            numBadAnswers = 0
+            if isinstance(saveGameObj, ZksFile) is True:
+                try:
+                    retVal = bbf06_GOLD_sub_menu(saveGameObj, numBadAnswers, MAX_ERRS)
+                except Exception as err:
+                    print("\nUnable to modify gold amount")
+                    print(repr(err))
+                    retVal = False
+                else:
+                    if retVal is True:
+                        numBadAnswers = 0
+            else:
+                print("Save game has already been closed")
+                numBadAnswers += 1
+        else:
+            print("\nInvalid selection.  Try again.")
+            numBadAnswers += 1
+
+        # MENU ACTIONS
+        # Save
+        if userSave is True and isinstance(saveGameObj, ZksFile) is True:
+            print("\nSaving any changes to {}".format(saveGameObj.zName))
+            saveGameObj.update_zks()
+            userSave = False
+        elif userSave is True and saveGameObj is None:
+            print("Save game has already been closed")
+            numBadAnswers += 1
+
+        # Close
+        if userClose is True and isinstance(saveGameObj, ZksFile) is True:
+            print("\nClosing {} without saving".format(saveGameObj.zName))
+            saveGameObj.close_zks()
+            saveGameObj = None
+            curSaveGame = "None"
+            userClose = False
+        elif userClose is True and saveGameObj is None:
+            print("Save game has already been closed")
+            numBadAnswers += 1
+
+        # Quit
+        if userExit is True:
+            print("\nExiting Baron Builder")
+            userExit = False
+            break
+
+    # DONE
+    print("")  # Blank line
+    if numBadAnswers > MAX_ERRS:
+        raise RuntimeError("Exceeded maximum bad answers")
+    return retVal
 
 
 ############## F01 - BUILD POINTS ###############
@@ -107,22 +309,22 @@ def bbf01_BP_sub_menu(saveGameObj, curNumBadAns, maxNumBadAns):
                     else:
                         newBP = newBP.lower()
 
-                        if "exit" == newBP:
-                            retVal = True
-                            break
+                    if "exit" == newBP:
+                        retVal = True
+                        break
+                    else:
+                        try:
+                            newBP = int(newBP)
+                        except Exception as err:
+                            print("Invalid selection.")
+                            numBadAnswers += 1
+                            if numBadAnswers <= maxNumBadAns:
+                                print("Try again.")
                         else:
-                            try:
-                                newBP = int(newBP)
-                            except Exception as err:
-                                print("Invalid selection.")
-                                numBadAnswers += 1
-                                if numBadAnswers <= maxNumBadAns:
-                                    print("Try again.")
-                            else:
-                                numBadAnswers = 0
-                                # Execute selection
-                                retVal = bbf01_BP_set_bps(saveGameObj, newBP)
-                                break
+                            numBadAnswers = 0
+                            # Execute selection
+                            retVal = bbf01_BP_set_bps(saveGameObj, newBP)
+                            break
 
     # DONE
     return retVal
@@ -494,9 +696,10 @@ def bbf06_GOLD_sub_menu(saveGameObj, curNumBadAns, maxNumBadAns):
     '''
     # LOCAL VARIABLES
     retVal = True
-    curGold = 0  # Current amount of gold
-    newGold = 0  # New amount of gold input by user
+    curGold = 0                   # Current amount of gold
+    newGold = 0                   # New amount of gold input by user
     numBadAnswers = curNumBadAns  # Number of bad answers given here
+    defaultGold = 0               # Default amount of gold to set
 
     # INPUT VALIDATION
     if not isinstance(saveGameObj, ZksFile):
@@ -526,13 +729,20 @@ def bbf06_GOLD_sub_menu(saveGameObj, curNumBadAns, maxNumBadAns):
 
                     # Print options
                     print("You currently have {} gold.".format(curGold))
+                    
+                    # Determine max gold
+                    if curGold * 2 > MAX_GOLD:
+                        defaultGold = MAX_GOLD
+                    else:
+                        defaultGold = curGold * 2
 
                     # Take input
-                    newGold = input("Enter the amount of gold you want up to a maximum of {} [{}]?  ".format(MAX_GOLD, curGold * 2))
+                    newGold = input("Enter the amount of gold you want up to a maximum of {} [{}]?  ".format(MAX_GOLD, defaultGold))
 
                     # Modify input
                     if len(newGold) == 0:
-                        newGold = curGold * 2
+                        newGold = defaultGold
+                        numBadAnswers = 0
                     else:
                         try:
                             newGold = int(newGold)
@@ -543,9 +753,10 @@ def bbf06_GOLD_sub_menu(saveGameObj, curNumBadAns, maxNumBadAns):
                                 print("Try again.")
                         else:
                             numBadAnswers = 0
-                            # Execute selection
-                            retVal = bbf06_GOLD_set_gold(saveGameObj, newGold)
-                            break
+
+                    # Execute selection
+                    retVal = bbf06_GOLD_set_gold(saveGameObj, newGold)
+                    break
 
     # DONE
     return retVal
