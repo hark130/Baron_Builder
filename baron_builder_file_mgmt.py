@@ -104,7 +104,7 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
         print("(f) Help")
         print("")
         print('Type "clear" to clear the screen')
-        print('Type "quit" to save and exit this program')
+        print('Type "quit" to exit this program')
 
         # Take input
         selection = input("Make your selection [a]:  ")
@@ -141,7 +141,7 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
                     retVal = False
                     break
                 else:
-                    print("Backing up file:\t{}".format(saveGameFileList[fileNum]))
+                    print("\nBacking up file:\t{}".format(saveGameFileList[fileNum]))
                     numBadAnswers = 0
             # Backup file
             try:
