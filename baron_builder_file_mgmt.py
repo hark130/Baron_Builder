@@ -659,10 +659,14 @@ def backup_a_file(srcFile, dstDir, newFileExt):
         raise OSError("Source file does not exist")
     elif os.path.isfile(srcFile) is False:
         raise OSError("Source file is not a file")
-    elif os.path.exists(dstDir) is False:
-        raise OSError("Destination directory does not exist")
-    elif os.path.isdir(dstDir) is False:
-        raise OSError("Destination directory is not a directory")
+
+    # MANAGE BACKUP DIRECTORY
+    # If it exists, verify it's a directory
+    if os.path.exists(dstDir) is True:
+        if os.path.isdir(dstDir) is False:
+            raise OSError("Destination directory is not a directory")
+    else:
+        os.mkdir(dstDir)
     
     # DETERMINE FILE EXTENSION
     splitFile = os.path.splitext(srcFile)
