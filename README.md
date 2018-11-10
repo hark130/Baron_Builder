@@ -36,7 +36,7 @@ My end goal is to create a save game editor that works on all operating systems 
 | :-------- | :--- | :---: | :-----: | :---: |
 | F01 | Add BPs | ✓ | ? | ? |
 | F02 | Change Kingdom Stability | ✓ | ? | ? |
-| F03 | Backup save games | | | |
+| F03 | Backup save games | ✓ | ? | ? |
 | F04 | Restore backed up save game | | | |
 | F05 | Archive (AKA backup/delete) old saves | | | |
 | F06 | Change gold | ✓ | ✓ | ? |
