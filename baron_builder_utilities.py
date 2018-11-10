@@ -151,10 +151,11 @@ def clear_screen(operSys):
     return retVal
 
 
-def are_you_sure(actionStr=""):
+def are_you_sure(curNumBadAns, actionStr=""):
     '''
         PURPOSE - Verify the user knows what they're doing
         INPUT
+            curNumBadAns - Current number of incorrect answers to track error tolerance
             actionStr - Optional string to confirm with the user
         OUTPUT
             If they're sure, True
@@ -166,6 +167,7 @@ def are_you_sure(actionStr=""):
     # LOCAL VARIABLES
     retVal = False
     selection = ""
+    numBadAnswers = curNumBadAns  # Current number of bad answers
 
     # GLOBAL VARIABLES
     global numBadAnswers
