@@ -200,8 +200,8 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
             empty_a_dir(os.path.join(saveGamePath, TOP_DIR, WORKING_DIR))
         elif "f" == selection:
             print("A - 'Editing a save game' will allow you to modify certain aspects of that save file.")
-            print("B - 'Backing up a save' will copy a save game file into a back up directory.  High speed but no compression.")
-            print("C - 'Archiving a save' will move a save game into an archive directory.\nSlow speed, some compression but this may speed up game load times.")
+            print("B - 'Backing up a save' will copy a save game file into a back up directory.\n    High speed but no compression.")
+            print("C - 'Archiving a save' will move a save game into an archive directory.\n    Slow speed, some compression but this may speed up game load times.")
             print("D - 'Restore save games' will allow you to recover backup and archive save games, overwriting your current save.")
             print("E - 'Clean working directory' will manually clear the temporary files created during file manipulation.")
             print("F - I just wanted to give the user some insight into what is happening without lengthy documentation.")
