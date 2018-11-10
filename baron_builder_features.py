@@ -18,7 +18,7 @@
 
 from baron_builder_imports import supportedOSGlobal
 from baron_builder_imports import MAX_ERRS
-from baron_builder_utilities import clear_screen
+from baron_builder_utilities import clear_screen, are_you_sure
 from collections import OrderedDict
 from zks_file_class import ZksFile
 
@@ -154,7 +154,7 @@ def user_feature_menu(operSys, saveGameObj, curNumBadAns):
             userSave = True
         elif "close" == selection:
             numBadAnswers = 0
-            if are_you_sure("close the file without saving") is True:
+            if are_you_sure(numBadAnswers, "close the file without saving") is True:
                 userClose = True
         elif "quit" == selection:
             numBadAnswers = 0
@@ -742,6 +742,7 @@ def bbf06_GOLD_sub_menu(saveGameObj, curNumBadAns, maxNumBadAns):
                     # Modify input
                     if len(newGold) == 0:
                         newGold = defaultGold
+                        numBadAnswers = 0
                     else:
                         try:
                             newGold = int(newGold)
@@ -752,9 +753,10 @@ def bbf06_GOLD_sub_menu(saveGameObj, curNumBadAns, maxNumBadAns):
                                 print("Try again.")
                         else:
                             numBadAnswers = 0
-                            # Execute selection
-                            retVal = bbf06_GOLD_set_gold(saveGameObj, newGold)
-                            break
+
+                    # Execute selection
+                    retVal = bbf06_GOLD_set_gold(saveGameObj, newGold)
+                    break
 
     # DONE
     return retVal
