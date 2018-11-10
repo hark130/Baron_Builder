@@ -47,9 +47,7 @@ My end goal is to create a save game editor that works on all operating systems 
 
 | Resolved | BUG # | File | Function | Details |
 | :------: | :---: | :--- | :------- | :------ |
-| ? | B01 | baron_builder_features | bbf06_GOLD_sub_menu | Menu allows default gold to exceed max macro |
-|  | B02 |  |  |  |
-
+| ✓ | B01 | baron_builder_features | bbf06_GOLD_sub_menu | Menu allows default gold to exceed max macro |
 
 ### Legend
 
