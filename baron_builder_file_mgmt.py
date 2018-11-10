@@ -10,12 +10,14 @@
 from baron_builder_imports import MAX_ERRS
 from baron_builder_imports import nixSaveGamePath, winSaveGamePath, macSaveGamePath
 from baron_builder_imports import OS_UNKNOWS, OS_LINUX, OS_WINDOWS, OS_APPLE
-from baron_builder_imports import TOP_DIR, ARCHIVE_DIR, BACKUP_DIR, WORKING_DIR
+from baron_builder_imports import TOP_DIR, ARCHIVE_DIR, BACKUP_DIR, WORKING_DIR, BACKUP_EXT
 from baron_builder_imports import supportedOSGlobal
 from baron_builder_utilities import clear_screen
 from stat import S_ISREG, ST_CTIME, ST_MODE, ST_MTIME
+from zks_file_class import ZksFile
 import os
 import shutil
+import sys
 
 
 #################################################
@@ -55,8 +57,13 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
     # LOCAL VARIABLES
     retVal = True
     supportedOS = supportedOSGlobal
+    fileNum = None                # Index of the user-selected file
     numBadAnswers = curNumBadAns  # Current number of bad answers
-    selection = 0  # User menu selection
+    selection = 0                 # User menu selection
+    tempRetVal = 0                # File index to backup/archive
+    backupZksFile = None          # ZksFile object to backup/archive
+    workDirExists = None          # Set this to true if a working directory already existed
+    zksWorkDir = ""               # Store the path of the full working directory here before ZksFile.close_zks()
 
     # GLOBAL VARIABLES
 
@@ -94,9 +101,10 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
         print("(c) Archive save game(s)")
         print("(d) Restore save game(s)")
         print("(e) Clean working directory")
+        print("(f) Help")
         print("")
         print('Type "clear" to clear the screen')
-        print('Type "quit" to save and exit this program')
+        print('Type "quit" to exit this program')
 
         # Take input
         selection = input("Make your selection [a]:  ")
@@ -116,16 +124,88 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
             numBadAnswers = 0
             raise RuntimeError("Quit")
         elif "a" == selection:
-            retVal = user_file_selection_menu(operSys, saveGamePath, saveGameFileList, numBadAnswers)
+            fileNum = user_file_selection_menu(operSys, saveGamePath, saveGameFileList, numBadAnswers)
             break
         elif "b" == selection:
-            break
+            numBadAnswers = 0
+            # Choose file to backup
+            try:
+                fileNum = user_file_selection_menu(operSys, saveGamePath, saveGameFileList, numBadAnswers)
+            except Exception as err:
+                print('user_file_selection_menu() raised "{}" exception'.format(str(err)))  # DEBUGGING
+                retVal = False
+                break
+            else:
+                if 0 > fileNum or fileNum >= len(saveGameFileList):
+                    print("user_file_selection_menu() failed to return a proper file index")  # DEBUGGING
+                    retVal = False
+                    break
+                else:
+                    print("\nBacking up file:\t{}".format(saveGameFileList[fileNum]))
+                    numBadAnswers = 0
+            # Backup file
+            try:
+                retVal = backup_a_file(os.path.join(saveGamePath, saveGameFileList[fileNum]),
+                                       os.path.join(saveGamePath, TOP_DIR, BACKUP_DIR), BACKUP_EXT)
+            except Exception as err:
+                print('backup_a_file() raised "{}" exception'.format(str(err)))  # DEBUGGING
+                retVal = False
+                break
+            else:
+                if retVal is False:
+                    print("backup_a_file() failed to backup the file")  # DEBUGGING
+                    break
+                else:
+                    print("Successfully backed up file")
         elif "c" == selection:
-            break
+            print("Archive feature not yet implemented")  # PLACEHOLDER
+            numBadAnswers += 1
+            continue  # I don't want the half-implemented code (see below) executed yet
+            # FUTURE NOTES
+            # 1. Does working directory already exist?  If yes, leave it.  If no, clean up afterwards
+            # 2. saveGame = ZksFile()
+            # 3. saveGame.unpack_file(os.path.join(TOP_DIR, WORKING_DIR))
+            # 4. saveGame.archive(os.path.join(TOP_DIR, ARCHIVE_DIR))
+            # 5. Remove original save game from list of saves
+            # 6. Delete original save game
+            # The following code block was to be used for backup purposes until I decided to merely copy
+            # backups and REcompress archives.  It's a start towards Feature 05 but it's not everything.
+            tempRetVal = user_file_selection_menu(operSys, saveGamePath, saveGameFileList, numBadAnswers)
+            try:
+                backupZksFile = ZksFile(os.path.join(saveGamePath, saveGameFileList[tempRetVal]))
+                if os.path.isdir(os.path.join(saveGamePath,TOP_DIR, WORKING_DIR, backupZksFile.zModDir)):
+                    print("{} exists".format(os.path.join(saveGamePath,TOP_DIR, WORKING_DIR, backupZksFile.zModDir)))  # DEBUGGING
+                    workDirExists = True
+                else:
+                    print("{} does not exist".format(os.path.join(saveGamePath,TOP_DIR, WORKING_DIR, backupZksFile.zModDir)))  # DEBUGGING
+                    workDirExists = False
+                backupZksFile.unpack_file(os.path.join(saveGamePath, TOP_DIR, WORKING_DIR))
+                backupZksFile.archive(os.path.join(saveGamePath, TOP_DIR, BACKUP_DIR))
+                zksWorkDir = backupZksFile.fullWorkPath
+                backupZksFile.close_zks()
+            except Exception as err:
+                print('ZksFile() raised "{}" exception'.format(str(err)))  # DEBUGGING
+                retVal = False
+                break
+            else:
+                if workDirExists is False:
+                    empty_a_dir(zksWorkDir)
+                    remove_a_dir(zksWorkDir)
+                    zksWorkDir = None
         elif "d" == selection:
-            break
+            print("Restore feature not yet implemented")  # PLACEHOLDER
+            numBadAnswers += 1
+            continue
         elif "e" == selection:
             empty_a_dir(os.path.join(saveGamePath, TOP_DIR, WORKING_DIR))
+        elif "f" == selection:
+            print("A - 'Editing a save game' will allow you to modify certain aspects of that save file.")
+            print("B - 'Backing up a save' will copy a save game file into a back up directory.  High speed but no compression.")
+            print("C - 'Archiving a save' will move a save game into an archive directory.\nSlow speed, some compression but this may speed up game load times.")
+            print("D - 'Restore save games' will allow you to recover backup and archive save games, overwriting your current save.")
+            print("E - 'Clean working directory' will manually clear the temporary files created during file manipulation.")
+            print("F - I just wanted to give the user some insight into what is happening without lengthy documentation.")
+            print("")
         else:
             print("\nInvalid selection.")
             numBadAnswers += 1
@@ -215,7 +295,7 @@ def user_file_selection_menu(operSys, saveGamePath, saveGameFileList, curNumBadA
 
         # Print options
         print("SAVE GAME SELECTION")
-        print("Enter the number of the save game you want to edit")
+        print("Enter the number of the save game you want")
         print("-or-")
         print('Type "top" to see the first page of files')
         print('Type "up" to see the previous page of files')
@@ -433,7 +513,8 @@ def empty_a_dir(oldPath):
         raise OSError("Path is not a path")
 
     # EMPTY DIRECTORY
-    print("Deleting Working Folders [", end = "")
+    print("Cleaning Up [", end = "")
+    sys.stdout.flush()
     for entry in os.listdir(oldPath):
         if retVal is False:
             break
@@ -443,17 +524,22 @@ def empty_a_dir(oldPath):
             retVal = remove_a_dir(os.path.join(oldPath, entry))
             if retVal is False:
                 print("X", end = "")
+                sys.stdout.flush()
                 break
             else:
                 print(".", end = "")
+                sys.stdout.flush()
         elif os.path.isfile(os.path.join(oldPath, entry)):
             # print("Removing file {}".format(os.path.join(oldPath, entry)))  # DEBUGGING
             os.remove(os.path.join(oldPath, entry))
             print(".", end = "")
+            sys.stdout.flush()
         else:
             print("X]")
+            sys.stdout.flush()
             raise OSError("Entry {} is not a file or directory".format(os.path.join(oldPath, entry)))
     print("]")
+    sys.stdout.flush()
 
     # DONE
     return retVal
@@ -490,3 +576,117 @@ def remove_a_dir(oldPath):
 
     # DONE
     return retVal
+
+
+def copy_a_file(srcFile, dstFile):
+    '''
+        PURPOSE - Copy srcFile to dstFile
+        INPUT
+            srcFile - Relative or absolute filename original file
+            dstFile - Relative or absolute filename of the copy
+        OUTPUT
+            On success, True
+            On failure, False
+            On error, Exception
+    '''
+    # LOCAL VARIABLES
+    retVal = False
+    
+    # INPUT VALIDATION
+    if not isinstance(srcFile, str):
+        raise TypeError('Source file is of type "{}" instead of string'.format(type(srcFile)))
+    elif len(srcFile) <= 0:
+        raise ValueError("Invalid source file name length")
+    elif not isinstance(dstFile, str):
+        raise TypeError('Source file is of type "{}" instead of string'.format(type(dstFile)))
+    elif len(dstFile) <= 0:
+        raise ValueError("Invalid destination file name length")
+    elif srcFile == dstFile:
+        raise ValueError("Source and destination can not be the same")
+    elif os.path.exists(srcFile) is False:
+        raise OSError("Source file does not exist")
+    elif os.path.isfile(srcFile) is False:
+        raise OSError("Source file is not a file")
+    elif os.path.exists(dstFile) is True:
+        raise OSError("Destination file already exists")
+    
+    # COPY
+    try:
+        shutil.copy2(srcFile, dstFile)
+    except Exception as err:
+        print("shutil.copy2() raised an exception")  # DEBUGGING
+        print(repr(err))  # DEBUGGING
+        retVal = False
+    else:
+        retVal = True
+    
+    # DONE
+    return retVal
+
+
+def backup_a_file(srcFile, dstDir, newFileExt):
+    '''
+        PURPOSE - Copy a file to a new destination directory while also modifying its file extension
+        INPUT
+            srcFile - Relative or absolute filename original file
+            dstDir - Relative or absolute directory to copy the file into
+            newFileExt - New file extension to replace the old file extension
+        OUTPUT
+            On success, True
+            on failure, False
+            on error, Exception
+    '''
+    # LOCAL VARIABLES
+    retVal = False
+    splitFile = ()    # Split the srcFile here
+    curFileExt = ""   # Store the current srcFile file extension, if any, here
+    dstFilename = ""  # Construct the destination file name, complete with new file extension, here
+    
+    # INPUT VALIDATION
+    if not isinstance(srcFile, str):
+        raise TypeError('Source file is of type "{}" instead of string'.format(type(srcFile)))
+    elif len(srcFile) <= 0:
+        raise ValueError("Invalid source file name length")
+    elif not isinstance(dstDir, str):
+        raise TypeError('Source file is of type "{}" instead of string'.format(type(dstDir)))
+    elif len(dstDir) <= 0:
+        raise ValueError("Invalid destination file name length")
+    elif not isinstance(newFileExt, str):
+        raise TypeError('File extension is of type "{}" instead of string'.format(type(dstDir)))
+    elif len(newFileExt) <= 0:
+        raise ValueError("Invalid file extension length")
+    elif os.path.exists(srcFile) is False:
+        raise OSError("Source file does not exist")
+    elif os.path.isfile(srcFile) is False:
+        raise OSError("Source file is not a file")
+    elif os.path.exists(dstDir) is False:
+        raise OSError("Destination directory does not exist")
+    elif os.path.isdir(dstDir) is False:
+        raise OSError("Destination directory is not a directory")
+    
+    # DETERMINE FILE EXTENSION
+    splitFile = os.path.splitext(srcFile)
+    curFileExt = splitFile[len(splitFile) - 1]
+    
+    # JOIN DESTINATION FILENAME
+    dstFilename = os.path.basename(srcFile)
+    if 0 < len(curFileExt):
+        dstFilename = dstFilename + newFileExt
+    else:
+        dstFilename = dstFilename.replace(curFileExt, newFileExt)
+        
+    # COPY
+    try:
+        retVal = copy_a_file(srcFile, os.path.join(dstDir, dstFilename))
+    except Exception as err:
+        print("copy_a_file() raised an exception")  # DEBUGGING
+        print(repr(err))  # DEBUGGING
+        retVal = False
+    else:
+        if retVal is False:
+            print("copy_a_file() failed")  # DEBUGGING
+            pass        
+    
+    # DONE
+    return retVal
+

@@ -27,9 +27,9 @@ TOP_DIR = "Baron_Builder"  # Store everything in there
 ARCHIVE_DIR = "Archive"    # Move archived save files here
 BACKUP_DIR = "Backup"      # Backup save files here
 WORKING_DIR = "Working"    # Use this directory to unarchive and modify save games
-# Dictionary of all Baron Build directory locations
-# DIR_DICT = { "TOP_DIR":TOP_DIR, "ARCHIVE_DIR":ARCHIVE_DIR,
-#              "BACKUP_DIR":BACKUP_DIR, "WORKING_DIR":WORKING_DIR }
+SAVE_GAME_EXT = ".zks"     # Pathfinder Kingmaker save game file extension
+BACKUP_EXT = ".bbb"        # Backed up save game file extension
+ARCHIVE_EXT = ".bba"       # Archived save game file extension
 
 
 #################################################
