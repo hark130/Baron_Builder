@@ -136,7 +136,7 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
                 retVal = False
                 break
             else:
-                if 0 > fileNum or fileNum >= len(saveGameFileList)):
+                if 0 > fileNum or fileNum >= len(saveGameFileList):
                     print("user_file_selection_menu() failed to return a proper file index")  # DEBUGGING
                     retVal = False
                     break
