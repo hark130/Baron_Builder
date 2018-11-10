@@ -1,0 +1,53 @@
+<unity_prefs version_major="1" version_minor="1">
+	<pref name="Antialiasing" type="string">MA==</pref>
+	<pref name="AutopauseOnEngagement" type="string">RmFsc2U=</pref>
+	<pref name="AutosaveSlots" type="string">Mw==</pref>
+	<pref name="Bloom" type="string">RmFsc2U=</pref>
+	<pref name="CharacterAtlasResolution" type="string">MA==</pref>
+	<pref name="ClothPhysicsQuality" type="string">MA==</pref>
+	<pref name="ClusteredLighting" type="string">RmFsc2U=</pref>
+	<pref name="Decals" type="string">MA==</pref>
+	<pref name="DepthOfField" type="string">RmFsc2U=</pref>
+	<pref name="Display" type="string">MA==</pref>
+	<pref name="DisplayMode" type="string">LTE=</pref>
+	<pref name="EnableGameStatistic" type="int">1</pref>
+	<pref name="FirstTimeLogoShow" type="int">1</pref>
+	<pref name="FluidSimulation" type="string">RmFsc2U=</pref>
+	<pref name="GrassDensity" type="string">MA==</pref>
+	<pref name="HardwareAlreadyChecked" type="int">1</pref>
+	<pref name="KingdomDifficulty" type="string">Mg==</pref>
+	<pref name="LightsQuality" type="string">MA==</pref>
+	<pref name="LocalePref" type="string">ZW5HQg==</pref>
+	<pref name="Localization" type="string">MA==</pref>
+	<pref name="PauseEndOfPartyMembersRound" type="string">RmFsc2U=</pref>
+	<pref name="PauseEnemySpotted" type="string">VHJ1ZQ==</pref>
+	<pref name="PauseWeaponIsIneffective" type="string">VHJ1ZQ==</pref>
+	<pref name="QuicksaveSlots" type="string">Mw==</pref>
+	<pref name="RealtimeEnvironmentShadows" type="string">RmFsc2U=</pref>
+	<pref name="SSAO" type="string">MA==</pref>
+	<pref name="ScreenResolution" type="string">OQ==</pref>
+	<pref name="Screenmanager Fullscreen mode" type="int">1</pref>
+	<pref name="Screenmanager Resolution Height" type="int">1080</pref>
+	<pref name="Screenmanager Resolution Width" type="int">1920</pref>
+	<pref name="SendGameStatistic" type="string">VHJ1ZQ==</pref>
+	<pref name="SendSavesToDevelopers" type="string">VHJ1ZQ==</pref>
+	<pref name="ShadowsQuality" type="string">MA==</pref>
+	<pref name="SoundVolumeAmbience" type="string">MTAw</pref>
+	<pref name="SoundVolumeMagicChants" type="string">MTAw</pref>
+	<pref name="SoundVolumeMaster" type="string">MTAw</pref>
+	<pref name="SoundVolumeMusic" type="string">MTAw</pref>
+	<pref name="SoundVolumeVoices" type="string">MTAw</pref>
+	<pref name="Textures" type="string">MQ==</pref>
+	<pref name="UnitySelectMonitor" type="int">0</pref>
+	<pref name="VSync" type="string">RmFsc2U=</pref>
+	<pref name="WaterScreenSpaceReflections" type="string">RmFsc2U=</pref>
+	<pref name="data.analyticsEnabled" type="int">1</pref>
+	<pref name="data.deviceStatsEnabled" type="int">1</pref>
+	<pref name="data.limitUserTracking" type="int">1</pref>
+	<pref name="data.optOut" type="int">1</pref>
+	<pref name="data.performanceReportingEnabled" type="int">1</pref>
+	<pref name="unity.cloud_userid" type="string">MTMyYTY5NTk5ZDRmOTRjNTk4YzVjZGJiODZhNTI4MjI=</pref>
+	<pref name="unity.player_session_background_time" type="string">MA==</pref>
+	<pref name="unity.player_session_elapsed_time" type="string">MA==</pref>
+	<pref name="unity.player_sessionid" type="string">MA==</pref>
+</unity_prefs>
