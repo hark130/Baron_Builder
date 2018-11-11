@@ -27,9 +27,11 @@ TOP_DIR = "Baron_Builder"  # Store everything in there
 ARCHIVE_DIR = "Archive"    # Move archived save files here
 BACKUP_DIR = "Backup"      # Backup save files here
 WORKING_DIR = "Working"    # Use this directory to unarchive and modify save games
+# FILE EXTENSIONS
 SAVE_GAME_EXT = ".zks"     # Pathfinder Kingmaker save game file extension
 BACKUP_EXT = ".bbb"        # Backed up save game file extension
 ARCHIVE_EXT = ".bba"       # Archived save game file extension
+MISC_BACKUP_EXT = ".bak"   # File extension for non-save games being backed up
 
 
 #################################################
@@ -49,4 +51,5 @@ nixSaveGamePath = os.path.join(".config", "unity3d", "Owlcat Games", "Pathfinder
 winSaveGamePath = os.path.join("AppData", "LocalLow", "Owlcat Games", "Pathfinder Kingmaker", "Saved Games")
 # Apple - /home/user/Library/Application\ Support/unity.Owlcat\ Games.Pathfinder\ Kingmaker/Saved\ Games 
 macSaveGamePath = os.path.join("Library", "Application Support", "unity.Owlcat Games.Pathfinder Kingmaker", "Saved Games")
-numBadAnswers = 0  # Current number of bad answers
+# File name of the json file storing the save game list
+saveGameJson = "steam-saves-release.json"
