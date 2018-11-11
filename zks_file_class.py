@@ -34,7 +34,7 @@ class ZksFile():
             [X] saveGame.save_json_files()              # Saves all supported json objects
             [X] saveGame.close_json_files()             # Closes all supported json objects
             ### FEATURES ###
-            [X] saveGame.archive(archiveDir)             # F03 - Unpacks the file and repacks using better compression in archiveDir
+            [X] saveGame.archive_file(archiveDir)       # F03 - Unpacks the file and repacks using better compression in archiveDir
 
 
             ### TEAR DOWN ###
@@ -265,7 +265,7 @@ class ZksFile():
         return retVal
 
 
-    def archive(self, archiveDir):
+    def archive_file(self, archiveDir):
         '''
             PURPOSE - Repack a save game file into a archive directory using better compression
             INPUT
