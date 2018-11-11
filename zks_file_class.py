@@ -209,6 +209,8 @@ class ZksFile():
                 On success, True
                 On failure, False
                 On bad input, None
+            NOTE
+                If workDir does not exist, this method will attempt to make it
         '''
         # LOCAL VARIABLES
         retVal = None
@@ -224,7 +226,7 @@ class ZksFile():
             # UNPACK THE FILE
             # 1. Setup Directories
             self.fullWorkPath = os.path.join(workDir, self.zModDir)
-            print("Full Work Path:\t{}".format(self.fullWorkPath))  # DEBUGGING
+            # print("Full Work Path:\t{}".format(self.fullWorkPath))  # DEBUGGING
             retVal = self.make_dirs(self.fullWorkPath)
 
             # 2. Unpack File
