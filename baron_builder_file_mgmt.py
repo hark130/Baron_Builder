@@ -10,7 +10,8 @@
 from baron_builder_imports import MAX_ERRS
 from baron_builder_imports import nixSaveGamePath, winSaveGamePath, macSaveGamePath
 from baron_builder_imports import OS_UNKNOWS, OS_LINUX, OS_WINDOWS, OS_APPLE
-from baron_builder_imports import TOP_DIR, ARCHIVE_DIR, BACKUP_DIR, WORKING_DIR, BACKUP_EXT
+from baron_builder_imports import TOP_DIR, ARCHIVE_DIR, BACKUP_DIR, WORKING_DIR
+from baron_builder_imports import BACKUP_EXT, MISC_BACKUP_EXT
 from baron_builder_imports import supportedOSGlobal
 from baron_builder_utilities import clear_screen
 from stat import S_ISREG, ST_CTIME, ST_MODE, ST_MTIME
@@ -158,40 +159,35 @@ def user_file_menu(operSys, saveGamePath, saveGameFileList, curNumBadAns):
                 else:
                     print("Successfully backed up file")
         elif "c" == selection:
-            print("Archive feature not yet implemented")  # PLACEHOLDER
-            numBadAnswers += 1
-            continue  # I don't want the half-implemented code (see below) executed yet
-            # FUTURE NOTES
-            # 1. Does working directory already exist?  If yes, leave it.  If no, clean up afterwards
-            # 2. saveGame = ZksFile()
-            # 3. saveGame.unpack_file(os.path.join(TOP_DIR, WORKING_DIR))
-            # 4. saveGame.archive(os.path.join(TOP_DIR, ARCHIVE_DIR))
-            # 5. Remove original save game from list of saves
-            # 6. Delete original save game
-            # The following code block was to be used for backup purposes until I decided to merely copy
-            # backups and REcompress archives.  It's a start towards Feature 05 but it's not everything.
-            tempRetVal = user_file_selection_menu(operSys, saveGamePath, saveGameFileList, numBadAnswers)
+            # Choose file to archive
             try:
-                backupZksFile = ZksFile(os.path.join(saveGamePath, saveGameFileList[tempRetVal]))
-                if os.path.isdir(os.path.join(saveGamePath,TOP_DIR, WORKING_DIR, backupZksFile.zModDir)):
-                    print("{} exists".format(os.path.join(saveGamePath,TOP_DIR, WORKING_DIR, backupZksFile.zModDir)))  # DEBUGGING
-                    workDirExists = True
-                else:
-                    print("{} does not exist".format(os.path.join(saveGamePath,TOP_DIR, WORKING_DIR, backupZksFile.zModDir)))  # DEBUGGING
-                    workDirExists = False
-                backupZksFile.unpack_file(os.path.join(saveGamePath, TOP_DIR, WORKING_DIR))
-                backupZksFile.archive(os.path.join(saveGamePath, TOP_DIR, BACKUP_DIR))
-                zksWorkDir = backupZksFile.fullWorkPath
-                backupZksFile.close_zks()
+                fileNum = user_file_selection_menu(operSys, saveGamePath, saveGameFileList, numBadAnswers)
             except Exception as err:
-                print('ZksFile() raised "{}" exception'.format(str(err)))  # DEBUGGING
+                print('user_file_selection_menu() raised "{}" exception'.format(str(err)))  # DEBUGGING
                 retVal = False
                 break
             else:
-                if workDirExists is False:
-                    empty_a_dir(zksWorkDir)
-                    remove_a_dir(zksWorkDir)
-                    zksWorkDir = None
+                if 0 > fileNum or fileNum >= len(saveGameFileList):
+                    print("user_file_selection_menu() failed to return a proper file index")  # DEBUGGING
+                    retVal = False
+                    break
+                else:
+                    print("\nArchiving file:\t{}".format(saveGameFileList[fileNum]))
+                    numBadAnswers = 0
+            # Archive file
+            try:
+                retVal = archive_a_file(os.path.join(saveGamePath, saveGameFileList[fileNum]),
+                                        os.path.join(saveGamePath, TOP_DIR, ARCHIVE_DIR))
+            except Exception as err:
+                print('archive_a_file() raised "{}" exception'.format(str(err)))  # DEBUGGING
+                retVal = False
+                break
+            else:
+                if retVal is False:
+                    print("archive_a_file() failed to archive the file")  # DEBUGGING
+                    break
+                else:
+                    print("Successfully archived file")
         elif "d" == selection:
             print("Restore feature not yet implemented")  # PLACEHOLDER
             numBadAnswers += 1
@@ -547,9 +543,9 @@ def empty_a_dir(oldPath):
 
 def remove_a_dir(oldPath):
     '''
-        PURPOSE - Empty an old directory of all files and directories
+        PURPOSE - Empty an old directory of all files and directories and remove it
         INPUT
-            oldPath - Directory to empty
+            oldPath - Directory to empty and remove
         OUTPUT
             On success, True
             On failure, False
@@ -578,12 +574,13 @@ def remove_a_dir(oldPath):
     return retVal
 
 
-def copy_a_file(srcFile, dstFile):
+def copy_a_file(srcFile, dstFile, overwrite=False):
     '''
         PURPOSE - Copy srcFile to dstFile
         INPUT
             srcFile - Relative or absolute filename original file
             dstFile - Relative or absolute filename of the copy
+            overwrite - Will delete destination file if it exists
         OUTPUT
             On success, True
             On failure, False
@@ -607,9 +604,25 @@ def copy_a_file(srcFile, dstFile):
         raise OSError("Source file does not exist")
     elif os.path.isfile(srcFile) is False:
         raise OSError("Source file is not a file")
-    elif os.path.exists(dstFile) is True:
+    elif os.path.exists(dstFile) is True and overwrite is False:
         raise OSError("Destination file already exists")
+    elif not isinstance(overwrite, bool):
+        raise TypeError('Overwrite is of type "{}" instead of bool'.format(type(overwrite)))
     
+    # DELETE?
+    if overwrite is True and os.path.exists(dstFile):
+        try:
+            # File
+            if os.path.isfile(dstFile):
+                os.path.remove(dstFile)
+            # Directory
+            elif os.path.isdir(dstFile):
+                remove_a_dir(dstFile)
+        except Exception as err:
+            print("Deleting existing destination file failed")  # DEBUGGING
+            print(repr(err))  # DEBUGGING
+            retVal = False
+
     # COPY
     try:
         shutil.copy2(srcFile, dstFile)
@@ -694,3 +707,118 @@ def backup_a_file(srcFile, dstDir, newFileExt):
     # DONE
     return retVal
 
+
+def archive_a_file(saveGamePath, srcFile, dstDir):
+    '''
+        PURPOSE - Archive a file to a new destination directory while also modifying its file extension
+            and deleting the original
+        INPUT
+            saveGamePath - Relative or absolute path to check for save games
+            srcFile - Relative or absolute filename original file
+            dstDir - Relative or absolute directory to archive the file into
+        OUTPUT
+            On success, True
+            on error, Exception
+        NOTES
+            The orginal steam-saves-release.json will be backed up, changing .json to .bak.  Any
+                existing backed up copies will be overwritten.
+    '''
+    # LOCAL VARIABLES
+    retVal = False         # Set this to True if everything succeeds
+    tempRetVal = False     # Check return values
+    splitFile = ()         # Split the srcFile here
+    archiveZksFile = None  # ZksFile object to archive remove archived save game from
+    saveGameJsonPath = os.path.join(saveGamePath, "..", saveGameJson)
+    saveGameJson = None    # JsonFile object to
+    workDir = os.path.join(saveGamePath, TOP_DIR, WORKING_DIR)
+    backDir = os.path.join(saveGamePath, TOP_DIR, BACKUP_DIR)
+    archDir = os.path.join(saveGamePath, TOP_DIR, ARCHIVE_DIR)
+    thisWorkDir = None     # Store the source file's full working directory here
+    workDirExists = False  # Determine if the working directory existed before ZksFile.unpack_file()
+
+    # INPUT VALIDATION
+    if not isinstance(srcFile, str):
+        raise TypeError('Source file is of type "{}" instead of string'.format(type(srcFile)))
+    elif len(srcFile) <= 0:
+        raise ValueError("Invalid source file name length")
+    elif not isinstance(dstDir, str):
+        raise TypeError('Source file is of type "{}" instead of string'.format(type(dstDir)))
+    elif len(dstDir) <= 0:
+        raise ValueError("Invalid destination file name length")
+    elif os.path.exists(srcFile) is False:
+        raise OSError("Source file does not exist")
+    elif os.path.isfile(srcFile) is False:
+        raise OSError("Source file is not a file")
+
+    # MANAGE BACKUP DIRECTORY
+    # If it exists, verify it's a directory
+    if os.path.exists(dstDir) is True:
+        if os.path.isdir(dstDir) is False:
+            raise OSError("Destination directory is not a directory")
+    else:
+        os.mkdir(dstDir)
+
+    # ARCHIVE FILE
+    try:
+        # 1. OPEN SAVE GAME AS ZksFile object
+        archiveZksFile = ZksFile(srcFile)
+        thisWorkDir = os.path.join(TOP_DIR, WORKING_DIR, archiveZksFile.zModDir)
+        # 2. DETERMINE WORKING DIRECTORY STATUS
+        if os.path.exists(thisWorkDir) is True:
+            if os.path.isdir(thisWorkDir) is True:
+                workDirExists = True
+            else:
+                raise OSError("Working directory is actually a file?!")
+        # 3. REPACK THE FILE
+        tempRetVal = archiveZksFile.unpack_file(os.path.join(saveGamePath, TOP_DIR, WORKING_DIR))
+        if tempRetVal:
+            tempRetVal = archiveZksFile.archive_file(dstDir)
+            if tempRetVal is False:
+                raise OSError("ZksFile object failed to archive the source file")
+            else:
+                archiveZksFile.close_zks()
+        else:
+            raise OSError("ZksFile object failed to unpack file being archived")
+    except Exception as err:
+        print(repr(err))  # DEBUGGING
+        raise err
+
+    try:
+        # 4. REMOVE FROM SAVE GAME LIST
+        # Backup save game file
+        tempRetVal = backup_a_file(saveGameJsonPath, backDir, MISC_BACKUP_EXT)
+        if tempRetVal is False:
+            raise OSError("Failed to backup {}".format(saveGameJson))
+        else:
+            # Edit save game file
+            # Open save game json file
+            saveGameJson = JsonFile(saveGameJsonPath)
+            # Modify contents
+            ### IMPLEMENT LATER ###
+            # Write contents
+            saveGameJson.write_json_file()
+            # Close object
+            saveGameJson.close_json_file()
+    except Exception as err:
+        print(repr(err))  # DEBUGGING
+        raise err
+
+    # 5. DELETE THE ORIGINAL
+    try:
+        os.path.remove(srcFile)
+    except Exception as err:
+        print("Failed to remove original save game file:\t{}".format(srcFile))  # DEBUGGING
+        print(repr(err))  # DEBUGGING
+        raise err
+
+    # 6. DELETE WORKING DIRECTORY?
+    if workDirExists:
+        try:
+            print("ABOUT TO EMPTY {}".format(thisWorkDir))  # DEBUGGING
+            # empty_a_dir(thisWorkDir)
+            print("ABOUT TO DELETE {}".format(thisWorkDir))  # DEBUGGING
+            # remove_a_dir(thisWorkDir)
+    except Exception as err:
+        print("Failed to remove original save game file:\t{}".format(srcFile))  # DEBUGGING
+        print(repr(err))  # DEBUGGING
+        raise err
