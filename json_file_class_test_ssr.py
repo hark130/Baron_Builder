@@ -32,17 +32,22 @@ def main():
 	for entry in sgjNixJsonObj.jDict["Files"]:
 		# print(entry)  # 1
 		# print(entry.keys())  # 2
-		print(entry["Filename"])
+		if entry["Filename"].startswith("Auto"):
+			print(entry)
+			# print(type(entry))
+			sgjNixJsonObj.jDict["Files"].remove(entry)
 
+	for entry in sgjNixJsonObj.jDict["Files"]:
+		print(entry["Filename"])
 
 	# Windows
 	# for key in sgjWinJsonObj.jDict.keys():
 		# print("{} : {}".format(key, sgjWinJsonObj.jDict[key]))
 
-	for entry in sgjWinJsonObj.jDict["Files"]:
-		# print(entry)  # 1
-		# print(entry.keys())  # 2
-		print(entry["Filename"])
+	# for entry in sgjWinJsonObj.jDict["Files"]:
+	# 	# print(entry)  # 1
+	# 	# print(entry.keys())  # 2
+	# 	print(entry["Filename"])
 
 	# DONE
 	return retVal
