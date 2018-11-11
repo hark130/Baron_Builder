@@ -45,6 +45,8 @@ My end goal is to create a save game editor that works on all operating systems 
 | F09 | Baron Builder log | | | |
 | F10 | 'Working' directory is automatically cleaned up | | | |
 | F11 | 'Repair' steam-saves-release.json (remove dead entries) | | | |
+| F12 | Restore archived save games | | | |
+| F13 | Restock camping supplies for vendors | | | |
 
 ### BUGS
 
