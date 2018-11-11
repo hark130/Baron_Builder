@@ -106,6 +106,8 @@ def main():
                 retVal = False
             else:
                 numBadAnswers = 0
+                # Update save game file list in case save games were deleted
+                saveGameFileList = list_save_games(operSys, saveGamePath)
                 absSaveGameFile = os.path.join(saveGamePath, saveGameFileList[fileNum])
 
     # Instantiate Save File Object
