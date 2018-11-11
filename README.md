@@ -42,6 +42,8 @@ My end goal is to create a save game editor that works on all operating systems 
 | F06 | Change gold | ✓ | ✓ | ? |
 | F07 | Clean up 'Working' directory | ✓ | ✓ | ? |
 | F08 | 'Working' directory tallies up storage size | | | |
+| F09 | Baron Builder log | | | |
+| F10 | 'Working' directory is automatically cleaned up | | | |
 
 ### BUGS
 
