@@ -1,5 +1,6 @@
 from baron_builder_imports import saveGameJson
 from json_file_class import JsonFile
+from collections import OrderedDict
 import os
 
 
@@ -25,8 +26,23 @@ def main():
 
 	# REVERSE FUZZINEER JSON FILES
 	# Linux
-	for key in sgjWinJsonObj.jDict.keys():
-		print("{} : {}".format(key, sgjWinJsonObj.jDict[key]))
+	# for key in sgjNixJsonObj.jDict.keys():
+		# print("{} : {}".format(key, sgjNixJsonObj.jDict[key]))
+
+	for entry in sgjNixJsonObj.jDict["Files"]:
+		# print(entry)  # 1
+		# print(entry.keys())  # 2
+		print(entry["Filename"])
+
+
+	# Windows
+	# for key in sgjWinJsonObj.jDict.keys():
+		# print("{} : {}".format(key, sgjWinJsonObj.jDict[key]))
+
+	for entry in sgjWinJsonObj.jDict["Files"]:
+		# print(entry)  # 1
+		# print(entry.keys())  # 2
+		print(entry["Filename"])
 
 	# DONE
 	return retVal
