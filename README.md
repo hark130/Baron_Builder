@@ -38,7 +38,7 @@ My end goal is to create a save game editor that works on all operating systems 
 | F02 | Change Kingdom Stability | ✓ | ? | ? |
 | F03 | Backup save games | ✓ | ✓ | ? |
 | F04 | Restore backed up save game | | | |
-| F05 | Archive (AKA backup/delete) old saves | | | |
+| F05 | Archive (AKA backup/delete) old saves | / | / | / |
 | F06 | Change gold | ✓ | ✓ | ? |
 | F07 | Clean up 'Working' directory | ✓ | ✓ | ? |
 | F08 | 'Working' directory tallies up storage size | | | |
@@ -48,6 +48,8 @@ My end goal is to create a save game editor that works on all operating systems 
 | Resolved | BUG # | File | Function | Details |
 | :------: | :---: | :--- | :------- | :------ |
 | ✓ | B01 | baron_builder_features | bbf06_GOLD_sub_menu | Menu allows default gold to exceed max macro |
+|   | B02 | baron_builder_* | * | Refactor all functions to raise Exception for failure/error and capture/silence/interpret in baron_builder.py |
+|   | B03 | baron_builder_file_mgmt | *menu() | Refactor top level menus to accomplish input validation once, at the highest appropriate level |
 
 ### Legend
 
