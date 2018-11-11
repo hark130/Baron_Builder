@@ -822,3 +822,33 @@ def archive_a_file(saveGamePath, srcFile, dstDir):
         print("Failed to remove original save game file:\t{}".format(srcFile))  # DEBUGGING
         print(repr(err))  # DEBUGGING
         raise err
+
+
+def add_save_game_to_list():
+    return
+
+
+def remove_save_game_from_list(saveGamePath, saveGameName):
+    '''
+        PURPOSE - Remove one save game from the stored list of save games
+        INPUT
+            saveGamePath - Relative or absolute path to check for save games
+            saveGameName - Name, or list of names, of save game(s) to remove from the list
+        OUTPUT
+            On failure or error, Exception
+    '''
+    # LOCAL VARIABLES
+    saveGameList = []
+
+    # INPUT VALIDATION
+    if isinstance(saveGameName, str):
+        saveGameList.append(saveGameName)
+    elif isinstance(saveGameName, list):
+        saveGameList = saveGameName
+
+    for filename in saveGameList:
+        if not isinstance(filename, str):
+            raise TypeError("Save game list contains non-string")
+
+    # DONE
+    return
