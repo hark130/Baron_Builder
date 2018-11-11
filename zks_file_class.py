@@ -34,7 +34,7 @@ class ZksFile():
             [X] saveGame.save_json_files()              # Saves all supported json objects
             [X] saveGame.close_json_files()             # Closes all supported json objects
             ### FEATURES ###
-            [X] saveGame.archive(archiveDir)             # F03 - Unpacks the file and repacks using better compression in archiveDir
+            [X] saveGame.archive_file(archiveDir)       # F03 - Unpacks the file and repacks using better compression in archiveDir
 
 
             ### TEAR DOWN ###
@@ -209,6 +209,8 @@ class ZksFile():
                 On success, True
                 On failure, False
                 On bad input, None
+            NOTE
+                If workDir does not exist, this method will attempt to make it
         '''
         # LOCAL VARIABLES
         retVal = None
@@ -224,7 +226,7 @@ class ZksFile():
             # UNPACK THE FILE
             # 1. Setup Directories
             self.fullWorkPath = os.path.join(workDir, self.zModDir)
-            print("Full Work Path:\t{}".format(self.fullWorkPath))  # DEBUGGING
+            # print("Full Work Path:\t{}".format(self.fullWorkPath))  # DEBUGGING
             retVal = self.make_dirs(self.fullWorkPath)
 
             # 2. Unpack File
@@ -263,7 +265,7 @@ class ZksFile():
         return retVal
 
 
-    def archive(self, archiveDir):
+    def archive_file(self, archiveDir):
         '''
             PURPOSE - Repack a save game file into a archive directory using better compression
             INPUT

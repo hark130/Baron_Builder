@@ -11,9 +11,11 @@ class JsonFile():
         PURPOSE - Open, modify, save, and close json files
         USAGE
             1. jsonSave = JsonFile("player.json")
-            2. [modify json contents using mod, add, or del]
-            3. jsonSave.write_json_file()
-            4. jsonSave.close_json_file()
+            2. jsonSave.read_json_file()
+            3. jsonSave.parse_json_contents()
+            4. [modify json contents using mod, add, or del]
+            5. jsonSave.write_json_file()
+            6. jsonSave.close_json_file()
         NOTES
             [X] jsonSave = JsonFile("player.json")       # Instantiates a JsonFile object
             [X] jsonSave.read_json_file()                # Read the raw file contents
