@@ -950,6 +950,7 @@ def remove_save_game_from_list(absSaveGameList, saveGameName):
     # LOCAL VARIABLES
     saveGameList = []      # List of save games to remove from
     sgjJsonFileObj = None  # Store the JsonFile object here
+    sgjJsonFiles = None    # sgjJsonFileObj.jDict["Files"]
 
     # INPUT VALIDATION
     # absSaveGameList
@@ -996,16 +997,20 @@ def remove_save_game_from_list(absSaveGameList, saveGameName):
 
     # Remove save games
     try:
-        for entry in sgjJsonFileObj.jDict["Files"]:
+        sgjJsonFiles = sgjJsonFileObj.get_data("Files")
+        # for entry in sgjJsonFileObj.jDict["Files"]:
+        for entry in sgjJsonFiles:
             if entry["Filename"] in saveGameList:
                 # print("Removing:\t{}".format(entry))  # DEBUGGING
-                sgjJsonFileObj.jDict["Files"].remove(entry)
+                # sgjJsonFileObj.jDict["Files"].remove(entry)
+                sgjJsonFiles.remove(entry)
     except Exception as err:
         print(repr(err))  # DEBUGGING
         raise err
 
     # Save changes
     try:
+        sgjJsonFileObj.mod_data("Files", sgjJsonFiles)
         sgjJsonFileObj.write_json_file()
         sgjJsonFileObj.close_json_file()
     except Exception as err:
