@@ -38,12 +38,13 @@ My end goal is to create a save game editor that works on all operating systems 
 | F02 | Change Kingdom Stability | ✓ | ? | ? |
 | F03 | Backup save games | ✓ | ✓ | ? |
 | F04 | Restore backed up save game | | | |
-| F05 | Archive (AKA backup/delete) old saves | / | / | / |
+| F05 | Archive (AKA backup/delete) old saves | ✓ | ✓ | ? |
 | F06 | Change gold | ✓ | ✓ | ? |
 | F07 | Clean up 'Working' directory | ✓ | ✓ | ? |
 | F08 | 'Working' directory tallies up storage size | | | |
 | F09 | Baron Builder log | | | |
 | F10 | 'Working' directory is automatically cleaned up | | | |
+| F11 | 'Repair' steam-saves-release.json (remove dead entries) | | | |
 
 ### BUGS
 
