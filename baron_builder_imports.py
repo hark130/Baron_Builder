@@ -53,3 +53,5 @@ winSaveGamePath = os.path.join("AppData", "LocalLow", "Owlcat Games", "Pathfinde
 macSaveGamePath = os.path.join("Library", "Application Support", "unity.Owlcat Games.Pathfinder Kingmaker", "Saved Games")
 # File name of the json file storing the save game list
 saveGameJson = "steam-saves-release.json"
+# File name of the baron_builder archive json file storing filenames and version of archived save games
+archGameJson = "baron-builder-release.json"
