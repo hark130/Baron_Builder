@@ -451,6 +451,8 @@ def user_restore_menu(operSys, saveGamePath, curNumBadAns):
     archJsonFile = ""             # Full path to the Baron Builder archive save game list json file
     archGamePath = ""             # Path to the archived save games
     backGamePath = ""             # Path to the backed up save games
+    workGamePath = ""             # Path to the Baron Builder working directory
+    archZksFileObj = None         # ZksFile object of archived save game
     # Dynamic Variables
     # These variables could be updated each while loop
     fileNum = None                # Index of the user-selected file
@@ -470,6 +472,7 @@ def user_restore_menu(operSys, saveGamePath, curNumBadAns):
     # Baron Builder Save Game Directories
     archGamePath = os.path.join(saveGamePath, TOP_DIR, ARCHIVE_DIR)
     backGamePath = os.path.join(saveGamePath, TOP_DIR, BACKUP_DIR)
+    workGamePath = os.path.join(saveGamePath, TOP_DIR, WORKING_DIR)
 
     # CLEAR SCREEN
     clear_screen(operSys)
@@ -584,19 +587,43 @@ def user_restore_menu(operSys, saveGamePath, curNumBadAns):
                         print("backup_a_file() failed to backup {}".format(backJsonFile))  # DEBUGGING
                         pass
                     # Restore file
-                    try:
-                        retVal = backup_a_file(os.path.join(restoreGamePath, restoreGameList[fileNum]),
-                                               saveGamePath, SAVE_GAME_EXT, srcJson=restoreJsonFile, dstJson=gameJsonFile,
-                                               overwrite=True)
-                    except Exception as err:
-                        print('backup_a_file() raised "{}" exception'.format(str(err)))  # DEBUGGING
-                        retVal = False
-                        break
-                    else:
-                        if retVal is False:
-                            print("backup_a_file() failed to restore the {} file".format(typeFile))  # DEBUGGING
+                    # Backup
+                    if "a" == selection:
+                        try:
+                            retVal = backup_a_file(os.path.join(restoreGamePath, restoreGameList[fileNum]),
+                                                   saveGamePath, SAVE_GAME_EXT, srcJson=restoreJsonFile, dstJson=gameJsonFile,
+                                                   overwrite=True)
+                        except Exception as err:
+                            print('backup_a_file() raised "{}" exception'.format(str(err)))  # DEBUGGING
+                            retVal = False
                             break
                         else:
+                            if retVal is False:
+                                print("backup_a_file() failed to restore the {} file".format(typeFile))  # DEBUGGING
+                                break
+                            else:
+                                print("Successfully restored {} file".format(typeFile))
+                    elif "b" == selection:
+                        try:
+                            archZksFileObj = ZksFile(os.path.join(restoreGamePath, restoreGameList[fileNum]))
+                            if archZksFileObj.unpack_file(workGamePath) is not True:
+                                print("ZksFile.unpack_file() failed on the {} file".format(typeFile))  # DEBUGGING
+                                retVal = False
+                                break
+                            if archZksFileObj.unarchive_file(saveGamePath) is not True:
+                                print("ZksFile.unarchive_file() failed on the {} file".format(typeFile))  # DEBUGGING
+                                retVal = False
+                                break
+                            if archZksFileObj.close_zks() is not True:
+                                print("ZksFile.close_zks() failed")  # DEBUGGING
+                                retVal = False
+                                break
+                        except Exception as err:
+                            print('ZksFile object raised "{}" exception'.format(str(err)))  # DEBUGGING
+                            retVal = False
+                            break
+                        else:
+                            # IMPLEMENT UPDATE SAVE GAME LIST JSON FILES HERE
                             print("Successfully restored {} file".format(typeFile))
 
         if userExit is True:
@@ -606,7 +633,7 @@ def user_restore_menu(operSys, saveGamePath, curNumBadAns):
             raise RuntimeError("Quit")
 
     # DONE
-    return
+    return retVal
 
 
 def locate_save_games(operSys):
@@ -1019,6 +1046,9 @@ def archive_a_file(saveGamePath, srcFile, dstDir):
         raise OSError("Source file is not a file")
 
     # MANAGE BACKUP DIRECTORY
+    print("*********************************************************************************************************")
+    print("DON'T FORGET TO REFACTOR ARCHIVE_A_FILE() SO THAT IT PROPERLY INITIALIZES A BARON BUILDER ARCHIVE JSON!!!")
+    print("*********************************************************************************************************")
     # If it exists, verify it's a directory
     if os.path.exists(dstDir) is True:
         if os.path.isdir(dstDir) is False:
