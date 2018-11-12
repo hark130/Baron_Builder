@@ -11,6 +11,8 @@ def main():
 	sgjWinFile = None     # Full path to the ./Test_Files/Windows/saveGameJson
 	sgjNixJsonObj = None  # JsonFile object containing the linux save game json file
 	sgjWinJsonObj = None  # JsonFile object containing the windows save game json file
+	sgjNixLowVer = 10000  # Store the lowest save game version here
+	sgjWinLowVer = 10000  # Store the lowest save game version here
 
 	# PARSE JSON FILES
 	# Linux
@@ -32,22 +34,33 @@ def main():
 	for entry in sgjNixJsonObj.jDict["Files"]:
 		# print(entry)  # 1
 		# print(entry.keys())  # 2
-		if entry["Filename"].startswith("Auto"):
-			print(entry)
-			# print(type(entry))
-			sgjNixJsonObj.jDict["Files"].remove(entry)
+		# 3
+		# if entry["Filename"].startswith("Auto"):
+		# 	print(entry)
+		# 	# print(type(entry))
+		# 	sgjNixJsonObj.jDict["Files"].remove(entry)
+		# 4
+		if sgjNixLowVer > entry["Version"]:
+			sgjNixLowVer = entry["Version"]
 
-	for entry in sgjNixJsonObj.jDict["Files"]:
-		print(entry["Filename"])
+	print("Lowest Linux save game version is {}".format(sgjNixLowVer))
+
+	# for entry in sgjNixJsonObj.jDict["Files"]:
+	# 	print(entry["Filename"])
 
 	# Windows
 	# for key in sgjWinJsonObj.jDict.keys():
 		# print("{} : {}".format(key, sgjWinJsonObj.jDict[key]))
 
-	# for entry in sgjWinJsonObj.jDict["Files"]:
-	# 	# print(entry)  # 1
-	# 	# print(entry.keys())  # 2
-	# 	print(entry["Filename"])
+	for entry in sgjWinJsonObj.jDict["Files"]:
+		# print(entry)  # 1
+		# print(entry.keys())  # 2
+		# print(entry["Filename"])
+		# 4
+		if sgjWinLowVer > entry["Version"]:
+			sgjWinLowVer = entry["Version"]
+
+	print("Lowest Windows save game version is {}".format(sgjWinLowVer))
 
 	# DONE
 	return retVal
