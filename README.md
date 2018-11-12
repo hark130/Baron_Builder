@@ -46,7 +46,7 @@ My end goal is to create a save game editor that works on all operating systems 
 | F06       | Game Play         | Change gold | ✓ | ✓ | ? |
 | F07       | File Management   | Clean up 'Working' directory | ✓ | ✓ | ? |
 | F08       | File Management   | 'Working' directory tallies up storage size | | | |
-| F09       | Utility           | Baron Builder log | | | |
+| F09       | Utility           | Baron Builder system log | | | |
 | F10       | File Management   | 'Working' directory is automatically cleaned up | | | |
 | F11       | Game Optimization | 'Repair' steam-saves-release.json (remove dead entries) | | | |
 | F12       | File Management   | Restore archived save games | / | / | / |
@@ -55,6 +55,7 @@ My end goal is to create a save game editor that works on all operating systems 
 | F15       | File Management   | Prompt to overwrite a backup save game | | | |
 | F16       | File Management   | Backup multiple save games at once | | | |
 | F17       | File Management   | Archive multiple save games at once | | | |
+| F18       | Utility           | Baron Builder user log | | | |
 
 ### BUGS
 
@@ -85,3 +86,9 @@ My end goal is to create a save game editor that works on all operating systems 
 		* AKA Don't 'hard code' directories
 		* Make Baron_Builder pass in the necessary directories (e.g., Archive, Backup, Working)
 		* This design will facilitate easy relocation of files in the future
+
+### Branching
+
+* Branch names should be based off BUG number, Feature number, or 'basic functionality' short title
+* Branches verified on one operating system can be merged into development
+* Avoid merging development into master until all implemented features have been tested on two operating systems
