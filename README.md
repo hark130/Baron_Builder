@@ -37,7 +37,7 @@ My end goal is to create a save game editor that works on all operating systems 
 | F01 | Add BPs | ✓ | ? | ? |
 | F02 | Change Kingdom Stability | ✓ | ? | ? |
 | F03 | Backup save games | ✓ | ✓ | ? |
-| F04 | Restore backed up save game | | | |
+| F04 | Restore backed up save game | ✓ | ? | ? |
 | F05 | Archive (AKA backup/delete) old saves | ✓ | ✓ | ? |
 | F06 | Change gold | ✓ | ✓ | ? |
 | F07 | Clean up 'Working' directory | ✓ | ✓ | ? |
@@ -47,6 +47,8 @@ My end goal is to create a save game editor that works on all operating systems 
 | F11 | 'Repair' steam-saves-release.json (remove dead entries) | | | |
 | F12 | Restore archived save games | | | |
 | F13 | Restock camping supplies for vendors | | | |
+| F14 | Fix a 'busted' save game list json | | | |
+| F15 | Prompt to overwrite a backup save game | | | |
 
 ### BUGS
 
