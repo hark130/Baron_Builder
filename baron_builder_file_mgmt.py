@@ -12,7 +12,7 @@ from baron_builder_imports import nixSaveGamePath, winSaveGamePath, macSaveGameP
 from baron_builder_imports import saveGameJson, backGameJson, archGameJson
 from baron_builder_imports import OS_UNKNOWS, OS_LINUX, OS_WINDOWS, OS_APPLE
 from baron_builder_imports import TOP_DIR, ARCHIVE_DIR, BACKUP_DIR, WORKING_DIR
-from baron_builder_imports import BACKUP_EXT, MISC_BACKUP_EXT
+from baron_builder_imports import BACKUP_EXT, MISC_BACKUP_EXT, SAVE_GAME_EXT
 from baron_builder_imports import supportedOSGlobal
 from baron_builder_utilities import clear_screen
 from collections import OrderedDict
@@ -71,10 +71,13 @@ def user_file_menu(operSys, saveGamePath, oldSaveGameFileList, curNumBadAns):
     zksWorkDir = ""                         # Store the path of the full working directory here before ZksFile.close_zks()
     userQuit = False                        # Set this to True if the user wants to quit
     saveGameFileList = oldSaveGameFileList  # Current list of save games in directory - Update on deletes
-    saveGamesChanged = False                # Set this to true if list of save games on disk ever change
+    backGameFileList = []                   # Current list of backed up save games - Update on deletes
+    saveGamesChanged = False                # Set this to True if list of save games on disk ever change
+    backGamesChanged = False                # Set this to True if list of backed up save games on disk ever change
     gameJsonFile = ""                       # Full path to the PKM save game list json file
     backJsonFile = ""                       # Full path to the Baron Builder backup save game list json file
     archJsonFile = ""                       # Full path to the Baron Builder archive save game list json file
+    backupGamePath = ""                     # Full path to the Baron Builder backup directory
 
 
     # GLOBAL VARIABLES
@@ -100,6 +103,7 @@ def user_file_menu(operSys, saveGamePath, oldSaveGameFileList, curNumBadAns):
         gameJsonFile = os.path.join(saveGamePath, "..", saveGameJson)
         backJsonFile = os.path.join(saveGamePath, TOP_DIR, BACKUP_DIR, backGameJson)
         archJsonFile = os.path.join(saveGamePath, TOP_DIR, ARCHIVE_DIR, archGameJson)
+        backupGamePath = os.path.join(saveGamePath, TOP_DIR, BACKUP_DIR)
 
     # CLEAR SCREEN
     clear_screen(operSys)
@@ -170,11 +174,12 @@ def user_file_menu(operSys, saveGamePath, oldSaveGameFileList, curNumBadAns):
                     clear_screen(operSys)
                     print("\nBacking up file:\t{}".format(saveGameFileList[fileNum]))
                     numBadAnswers = 0
+            # Prepare backup directory
+            start_storage_dir(backupGamePath, backGameJson)
             # Backup file
             try:
                 retVal = backup_a_file(os.path.join(saveGamePath, saveGameFileList[fileNum]),
-                                       os.path.join(saveGamePath, TOP_DIR, BACKUP_DIR), BACKUP_EXT,
-                                       srcJson=gameJsonFile, dstJson=backJsonFile)
+                                       backupGamePath, BACKUP_EXT, srcJson=gameJsonFile, dstJson=backJsonFile)
             except Exception as err:
                 print('backup_a_file() raised "{}" exception'.format(str(err)))  # DEBUGGING
                 retVal = False
@@ -186,6 +191,7 @@ def user_file_menu(operSys, saveGamePath, oldSaveGameFileList, curNumBadAns):
                 else:
                     print("Successfully backed up file")
         elif "c" == selection:
+            numBadAnswers = 0
             # Choose file to archive
             try:
                 fileNum = user_file_selection_menu(operSys, saveGamePath, saveGameFileList, numBadAnswers)
@@ -199,6 +205,7 @@ def user_file_menu(operSys, saveGamePath, oldSaveGameFileList, curNumBadAns):
                     retVal = False
                     break
                 else:
+                    clear_screen(operSys)
                     print("\nArchiving file:\t{}".format(saveGameFileList[fileNum]))
                     numBadAnswers = 0
             # Archive file
@@ -218,9 +225,52 @@ def user_file_menu(operSys, saveGamePath, oldSaveGameFileList, curNumBadAns):
                     print("Successfully archived file")
                     saveGamesChanged = True
         elif "d" == selection:
-            print("Restore feature not yet implemented")  # PLACEHOLDER
-            numBadAnswers += 1
-            continue
+            numBadAnswers = 0
+            # Get the list of backed up save games
+            try:
+                backGameFileList = list_save_games(operSys, backupGamePath, fileExt=BACKUP_EXT)
+            except Exception as err:
+                print('list_save_games() raised "{}" exception'.format(str(err)))
+                retVal = False
+                break
+            else:
+                # Allow user to choose a save game to restore
+                try:
+                    fileNum = user_file_selection_menu(operSys, backupGamePath, backGameFileList, numBadAnswers)
+                except RuntimeError as err:
+                    if str(err) == "Quit":
+                        userQuit = True
+                except Exception as err:
+                    print('user_file_selection_menu() raised "{}" exception'.format(str(err)))  # DEBUGGING
+                    retVal = False
+                else:
+                    if 0 > fileNum or fileNum >= len(backGameFileList):
+                        print("user_file_selection_menu() failed to return a proper file index")  # DEBUGGING
+                        retVal = False
+                        break
+                    else:
+                        # Restore the backed up file
+                        clear_screen(operSys)
+                        print("\nRestoring file:\t{}".format(backGameFileList[fileNum]))
+                        numBadAnswers = 0
+                        if backup_a_file(backJsonFile, backupGamePath, MISC_BACKUP_EXT, overwrite=True) is False:
+                            print("backup_a_file() failed to backup {}".format(backJsonFile))  # DEBUGGING
+                            pass
+                        # Restore file
+                        try:
+                            retVal = backup_a_file(os.path.join(backupGamePath, backGameFileList[fileNum]),
+                                                   saveGamePath, SAVE_GAME_EXT, srcJson=backJsonFile, dstJson=gameJsonFile,
+                                                   overwrite=True)
+                        except Exception as err:
+                            print('backup_a_file() raised "{}" exception'.format(str(err)))  # DEBUGGING
+                            retVal = False
+                            break
+                        else:
+                            if retVal is False:
+                                print("backup_a_file() failed to restore the file")  # DEBUGGING
+                                break
+                            else:
+                                print("Successfully restored file")
         elif "e" == selection:
             empty_a_dir(os.path.join(saveGamePath, TOP_DIR, WORKING_DIR))
         elif "f" == selection:
@@ -244,6 +294,11 @@ def user_file_menu(operSys, saveGamePath, oldSaveGameFileList, curNumBadAns):
             # Update save game file list in case save games were deleted
             saveGameFileList = list_save_games(operSys, saveGamePath)
             saveGamesChanged = False
+
+        if backGamesChanged is True:
+            # Update save game file list in case save games were deleted
+            backGameFileList = list_save_games(operSys, backupGamePath, fileExt=BACKUP_EXT)
+            backGamesChanged = False
 
     # DONE
     if numBadAnswers > MAX_ERRS:
@@ -721,17 +776,15 @@ def backup_a_file(srcFile, dstDir, newFileExt, srcJson=None, dstJson=None, overw
             destinationJson = backGameJson
         else:
             destinationJson = os.path.basename(dstJson)
-
-    # MANAGE BACKUP DIRECTORY
-    start_storage_dir(dstDir, destinationJson)
     
     # DETERMINE FILE EXTENSION
     splitFile = os.path.splitext(srcFile)
     curFileExt = splitFile[len(splitFile) - 1]
+    # print("Current file extension for {}:\t{}".format(srcFile, curFileExt))  # DEBUGGING
     
     # JOIN DESTINATION FILENAME
     dstFilename = os.path.basename(srcFile)
-    if 0 < len(curFileExt):
+    if 0 >= len(curFileExt):
         dstFilename = dstFilename + newFileExt
     else:
         dstFilename = dstFilename.replace(curFileExt, newFileExt)
@@ -772,9 +825,12 @@ def backup_a_file(srcFile, dstDir, newFileExt, srcJson=None, dstJson=None, overw
             print("copy_save_game_from_list() failed to copy {} from {}".format(os.path.basename(srcFile), srcJson))  # DEBUGGING
             print(repr(err))
             retVal = False
+        else:
+            # print("Copied List:\t{}".format(copiedList))  # DEBUGGING
+            pass
 
     # ADD TO NEW JSON FILE
-    if retVal is True and dstJson is not None:
+    if retVal is True and dstJson is not None and isinstance(copiedList, list) and 0 < len(copiedList):
         try:
             add_save_game_to_list(dstJson, copiedList)
         except Exception as err:
@@ -895,22 +951,24 @@ def archive_a_file(saveGamePath, srcFile, dstDir):
             raise err
 
 
-def add_save_game_to_list(absSaveGameList, saveGameName):
+def add_save_game_to_list(absSaveGameList, newSaveGame):
     '''
-        PURPOSE - Remove one save game from the stored list of save games
+        PURPOSE - Add one save game, or list of save games, to the stored list of save games
         INPUT
             absSaveGameList - Relative or absolute path to the json file storing the list of save games
-            saveGameName - Name, or list of names, of save game(s) to remove from the list
+            newSaveGame - OrderedDict, or list of OrderedDicts, of save game(s) to add to the list
         OUTPUT
             On failure or error, Exception
     '''
     # LOCAL VARIABLES
-    saveGameList = []                          # List of save games to remove from
+    saveGameList = []                          # List of save games to add to existing list
+    newGameFilenameList = []                   # List of new filenames parse from saveGameList
+    existFilenameList = []                     # List of existing filenames parsed from absSaveGameList
     sgjJsonFileObj = None                      # Store the JsonFile object here
     mandatoryKeys = [ "Filename", "Version" ]  # Mandatory keys for each save game list entry
     sgjJsonDict = OrderedDict()                # Store the sgjJsonFileObj.jDict["Files"] here to modify
     asglVersion = 0                            # Version of the absSaveGameList
-    highVersion = 0                            # Highest version from the saveGameNames
+    highVersion = 0                            # Highest version from the newSaveGames
 
     # INPUT VALIDATION
     # absSaveGameList
@@ -923,13 +981,13 @@ def add_save_game_to_list(absSaveGameList, saveGameName):
     elif os.path.isfile(absSaveGameList) is False:
         raise OSError("Save game list json file is not a file")
 
-    # saveGameName
-    if isinstance(saveGameName, OrderedDict):
-        saveGameList.append(saveGameName)
-    elif isinstance(saveGameName, list):
-        saveGameList = saveGameName
+    # newSaveGame
+    if isinstance(newSaveGame, OrderedDict):
+        saveGameList.append(newSaveGame)
+    elif isinstance(newSaveGame, list):
+        saveGameList = newSaveGame
     else:
-        raise TypeError('Save game name is of type "{}" instead of OrderedDict or list'.format(type(saveGameName)))
+        raise TypeError('Save game name is of type "{}" instead of OrderedDict or list'.format(type(newSaveGame)))
 
     # saveGameName entries
     for oDict in saveGameList:
@@ -950,6 +1008,8 @@ def add_save_game_to_list(absSaveGameList, saveGameName):
                         else:
                             if oDict[entry] != os.path.basename(oDict[entry]):
                                 raise ValueError("Save game list contains an OrderedDict with a path/filename")
+                            else:
+                                newGameFilenameList.append(oDict[entry])
                     elif entry == "Version":
                         if not isinstance(oDict[entry], int):
                             raise TypeError("Save game list contains an OrderedDict with a non-int version")
@@ -976,10 +1036,25 @@ def add_save_game_to_list(absSaveGameList, saveGameName):
 
     # Add save games
     try:
+        # Get existing list of OrderedDicts
         sgjJsonDict = sgjJsonFileObj.get_data("Files")
+        # Parse list of OrderedDicts into list of filenames
+        for entry in sgjJsonDict:
+            existFilenameList.append(entry["Filename"])
+        # Update existing entries
+        for index, entry in enumerate(sgjJsonDict):
+            if entry["Filename"] in newGameFilenameList:
+                for newEntry in saveGameList:
+                    if entry["Filename"] == newEntry["Filename"]:
+                        # print("Updating:\t{} with {}".format(entry, newEntry))  # DEBUGGING
+                        sgjJsonDict[index]["Version"] = newEntry["Version"]
+                        # print("Updated:\t{}".format(sgjJsonDict[index]))  # DEBUGGING
+                        break
+        # Add new entries
         for entry in saveGameList:
-            # print("Adding:\t{}".format(entry))  # DEBUGGING
-            sgjJsonDict.append(entry)
+            if entry["Filename"] not in existFilenameList:
+                # print("Adding:\t{}".format(entry))  # DEBUGGING
+                sgjJsonDict.append(entry)
     except Exception as err:
         print(repr(err))  # DEBUGGING
         raise err
@@ -1065,12 +1140,15 @@ def copy_save_game_from_list(absSaveGameList, saveGameName):
         print(repr(err))  # DEBUGGING
         raise err
 
-    # Remove save games
+    # Copy save games
+    # print("saveGameList:\t{}".format(saveGameList))  # DEBUGGING
     try:
         sgjJsonFiles = sgjJsonFileObj.get_data("Files")
         # sgjJsonFiles = deepcopy(sgjJsonFileObj.get_data("Files"))
         for entry in sgjJsonFiles:
-            if entry["Filename"] in saveGameList:
+            # print(entry["Filename"])  # DEBUGGING
+            # if entry["Filename"] in saveGameList:
+            if check_filename_no_ext(entry["Filename"], saveGameList) is True:
                 # print("Copying:\t{}".format(entry))  # DEBUGGING
                 retVal.append(entry)
     except Exception as err:
@@ -1358,6 +1436,70 @@ def verify_storage_dir(dstDir, bbJsonFile, fixIt=False):
     if retVal is False and fixIt is True:
         print("SAVE GAME JSON REPAIR NOT YET IMPLEMENTED")  # DEBUGGING
         pass
+
+    # DONE
+    return retVal
+
+
+def check_filename_no_ext(needleFilename, haystackFile):
+    '''
+        PURPOSE - Determine if a filename matches another filename, or a list of filenames, without
+            concern for file extensions
+        INPUT
+            needleFilename - String representation of a relative or absolute filename, with or
+                without a file extension
+            haystackFile - String, or list of strings, representation of a relative or absolute
+                filename, with or without a file extension
+        OUTPUT
+            True if needleFilename matches something in haystackFile
+            False if there's no match for needleFilename in haystackFile
+            Exception on error
+        NOTE
+            The catalyst for this function is that I've begun comparing .zks file lists to .bbb
+                file lists, etc.  I don't want to have to worry about file extensions but that
+                means that needleFile in haystackList doesn't work easily as an inline one-liner.
+            Examples:
+                True == check_filename_no_ext(some_file.bak, some_file.orig)
+                True == check_filename_no_ext(some_file.bak, [some_file.orig, nunya.txt])
+                True == check_filename_no_ext(a_file.bak, [some_file.orig, nunya.txt, a_file])
+                True == check_filename_no_ext(../some_file.bak, ../../some_file.orig)
+                True == check_filename_no_ext(/root/some_file.bak, [/home/user/some_file.orig, nunya.txt])
+                True == check_filename_no_ext(a_file.bak, [some_file.orig, nunya.txt, ../a_file])
+                True == check_filename_no_ext(/root/a_file.bak, [some_file.orig, nunya.txt, a_file])
+    '''
+    # LOCAL VARIABLES
+    retVal = False
+    tempList = []    # Translate haystackFile here based on dynamic typing
+    hsFileList = []  # Build this from haystackFile
+    nFile = ""       # Build this from needleFilename
+
+    # INPUT VALIDATION
+    # needleFilename
+    if not isinstance(needleFilename, str):
+        raise TypeError("Needle is not a string")
+    elif 0 >= len(needleFilename):
+        raise ValueError("Needle is empty")
+    # haystackFile
+    if isinstance(haystackFile, str):
+        tempList.append(haystackFile)
+    elif isinstance(haystackFile, list):
+        tempList = haystackFile
+    else:
+        raise TypeError("Haystack is not a string or list")
+    # tempList
+    for entry in tempList:
+        if not isinstance(entry, str):
+            raise TypeError("Haystack contained a non-string")
+
+    # PREPARATION
+    for entry in tempList:
+        hsFileList.append(os.path.splitext(os.path.basename(entry))[0])
+
+    nFile = os.path.splitext(os.path.basename(needleFilename))[0]
+
+    # COMPARISON
+    if nFile in hsFileList:
+        retVal = True
 
     # DONE
     return retVal
