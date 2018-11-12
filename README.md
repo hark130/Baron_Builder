@@ -49,7 +49,7 @@ My end goal is to create a save game editor that works on all operating systems 
 | F09       | Utility           | Baron Builder log | | | |
 | F10       | File Management   | 'Working' directory is automatically cleaned up | | | |
 | F11       | Game Optimization | 'Repair' steam-saves-release.json (remove dead entries) | | | |
-| F12       | File Management   | Restore archived save games | | | |
+| F12       | File Management   | Restore archived save games | / | / | / |
 | F13       | Game Play         | Restock camping supplies for vendors | | | |
 | F14       | Game Optimization | Fix a 'busted' save game list json | | | |
 | F15       | File Management   | Prompt to overwrite a backup save game | | | |
@@ -63,7 +63,7 @@ My end goal is to create a save game editor that works on all operating systems 
 | ✓ | B01 | baron_builder_features | bbf06_GOLD_sub_menu | Menu allows default gold to exceed max macro |
 |   | B02 | baron_builder_* | * | Refactor * to raise Exception for failure/error and capture/silence/interpret in baron_builder.py |
 |   | B03 | baron_builder_file_mgmt | *menu() | Refactor top level menus to validate input once, at the highest appropriate level |
-|   | B04 | baron_builder_file_mgmt | add_save_game_to_list() | "Add save games" doesn't check for prior existence |
+| ✓ | B04 | baron_builder_file_mgmt | add_save_game_to_list() | "Add save games" doesn't check for prior existence (fixed in F04) |
 
 ### Legend
 
