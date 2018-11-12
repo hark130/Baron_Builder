@@ -29,6 +29,9 @@ My end goal is to create a save game editor that works on all operating systems 
 | Write wiki | / | / | / |
 | Python command not required to run | | | |
 | Search _all_ home dirs for save games(?) | | | |
+| Implement pylint | | | |
+| Implement continuous integration | | | |
+| Implement doxygen | | | |
 
 ### Editor Features 
 
