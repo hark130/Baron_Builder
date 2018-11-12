@@ -90,6 +90,8 @@ def main():
     if retVal:
         try:
             fileNum = user_file_menu(operSys, saveGamePath, saveGameFileList, numBadAnswers)
+            # print("user_file_menu() returned type {}".format(type(fileNum)))  # DEBUGGING
+            # print("user_file_menu() returned {}".format(fileNum))  # DEBUGGING
         except RuntimeError as err:
             if "Quit" == str(err):
                 retVal = False

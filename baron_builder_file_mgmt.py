@@ -139,6 +139,9 @@ def user_file_menu(operSys, saveGamePath, oldSaveGameFileList, curNumBadAns):
             except Exception as err:
                 print('user_file_selection_menu() raised "{}" exception'.format(str(err)))  # DEBUGGING
                 retVal = False
+            else:
+                retVal = fileNum
+                break
         elif "b" == selection:
             numBadAnswers = 0
             # Choose file to backup
