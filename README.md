@@ -55,8 +55,9 @@ My end goal is to create a save game editor that works on all operating systems 
 | Resolved | BUG # | File | Function | Details |
 | :------: | :---: | :--- | :------- | :------ |
 | ✓ | B01 | baron_builder_features | bbf06_GOLD_sub_menu | Menu allows default gold to exceed max macro |
-|   | B02 | baron_builder_* | * | Refactor all functions to raise Exception for failure/error and capture/silence/interpret in baron_builder.py |
-|   | B03 | baron_builder_file_mgmt | *menu() | Refactor top level menus to accomplish input validation once, at the highest appropriate level |
+|   | B02 | baron_builder_* | * | Refactor * to raise Exception for failure/error and capture/silence/interpret in baron_builder.py |
+|   | B03 | baron_builder_file_mgmt | *menu() | Refactor top level menus to validate input once, at the highest appropriate level |
+|   | B04 | baron_builder_file_mgmt | add_save_game_to_list() | "Add save games" doesn't check for prior existence |
 
 ### Legend
 
