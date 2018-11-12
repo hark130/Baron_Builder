@@ -32,23 +32,23 @@ My end goal is to create a save game editor that works on all operating systems 
 
 ### Editor Features 
 
-| Feature # | Task | Linux | Windows | Apple |
-| :-------- | :--- | :---: | :-----: | :---: |
-| F01 | Add BPs | ✓ | ? | ? |
-| F02 | Change Kingdom Stability | ✓ | ? | ? |
-| F03 | Backup save games | ✓ | ✓ | ? |
-| F04 | Restore backed up save game | / | / | / |
-| F05 | Archive (AKA backup/delete) old saves | ✓ | ✓ | ? |
-| F06 | Change gold | ✓ | ✓ | ? |
-| F07 | Clean up 'Working' directory | ✓ | ✓ | ? |
-| F08 | 'Working' directory tallies up storage size | | | |
-| F09 | Baron Builder log | | | |
-| F10 | 'Working' directory is automatically cleaned up | | | |
-| F11 | 'Repair' steam-saves-release.json (remove dead entries) | | | |
-| F12 | Restore archived save games | | | |
-| F13 | Restock camping supplies for vendors | | | |
-| F14 | Fix a 'busted' save game list json | | | |
-| F15 | Prompt to overwrite a backup save game | | | |
+| Feature # | Category          | Task | Linux | Windows | Apple |
+| :-------: | :---------------: | :--- | :---: | :-----: | :---: |
+| F01       | Game Play         | Add BPs | ✓ | ? | ? |
+| F02       | Game Play         | Change Kingdom Stability | ✓ | ? | ? |
+| F03       | File Management   | Backup save games | ✓ | ✓ | ? |
+| F04       | File Management   | Restore backed up save game | / | / | / |
+| F05       | File Management   | Archive (AKA backup/delete) old saves | ✓ | ✓ | ? |
+| F06       | Game Play         | Change gold | ✓ | ✓ | ? |
+| F07       | File Management   | Clean up 'Working' directory | ✓ | ✓ | ? |
+| F08       | File Management   | 'Working' directory tallies up storage size | | | |
+| F09       | Utility           | Baron Builder log | | | |
+| F10       | File Management   | 'Working' directory is automatically cleaned up | | | |
+| F11       | Game Optimization | 'Repair' steam-saves-release.json (remove dead entries) | | | |
+| F12       | File Management   | Restore archived save games | | | |
+| F13       | Game Play         | Restock camping supplies for vendors | | | |
+| F14       | Game Optimization | Fix a 'busted' save game list json | | | |
+| F15       | File Management   | Prompt to overwrite a backup save game | | | |
 
 ### BUGS
 
