@@ -32,6 +32,7 @@ My end goal is to create a save game editor that works on all operating systems 
 | Implement pylint | | | |
 | Implement continuous integration | | | |
 | Implement doxygen | | | |
+| Organize test code, class modules, and production code | | | |
 
 ### Editor Features 
 
@@ -52,6 +53,8 @@ My end goal is to create a save game editor that works on all operating systems 
 | F13       | Game Play         | Restock camping supplies for vendors | | | |
 | F14       | Game Optimization | Fix a 'busted' save game list json | | | |
 | F15       | File Management   | Prompt to overwrite a backup save game | | | |
+| F16       | File Management   | Backup multiple save games at once | | | |
+| F17       | File Management   | Archive multiple save games at once | | | |
 
 ### BUGS
 
