@@ -16,12 +16,23 @@ class ZksFile():
         PURPOSE - Open, modify, save, and close json files contained in Pathfinder Kingmaker
             save game files.
         USAGE
-            1. saveGame = ZksFile("save_game_42.zks")
-            2. saveGame.unpack_file(os.path.join("Baron_Builder", "Working"))
-            3. saveGame.load_data()
-            4. [modify save game contents]
-            5. saveGame.update_zks()
-            6. saveGame.close_zks()
+            USE CASE #1 - Edit exisitng .zks
+                1. saveGame = ZksFile("save_game_42.zks")
+                2. saveGame.unpack_file(os.path.join("Baron_Builder", "Working"))
+                3. saveGame.load_data()
+                4. [modify save game contents]
+                5. saveGame.update_zks()
+                6. saveGame.close_zks()
+            USE CASE #2 - Archive existing .zks
+                1. saveGame = ZksFile("save_game_42.zks")
+                2. saveGame.unpack_file(os.path.join("Baron_Builder", "Working"))
+                3. saveGame.archive_file(os.path.join("Baron_Builder", "Archive"))
+                4. saveGame.close_zks()
+            USE CASE #3 - Restoring archived .zks (see: .bba)
+                1. saveGame = ZksFile("save_game_42.bba")
+                2. saveGame.unpack_file(os.path.join("Baron_Builder", "Working"))
+                3. saveGame.unarchive_file(os.path.join(saveGameDir)  # Pathfinder Kingmaker's "Saved Games" directory
+                4. saveGame.close_zks()
         NOTES
             ### SETUP ###
             [X] saveGame = ZksFile("save_game_42.zks")  # Instantiates a ZksFile object
@@ -34,7 +45,8 @@ class ZksFile():
             [X] saveGame.save_json_files()              # Saves all supported json objects
             [X] saveGame.close_json_files()             # Closes all supported json objects
             ### FEATURES ###
-            [X] saveGame.archive_file(archiveDir)       # F03 - Unpacks the file and repacks using better compression in archiveDir
+            [X] saveGame.archive_file(archiveDir)       # Baron Builder F03 - Unpacks the file and repacks using better compression in archiveDir
+            [X] saveGame.unarchive_file(restoreDir)     # Baron Builder F12 - Unpacks the file and repacks using original compression in restoreDir
 
 
             ### TEAR DOWN ###
@@ -72,6 +84,7 @@ class ZksFile():
         self.zModDir = None       # Save game-specific working directory name
         self.fullWorkPath = None  # Full directory to the unpacked file's directory in the working dir
         self.fullArchFile = None  # Full directory to the new archive file
+        self.fullRestFile = None  # Fully directory to the restored archive file
         self.zSuccess = False     # Set this to False if anything fails
         self.zChanged = False     # Set this to True if any json contents are modified
         # JSON Files Supported by the ZksFile class
@@ -250,6 +263,7 @@ class ZksFile():
                                 retVal = False
                                 self.zSuccess = False
                                 break
+                            print("{} was compressed with {}".format(zFileInfo.filename, self.zFileDict[zFileInfo.filename]))  # DEBUGGING
 
                         # EXTRACT THE FILES
                         if retVal is True and self.zSuccess is True:
@@ -311,7 +325,7 @@ class ZksFile():
                     filesFound = files
 
                 # 3. Add those files to the working archive
-                with zipfile.ZipFile(os.path.join(archiveDir, self.fullArchFile), "w", compression=zipfile.ZIP_LZMA) as outZipFile:
+                with zipfile.ZipFile(os.path.join(archiveDir, self.fullArchFile), "w", compression=ZIP_LZMA) as outZipFile:
                     for file in filesFound:
                         outZipFile.write(os.path.join(rootDir, file), os.path.basename(file))
             except Exception as err:
@@ -319,6 +333,68 @@ class ZksFile():
                 retVal = False
             else:
                 retVal = True
+
+
+    def unarchive_file(self, restoreDir):
+        '''
+            PURPOSE - Restore a previously archived save game into restoreDir using original compression
+            INPUT
+                restoreDir - Absolute or relative path to restore the archive
+            OUTPUT
+                On success, True
+                On failure, False
+                On bad input, None
+        '''
+        # LOCAL VARIABLES
+        retVal = None
+
+        # INPUT VALIDATION
+        if not self.zSuccess:
+            retVal = self.zSuccess
+        elif not isinstance(restoreDir, str):
+            pass
+        elif 0 >= len(restoreDir):
+            pass
+        elif self.fullWorkPath is None:
+            print("self.fullWorkPath is None")  # DEBUGGING
+            retVal = False
+        elif os.path.exists(self.fullWorkPath) is False:
+            print("{} does not exist".format(self.fullWorkPath))  # DEBUGGING
+            retVal = False
+        elif os.path.isdir(self.fullWorkPath) is False:
+            print("{} is not a directory".format(self.fullWorkPath))  # DEBUGGING
+            retVal = False
+        elif not os.listdir(self.fullWorkPath):
+            print("{} is empty".format(self.fullWorkPath))  # DEBUGGING
+            retVal = False
+        else:
+            # UNPACK THE FILE
+            # 1. Setup Directories and Attributes
+            retVal = self.make_dirs(restoreDir)
+            self.fullRestFile = self.zModDir + self.saveGameExt
+
+            if os.path.exists(os.path.join(restoreDir, self.fullRestFile)) is True:
+                print("Unarchive file {} already exists in directory {}".format(self.fullRestFile, restoreDir))
+                retVal = False
+            else:
+                try:
+                    # 2. Get file list
+                    for root, dirs, files in os.walk(self.fullWorkPath):
+                        rootDir = root
+                        dirsFound = dirs
+                        filesFound = files
+
+                    # 3. Add those files to the working archive
+                    with zipfile.ZipFile(os.path.join(restoreDir, self.fullRestFile), "w", compression=ZIP_DEFLATED) as outZipFile:
+                        for file in filesFound:
+                            outZipFile.write(os.path.join(rootDir, file), os.path.basename(file))
+                except Exception as err:
+                    print("\n{}".format(repr(err)))  # DEBUGGING
+                    retVal = False
+                else:
+                    retVal = True
+
+        return retVal
 
 
     def load_data(self):
@@ -622,6 +698,8 @@ class ZksFile():
         except Exception as err:
             print("\n{}".format(repr(err)))  # DEBUGGING
             retVal = False
+        else:
+            retVal = True
 
         # DONE
         return retVal
