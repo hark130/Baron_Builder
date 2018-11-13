@@ -1125,7 +1125,7 @@ def archive_a_file(saveGamePath, srcFile, dstDir, srcJson=None, dstJson=None):
             print(repr(err))
             retVal = False
         else:
-            print("Removed List:\t{}".format(removedList))  # DEBUGGING
+            # print("Removed List:\t{}".format(removedList))  # DEBUGGING
             pass
 
     # 5. ADD TO NEW JSON FILE
