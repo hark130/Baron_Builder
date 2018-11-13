@@ -50,7 +50,7 @@ My end goal is to create a save game editor that works on all operating systems 
 | F10       | File Management   | 'Working' directory is automatically cleaned up | | | |
 | F11       | Game Optimization | 'Repair' steam-saves-release.json (remove dead entries) | | | |
 | F12       | File Management   | Restore archived save games | ✓ | ? | ? |
-| F13       | Game Play         | Restock camping supplies for vendors | | | |
+| F13       | Game Play         | Restock camping supplies for vendors | / | / | / |
 | F14       | Game Optimization | Fix a 'busted' save game list json | | | |
 | F15       | File Management   | Prompt to overwrite a backup save game | | | |
 | F16       | File Management   | Backup multiple save games at once | | | |
