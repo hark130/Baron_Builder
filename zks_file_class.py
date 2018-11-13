@@ -263,7 +263,7 @@ class ZksFile():
                                 retVal = False
                                 self.zSuccess = False
                                 break
-                            print("{} was compressed with {}".format(zFileInfo.filename, self.zFileDict[zFileInfo.filename]))  # DEBUGGING
+                            # print("{} was compressed with {}".format(zFileInfo.filename, self.zFileDict[zFileInfo.filename]))  # DEBUGGING
 
                         # EXTRACT THE FILES
                         if retVal is True and self.zSuccess is True:
