@@ -12,7 +12,7 @@ from baron_builder_imports import nixSaveGamePath, winSaveGamePath, macSaveGameP
 from baron_builder_imports import saveGameJson, backGameJson, archGameJson
 from baron_builder_imports import OS_UNKNOWS, OS_LINUX, OS_WINDOWS, OS_APPLE
 from baron_builder_imports import TOP_DIR, ARCHIVE_DIR, BACKUP_DIR, WORKING_DIR
-from baron_builder_imports import BACKUP_EXT, MISC_BACKUP_EXT, SAVE_GAME_EXT
+from baron_builder_imports import ARCHIVE_EXT, BACKUP_EXT, MISC_BACKUP_EXT, SAVE_GAME_EXT
 from baron_builder_imports import supportedOSGlobal
 from baron_builder_utilities import clear_screen
 from collections import OrderedDict
@@ -108,6 +108,9 @@ def user_file_menu(operSys, saveGamePath, oldSaveGameFileList, curNumBadAns):
     # CLEAR SCREEN
     clear_screen(operSys)
 
+    # PREPARE BACKUP DIRECTORY
+    start_storage_dir(backupGamePath, backGameJson)
+
     # PRINT MENU
     while numBadAnswers <= MAX_ERRS:
         print("")  # Blank line
@@ -174,8 +177,7 @@ def user_file_menu(operSys, saveGamePath, oldSaveGameFileList, curNumBadAns):
                     clear_screen(operSys)
                     print("\nBacking up file:\t{}".format(saveGameFileList[fileNum]))
                     numBadAnswers = 0
-            # Prepare backup directory
-            start_storage_dir(backupGamePath, backGameJson)
+
             # Backup file
             try:
                 retVal = backup_a_file(os.path.join(saveGamePath, saveGameFileList[fileNum]),
@@ -195,6 +197,9 @@ def user_file_menu(operSys, saveGamePath, oldSaveGameFileList, curNumBadAns):
             # Choose file to archive
             try:
                 fileNum = user_file_selection_menu(operSys, saveGamePath, saveGameFileList, numBadAnswers)
+            except RuntimeError as err:
+                if str(err) == "Quit":
+                    userQuit = True
             except Exception as err:
                 print('user_file_selection_menu() raised "{}" exception'.format(str(err)))  # DEBUGGING
                 retVal = False
@@ -208,69 +213,39 @@ def user_file_menu(operSys, saveGamePath, oldSaveGameFileList, curNumBadAns):
                     clear_screen(operSys)
                     print("\nArchiving file:\t{}".format(saveGameFileList[fileNum]))
                     numBadAnswers = 0
-            # Archive file
-            try:
-                retVal = archive_a_file(saveGamePath,
-                                        os.path.join(saveGamePath, saveGameFileList[fileNum]),
-                                        os.path.join(saveGamePath, TOP_DIR, ARCHIVE_DIR))
-            except Exception as err:
-                print('archive_a_file() raised "{}" exception'.format(str(err)))  # DEBUGGING
-                retVal = False
-                break
-            else:
-                if retVal is False:
-                    print("archive_a_file() failed to archive the file")  # DEBUGGING
-                    break
-                else:
-                    print("Successfully archived file")
-                    saveGamesChanged = True
-        elif "d" == selection:
-            numBadAnswers = 0
-            # Get the list of backed up save games
-            try:
-                backGameFileList = list_save_games(operSys, backupGamePath, fileExt=BACKUP_EXT)
-            except Exception as err:
-                print('list_save_games() raised "{}" exception'.format(str(err)))
-                retVal = False
-                break
-            else:
-                # Allow user to choose a save game to restore
-                try:
-                    fileNum = user_file_selection_menu(operSys, backupGamePath, backGameFileList, numBadAnswers)
-                except RuntimeError as err:
-                    if str(err) == "Quit":
-                        userQuit = True
-                except Exception as err:
-                    print('user_file_selection_menu() raised "{}" exception'.format(str(err)))  # DEBUGGING
-                    retVal = False
-                else:
-                    if 0 > fileNum or fileNum >= len(backGameFileList):
-                        print("user_file_selection_menu() failed to return a proper file index")  # DEBUGGING
+                    # Archive file
+                    try:
+                        retVal = archive_a_file(saveGamePath,
+                                                os.path.join(saveGamePath, saveGameFileList[fileNum]),
+                                                os.path.join(saveGamePath, TOP_DIR, ARCHIVE_DIR),
+                                                srcJson=gameJsonFile, dstJson=archJsonFile)
+                    except Exception as err:
+                        print('archive_a_file() raised "{}" exception'.format(str(err)))  # DEBUGGING
                         retVal = False
                         break
                     else:
-                        # Restore the backed up file
-                        clear_screen(operSys)
-                        print("\nRestoring file:\t{}".format(backGameFileList[fileNum]))
-                        numBadAnswers = 0
-                        if backup_a_file(backJsonFile, backupGamePath, MISC_BACKUP_EXT, overwrite=True) is False:
-                            print("backup_a_file() failed to backup {}".format(backJsonFile))  # DEBUGGING
-                            pass
-                        # Restore file
-                        try:
-                            retVal = backup_a_file(os.path.join(backupGamePath, backGameFileList[fileNum]),
-                                                   saveGamePath, SAVE_GAME_EXT, srcJson=backJsonFile, dstJson=gameJsonFile,
-                                                   overwrite=True)
-                        except Exception as err:
-                            print('backup_a_file() raised "{}" exception'.format(str(err)))  # DEBUGGING
-                            retVal = False
+                        if retVal is False:
+                            print("archive_a_file() failed to archive the file")  # DEBUGGING
                             break
                         else:
-                            if retVal is False:
-                                print("backup_a_file() failed to restore the file")  # DEBUGGING
-                                break
-                            else:
-                                print("Successfully restored file")
+                            print("Successfully archived file")
+                            saveGamesChanged = True
+        elif "d" == selection:
+            numBadAnswers = 0
+            try:
+                user_restore_menu(operSys, saveGamePath, numBadAnswers)
+            except RuntimeError as err:
+                if "Quit" == str(err):
+                    userQuit = True
+                elif "Exit" == str(err):
+                    clear_screen(operSys)
+                    continue
+                else:
+                    raise err
+            except Exception as err:
+                print('user_file_selection_menu() raised "{}" exception'.format(str(err)))  # DEBUGGING
+                retVal = False
+                break
         elif "e" == selection:
             empty_a_dir(os.path.join(saveGamePath, TOP_DIR, WORKING_DIR))
         elif "f" == selection:
@@ -287,7 +262,7 @@ def user_file_menu(operSys, saveGamePath, oldSaveGameFileList, curNumBadAns):
             if numBadAnswers <= MAX_ERRS:
                 print("Try again.")
 
-        if userQuit:
+        if userQuit is True:
             raise RuntimeError("Quit")
 
         if saveGamesChanged is True:
@@ -457,6 +432,238 @@ def user_file_selection_menu(operSys, saveGamePath, saveGameFileList, curNumBadA
     return retVal
 
 
+def user_restore_menu(operSys, saveGamePath, curNumBadAns):
+    '''
+        PURPOSE - Extricate restore functionality into a restore sub-menu
+        INPUT
+            operSys - See OPERATAING SYSTEM macros
+            saveGamePath - Relative or absolute path to check for save games
+            curNumBadAns - Current number of incorrect answers to track error tolerance
+        OUTPUT
+            On error, Exception
+        EXCEPTIONS
+            Runtime("Exit") - User selected exit from menu
+            Runtime("Quit") - User selected quit from menu
+    '''
+    # LOCAL VARIABLES
+    numBadAnswers = curNumBadAns  # Current number of bad answers
+    selection = ""                # User selection from "RESTORE" menu
+    userExit = False              # Set this to True if the user wants to return to the previous menu
+    userQuit = False              # Set this to True if the user wants to quit
+    readFiles = False             # Set this to True if it's time to select files
+    typeFile = ""                 # Dynamic string to aid in user feedback (e.g., backup, archive)
+    gameJsonFile = ""             # Full path to the PKM save game list json file
+    backJsonFile = ""             # Full path to the Baron Builder backup save game list json file
+    archJsonFile = ""             # Full path to the Baron Builder archive save game list json file
+    archGamePath = ""             # Path to the archived save games
+    backGamePath = ""             # Path to the backed up save games
+    workGamePath = ""             # Path to the Baron Builder working directory
+    archZksFileObj = None         # ZksFile object of archived save game
+    # Dynamic Variables
+    # These variables could be updated each while loop
+    fileNum = None                # Index of the user-selected file
+    restoreGamePath = ""          # Path to backed up or archived save games
+    restoreGameList = []          # List of save games found in restoreGamePath
+    restoreJsonFile = ""          # Full path to the Baron Builder save game list json file to restore from
+    archGameList = []             # List of available archived games to restore
+    backGameList = []             # List of available backed up games to restore
+    numArchGames = 0              # Number of available archive games
+    numBackGames = 0              # Number of available backed up games
+    copiedList = []               # Return value from copy_save_game_from_list()
+
+    # INPUT VALIDATION
+    # Save Game List Json Files
+    archJsonFile = os.path.join(saveGamePath, TOP_DIR, ARCHIVE_DIR, archGameJson)
+    backJsonFile = os.path.join(saveGamePath, TOP_DIR, BACKUP_DIR, backGameJson)
+    gameJsonFile = os.path.join(saveGamePath, "..", saveGameJson)
+    # Baron Builder Save Game Directories
+    archGamePath = os.path.join(saveGamePath, TOP_DIR, ARCHIVE_DIR)
+    backGamePath = os.path.join(saveGamePath, TOP_DIR, BACKUP_DIR)
+    workGamePath = os.path.join(saveGamePath, TOP_DIR, WORKING_DIR)
+
+    # CLEAR SCREEN
+    clear_screen(operSys)
+
+    while numBadAnswers <= MAX_ERRS:
+        # UPDATE DYNAMIC VARIABLES
+        try:
+            archGameList = list_save_games(operSys, archGamePath, fileExt=ARCHIVE_EXT)
+        except OSError:
+            archGameList = []
+        try:
+            backGameList = list_save_games(operSys, backGamePath, fileExt=BACKUP_EXT)
+        except OSError:
+            backGameList = []
+        numArchGames = len(archGameList)
+        numBackGames = len(backGameList)
+
+        # PRINT MENU
+        print("")  # Blank line
+
+        # Print options
+        print("RESTORE SAVE GAME SELECTION")
+        print("What type of save game do you want to restore?")
+        print("(a) Backup [{} files]".format(numBackGames))
+        print("(b) Archive [{} files]".format(numArchGames))
+        print("-or-")
+        print('Type "clear" to clear the screen')
+        print('Type "exit" to return to the previous menu')
+        print('Type "quit" to exit this program')
+
+        # Take input
+        selection = input("Make your selection [Backup]:  ")
+
+        # Modify input
+        if len(selection) == 0:
+            selection = "a"
+        else:
+            selection = selection.lower()
+
+            # Translate human answers into scantron answers
+            if "backup" == selection:
+                selection = "a"
+            elif "archive" == selection:
+                selection = "b"
+
+        # Execute selection
+        if "clear" == selection:
+            numBadAnswers = 0
+            clear_screen(operSys)
+            readFiles = False
+        elif "exit" == selection:
+            numBadAnswers = 0
+            userExit = True
+            readFiles = False
+        elif "quit" == selection:
+            numBadAnswers = 0
+            userQuit = True
+            readFiles = False
+        elif "a" == selection:
+            numBadAnswers = 0
+            restoreGamePath = backGamePath
+            restoreGameList = backGameList
+            restoreJsonFile = backJsonFile
+            typeFile = "backup"
+            readFiles = True
+        elif "b" == selection:
+            numBadAnswers = 0
+            restoreGamePath = archGamePath
+            restoreGameList = archGameList
+            restoreJsonFile = archJsonFile
+            typeFile = "archive"
+            readFiles = True
+        else:
+            print("\nInvalid selection.")
+            numBadAnswers += 1
+            if numBadAnswers <= MAX_ERRS:
+                print("Try again.")
+
+        if readFiles is True and userExit is False and userQuit is False:
+            # Validate selection
+            if 0 >= len(restoreGameList):
+                print("\nThere are no {} files to restore.".format(typeFile))
+                numBadAnswers += 1
+                if numBadAnswers <= MAX_ERRS:
+                    print("Try again.")
+                continue
+
+            # Allow user to choose a save game to restore
+            try:
+                fileNum = user_file_selection_menu(operSys, restoreGamePath, restoreGameList, numBadAnswers)
+            except RuntimeError as err:
+                if "Quit" == str(err):
+                    userQuit = True
+                elif "Exit" == str(err):
+                    clear_screen(operSys)
+                    continue
+                else:
+                    raise err
+            except Exception as err:
+                print('user_file_selection_menu() raised "{}" exception'.format(str(err)))  # DEBUGGING
+                break
+            else:
+                if 0 > fileNum or fileNum >= len(restoreGameList):
+                    print("user_file_selection_menu() failed to return a proper file index")  # DEBUGGING
+                    break
+                else:
+                    # Restore the backed up file
+                    clear_screen(operSys)
+                    print("\nRestoring {} file:\t{}".format(typeFile, restoreGameList[fileNum]))
+                    numBadAnswers = 0
+                    if backup_a_file(gameJsonFile, backGamePath, MISC_BACKUP_EXT, overwrite=True) is False:
+                        print("backup_a_file() failed to backup {}".format(backJsonFile))  # DEBUGGING
+                        pass
+                    # Restore file
+                    # Backup
+                    if "a" == selection:
+                        try:
+                            retVal = backup_a_file(os.path.join(restoreGamePath, restoreGameList[fileNum]),
+                                                   saveGamePath, SAVE_GAME_EXT, srcJson=restoreJsonFile, dstJson=gameJsonFile,
+                                                   overwrite=True)
+                        except Exception as err:
+                            print('backup_a_file() raised "{}" exception'.format(str(err)))  # DEBUGGING
+                            retVal = False
+                            break
+                        else:
+                            if retVal is False:
+                                print("backup_a_file() failed to restore the {} file".format(typeFile))  # DEBUGGING
+                                break
+                            else:
+                                print("Successfully restored {} file".format(typeFile))
+                    elif "b" == selection:
+                        try:
+                            archZksFileObj = ZksFile(os.path.join(restoreGamePath, restoreGameList[fileNum]))
+                            if archZksFileObj.unpack_file(workGamePath) is not True:
+                                print("ZksFile.unpack_file() failed on the {} file".format(typeFile))  # DEBUGGING
+                                retVal = False
+                                break
+                            if archZksFileObj.unarchive_file(saveGamePath) is not True:
+                                print("ZksFile.unarchive_file() failed on the {} file".format(typeFile))  # DEBUGGING
+                                retVal = False
+                                break
+                            if archZksFileObj.close_zks() is not True:
+                                print("ZksFile.close_zks() failed")  # DEBUGGING
+                                retVal = False
+                                break
+                        except Exception as err:
+                            print('ZksFile object raised "{}" exception'.format(str(err)))  # DEBUGGING
+                            retVal = False
+                            break
+                        else:
+                            # GET ITEM FROM OLD JSON FILE
+                            try:
+                                copiedList = copy_save_game_from_list(archJsonFile, os.path.basename(restoreGameList[fileNum]))
+                            except Exception as err:
+                                print("copy_save_game_from_list() failed to copy {} from {}".format(os.path.basename(restoreGameList[fileNum]), archJsonFile))  # DEBUGGING
+                                print(repr(err))
+                                retVal = False
+                                break
+                            else:
+                                # print("Copied List:\t{}".format(copiedList))  # DEBUGGING
+                                pass
+
+                            # ADD TO NEW JSON FILE
+                            if isinstance(copiedList, list) and 0 < len(copiedList):
+                                try:
+                                    add_save_game_to_list(gameJsonFile, copiedList)
+                                except Exception as err:
+                                    print("add_save_game_to_list() failed to add {} to {}".format(copiedList, os.path.basename(gameJsonFile)))  # DEBUGGING
+                                    print(repr(err))
+                                    retVal = False
+                                    break
+
+                            print("Successfully restored {} file".format(typeFile))
+
+        if userExit is True:
+            raise RuntimeError("Exit")
+
+        if userQuit is True:
+            raise RuntimeError("Quit")
+
+    # DONE
+    return retVal
+
+
 def locate_save_games(operSys):
     '''
         PURPOSE - Find the absolute path to the save games directory
@@ -534,10 +741,10 @@ def list_save_games(operSys, saveGamePath, fileExt="zks"):
             This function will sort the file names so the most recent modification is first
     '''
     # LOCAL VARIABLES
-    retVal = []  # List of file names sorted by modification time, descending
+    retVal = []      # List of file names sorted by modification time, descending
     supportedOS = supportedOSGlobal
     rawTupList = []  # Unsorted list of tuples
-    sortBy = None  # Set this to ST_MTIME for *nix and ST_CTIME for Windows
+    sortBy = None    # Set this to ST_MTIME for *nix and ST_CTIME for Windows
 
     # INPUT VALIDATION
     if not isinstance(saveGamePath, str):
@@ -551,7 +758,7 @@ def list_save_games(operSys, saveGamePath, fileExt="zks"):
     elif not isinstance(fileExt, str):
         raise TypeError('File extension is of type "{}" instead of string'.format(type(fileExt)))
     elif not os.path.isdir(saveGamePath):
-        raise RuntimeError('Directory "{}" does not exist'.format(saveGamePath))
+        raise OSError('Directory "{}" does not exist'.format(saveGamePath))
 
     # SET SORT BY
     if OS_LINUX == operSys or OS_APPLE == operSys:
@@ -560,7 +767,6 @@ def list_save_games(operSys, saveGamePath, fileExt="zks"):
         sortBy = ST_CTIME
     else:
         raise RuntimeError("Consider updating supportedOS list or control flow in list_save_games()")
-
 
     # GET THE SAVE GAME FILE LIST
     # Get the list of tuples
@@ -750,7 +956,7 @@ def backup_a_file(srcFile, dstDir, newFileExt, srcJson=None, dstJson=None, overw
     curFileExt = ""       # Store the current srcFile file extension, if any, here
     dstFilename = ""      # Construct the destination file name, complete with new file extension, here
     destinationJson = ""  # os.path.basename(dstJson) or backGameJson... whichever is not None first
-    copiedList = []       # List of removed entries; Return value from remove_save_game_from_list()
+    copiedList = []       # List of copied entries; Return value from copy_save_game_from_list()
     
     # INPUT VALIDATION
     if not isinstance(srcFile, str):
@@ -801,22 +1007,6 @@ def backup_a_file(srcFile, dstDir, newFileExt, srcJson=None, dstJson=None, overw
             print("copy_a_file() failed")  # DEBUGGING
             pass
 
-    # THIS IS FOR ARCHIVE
-    # # REMOVE FROM OLD JSON FILE
-    # if retVal is True and srcJson is not None:
-    #     try:
-    #         removedList = remove_save_game_from_list(srcJson, os.path.basename(srcFile))
-    #     except Exception as err:
-    #         print("remove_save_game_from_list() failed to remove {} from {}".format(os.path.basename(srcFile), srcJson))  # DEBUGGING
-    #         print(repr(err))
-    #         retVal = False
-    #     else:
-    #         if not isinstance(removedList, list):
-    #             raise TypeError("remove_save_game_from_list() returned a non-list")
-    #         elif 0 >= len(removedList):
-    #             print("remove_save_game_from_list() failed to remove {} from {}".format(os.path.basename(srcFile), srcJson))  # DEBUGGING
-    #             retVal = False
-
     # GET ITEM FROM OLD JSON FILE
     if retVal is True and srcJson is not None:
         try:
@@ -842,7 +1032,7 @@ def backup_a_file(srcFile, dstDir, newFileExt, srcJson=None, dstJson=None, overw
     return retVal
 
 
-def archive_a_file(saveGamePath, srcFile, dstDir):
+def archive_a_file(saveGamePath, srcFile, dstDir, srcJson=None, dstJson=None):
     '''
         PURPOSE - Archive a file to a new destination directory while also modifying its file extension
             and deleting the original
@@ -850,15 +1040,18 @@ def archive_a_file(saveGamePath, srcFile, dstDir):
             saveGamePath - Relative or absolute path to check for save games
             srcFile - Relative or absolute filename original file
             dstDir - Relative or absolute directory to archive the file into
+            srcJson - Source save game list json file to remove the entry from
+            dstJson - Destination save game list json file to add the entry to
         OUTPUT
             On success, True
-            on error, Exception
+            On failure, False
+            On error, Exception
         NOTES
             The orginal steam-saves-release.json will be backed up, changing .json to .bak.  Any
                 existing backed up copies will be overwritten.
     '''
     # LOCAL VARIABLES
-    retVal = False         # Set this to True if everything succeeds
+    retVal = True          # Set this to False if anything fails
     tempRetVal = False     # Check return values
     splitFile = ()         # Split the srcFile here
     archiveZksFile = None  # ZksFile object to archive remove archived save game from
@@ -866,8 +1059,10 @@ def archive_a_file(saveGamePath, srcFile, dstDir):
     workDir = os.path.join(saveGamePath, TOP_DIR, WORKING_DIR)
     backDir = os.path.join(saveGamePath, TOP_DIR, BACKUP_DIR)
     archDir = os.path.join(saveGamePath, TOP_DIR, ARCHIVE_DIR)
+    archGameJsonPath = os.path.join(archDir, archGameJson)
     thisWorkDir = None     # Store the source file's full working directory here
     workDirExists = False  # Determine if the working directory existed before ZksFile.unpack_file()
+    removedList = []       # List of removed entries; Return value from remove_save_game_from_list()
 
     # INPUT VALIDATION
     if not isinstance(srcFile, str):
@@ -884,12 +1079,7 @@ def archive_a_file(saveGamePath, srcFile, dstDir):
         raise OSError("Source file is not a file")
 
     # MANAGE BACKUP DIRECTORY
-    # If it exists, verify it's a directory
-    if os.path.exists(dstDir) is True:
-        if os.path.isdir(dstDir) is False:
-            raise OSError("Destination directory is not a directory")
-    else:
-        os.mkdir(dstDir)
+    start_storage_dir(archDir, archGameJson)
 
     # ARCHIVE FILE
     try:
@@ -922,15 +1112,32 @@ def archive_a_file(saveGamePath, srcFile, dstDir):
         tempRetVal = backup_a_file(saveGameJsonPath, backDir, MISC_BACKUP_EXT, overwrite=True)
         if tempRetVal is False:
             raise OSError("Failed to backup {}".format(saveGameJson))
-        else:
-            if remove_save_game_from_list(saveGameJsonPath, os.path.basename(srcFile)) is False:
-                print("Failed to remove {} from {}".format(os.path.basename(srcFile), saveGameJson))  # DEBUGGING
-                raise RuntimeError("Failed to remove save game from list")
     except Exception as err:
         print(repr(err))  # DEBUGGING
         raise err
 
-    # 5. DELETE THE ORIGINAL
+    # 4. GET ITEM FROM OLD JSON FILE
+    if retVal is True and srcJson is not None:
+        try:
+            removedList = remove_save_game_from_list(srcJson, os.path.basename(srcFile))
+        except Exception as err:
+            print("remove_save_game_from_list() failed to copy {} from {}".format(os.path.basename(srcFile), srcJson))  # DEBUGGING
+            print(repr(err))
+            retVal = False
+        else:
+            print("Removed List:\t{}".format(removedList))  # DEBUGGING
+            pass
+
+    # 5. ADD TO NEW JSON FILE
+    if retVal is True and dstJson is not None and isinstance(removedList, list) is True and 0 < len(removedList):
+        try:
+            add_save_game_to_list(dstJson, removedList)
+        except Exception as err:
+            print("add_save_game_to_list() failed to add {} to {}".format(removedList, os.path.basename(dstJson)))  # DEBUGGING
+            print(repr(err))
+            retVal = False
+
+    # 6. DELETE THE ORIGINAL
     try:
         os.remove(srcFile)
     except Exception as err:
@@ -938,7 +1145,7 @@ def archive_a_file(saveGamePath, srcFile, dstDir):
         print(repr(err))  # DEBUGGING
         raise err
 
-    # 6. DELETE WORKING DIRECTORY?
+    # 7. DELETE WORKING DIRECTORY?
     if workDirExists:
         try:
             print("ABOUT TO EMPTY {}".format(thisWorkDir))  # DEBUGGING
@@ -949,6 +1156,9 @@ def archive_a_file(saveGamePath, srcFile, dstDir):
             print("Failed to remove original save game file:\t{}".format(srcFile))  # DEBUGGING
             print(repr(err))  # DEBUGGING
             raise err
+
+    # DONE
+    return retVal
 
 
 def add_save_game_to_list(absSaveGameList, newSaveGame):
@@ -992,6 +1202,8 @@ def add_save_game_to_list(absSaveGameList, newSaveGame):
     # saveGameName entries
     for oDict in saveGameList:
         if not isinstance(oDict, OrderedDict):
+            print("oDict is :\t{}".format(oDict))  # DEBUGGING
+            print("oDict is type:\t{}".format(type(oDict)))  # DEBUGGING
             raise TypeError("Save game list contains non-OrderedDict")
         elif 2 != len(oDict):
             raise ValueError("Save game list contains an OrderedDict of improper length")
@@ -1233,7 +1445,10 @@ def remove_save_game_from_list(absSaveGameList, saveGameName):
             if entry["Filename"] in saveGameList:
                 # print("Removing:\t{}".format(entry))  # DEBUGGING
                 # sgjJsonFileObj.jDict["Files"].remove(entry)
-                retVal.append(sgjJsonFiles.remove(entry))
+                retVal.append(entry)
+                sgjJsonFiles.remove(entry)
+                # retVal.append(sgjJsonFiles.remove(entry))
+                # print("remove_save_game_from_list() retVal is currently:\t{}".format(retVal))  # DEBUGGING
     except Exception as err:
         print(repr(err))  # DEBUGGING
         raise err
@@ -1248,7 +1463,7 @@ def remove_save_game_from_list(absSaveGameList, saveGameName):
         raise err
 
     # DONE
-    return
+    return retVal
 
 
 def start_storage_dir(dstDir, bbJsonFile):

@@ -195,19 +195,22 @@ def same_ZipInfo_objs(obj1, obj2):
 
 
 def main():
-    goodZipFile = "/home/joe/Documents/Personal/Programming/Baron_Builder/Test_Files/ZksFile_Test_Recent_Save_Game.zks.bak"
-    badZipFile = "/home/joe/Documents/Personal/Programming/Baron_Builder/Test_Files/ZksFile_Test_Recent_Save_Game.zks"
+    # firstZipFile = "/home/joe/Documents/Personal/Programming/Baron_Builder/Test_Files/ZksFile_Test_Recent_Save_Game.zks.bak"
+    firstZipFile = "/home/joe/.config/unity3d/Owlcat Games/Pathfinder Kingmaker/Saved Games/Manual_475_Wilderness_Encounter___10_Arodus__VIII__4711___01_04_26.zks"
+    # secondZipFile = "/home/joe/Documents/Personal/Programming/Baron_Builder/Test_Files/ZksFile_Test_Recent_Save_Game.zks"
+    # secondZipFile = "/home/joe/.config/unity3d/Owlcat Games/Pathfinder Kingmaker/Saved Games/Baron_Builder/Archive/Manual_475_Wilderness_Encounter___10_Arodus__VIII__4711___01_04_26.bba"
+    secondZipFile = "/home/joe/.config/unity3d/Owlcat Games/Pathfinder Kingmaker/Saved Games/Backup/Manual_475_Wilderness_Encounter___10_Arodus__VIII__4711___01_04_26.zks"
 
-    goodZipObj = zipfile.ZipFile(goodZipFile, "r")
-    badZipObj = zipfile.ZipFile(badZipFile, "r")
+    firstZipObj = zipfile.ZipFile(firstZipFile, "r")
+    secondZipObj = zipfile.ZipFile(secondZipFile, "r")
 
-    goodZipInfoList = goodZipObj.infolist()
-    badZipInfoList = badZipObj.infolist()
+    firstZipInfoList = firstZipObj.infolist()
+    secondZipInfoList = secondZipObj.infolist()
 
-    if len(goodZipInfoList) == len(badZipInfoList):
-        for index in range(len(goodZipInfoList)):
-            print("{}".format(goodZipInfoList[index].filename))
-            same_ZipInfo_objs(goodZipInfoList[index], badZipInfoList[index])
+    if len(firstZipInfoList) == len(secondZipInfoList):
+        for index in range(len(firstZipInfoList)):
+            print("{}".format(firstZipInfoList[index].filename))
+            same_ZipInfo_objs(firstZipInfoList[index], secondZipInfoList[index])
     else:
         raise RuntimeError("Mismatch in list length")
 

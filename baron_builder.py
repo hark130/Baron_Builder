@@ -11,7 +11,7 @@ from baron_builder_imports import supportedOSGlobal
 from baron_builder_imports import minMajNum, minMinNum, minMicNum
 from baron_builder_imports import TOP_DIR, WORKING_DIR
 from baron_builder_file_mgmt import list_save_games, locate_save_games, user_file_menu
-from baron_builder_utilities import check_py_ver, determine_os
+from baron_builder_utilities import check_py_ver, clear_screen, determine_os
 from zks_file_class import ZksFile              # ZksFile class
 import os                                       # environ, path.join, getuid, path.isdir, system
 
@@ -94,6 +94,7 @@ def main():
             # print("user_file_menu() returned {}".format(fileNum))  # DEBUGGING
         except RuntimeError as err:
             if "Quit" == str(err):
+                clear_screen(operSys)
                 retVal = False
             else:
                 raise err

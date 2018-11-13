@@ -46,15 +46,16 @@ My end goal is to create a save game editor that works on all operating systems 
 | F06       | Game Play         | Change gold | ✓ | ✓ | ? |
 | F07       | File Management   | Clean up 'Working' directory | ✓ | ✓ | ? |
 | F08       | File Management   | 'Working' directory tallies up storage size | | | |
-| F09       | Utility           | Baron Builder log | | | |
+| F09       | Utility           | Baron Builder system log | | | |
 | F10       | File Management   | 'Working' directory is automatically cleaned up | | | |
 | F11       | Game Optimization | 'Repair' steam-saves-release.json (remove dead entries) | | | |
-| F12       | File Management   | Restore archived save games | | | |
+| F12       | File Management   | Restore archived save games | ✓ | ? | ? |
 | F13       | Game Play         | Restock camping supplies for vendors | | | |
 | F14       | Game Optimization | Fix a 'busted' save game list json | | | |
 | F15       | File Management   | Prompt to overwrite a backup save game | | | |
 | F16       | File Management   | Backup multiple save games at once | | | |
 | F17       | File Management   | Archive multiple save games at once | | | |
+| F18       | Utility           | Baron Builder user log | | | |
 
 ### BUGS
 
@@ -63,7 +64,7 @@ My end goal is to create a save game editor that works on all operating systems 
 | ✓ | B01 | baron_builder_features | bbf06_GOLD_sub_menu | Menu allows default gold to exceed max macro |
 |   | B02 | baron_builder_* | * | Refactor * to raise Exception for failure/error and capture/silence/interpret in baron_builder.py |
 |   | B03 | baron_builder_file_mgmt | *menu() | Refactor top level menus to validate input once, at the highest appropriate level |
-|   | B04 | baron_builder_file_mgmt | add_save_game_to_list() | "Add save games" doesn't check for prior existence |
+| ✓ | B04 | baron_builder_file_mgmt | add_save_game_to_list() | "Add save games" doesn't check for prior existence (fixed in F04) |
 
 ### Legend
 
@@ -85,3 +86,9 @@ My end goal is to create a save game editor that works on all operating systems 
 		* AKA Don't 'hard code' directories
 		* Make Baron_Builder pass in the necessary directories (e.g., Archive, Backup, Working)
 		* This design will facilitate easy relocation of files in the future
+
+### Branching
+
+* Branch names should be based off BUG number, Feature number, or 'basic functionality' short title
+* Branches verified on one operating system can be merged into development
+* Avoid merging development into master until all implemented features have been tested on two operating systems
