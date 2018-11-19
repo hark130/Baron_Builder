@@ -68,6 +68,7 @@ My end goal is to create a save game editor that works on all operating systems 
 |   | B03 | baron_builder_file_mgmt | *menu() | Refactor top level menus to validate input once, at the highest appropriate level |
 | ✓ | B04 | baron_builder_file_mgmt | add_save_game_to_list() | "Add save games" doesn't check for prior existence (fixed in F04) |
 |   | B05 | baron_builder_file_mgmt | ???() | List of save games isn't updated after an archived save game is restored |
+|   | B06 | baron_builder_file_mgmt | backup_a_file | backup_a_file() raised "list indices must be integers or slices, not NoneType" exception |
 
 ### Legend
 
