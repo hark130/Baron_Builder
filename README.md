@@ -56,6 +56,8 @@ My end goal is to create a save game editor that works on all operating systems 
 | F16       | File Management   | Backup multiple save games at once | | | |
 | F17       | File Management   | Archive multiple save games at once | | | |
 | F18       | Utility           | Baron Builder user log | | | |
+| F19       | File Management   | Delete backup/archive save games | | | |
+| F20       | File Management   | Delete multiple backup/archive save games at once | | | |
 
 ### BUGS
 
@@ -65,6 +67,7 @@ My end goal is to create a save game editor that works on all operating systems 
 |   | B02 | baron_builder_* | * | Refactor * to raise Exception for failure/error and capture/silence/interpret in baron_builder.py |
 |   | B03 | baron_builder_file_mgmt | *menu() | Refactor top level menus to validate input once, at the highest appropriate level |
 | ✓ | B04 | baron_builder_file_mgmt | add_save_game_to_list() | "Add save games" doesn't check for prior existence (fixed in F04) |
+|   | B05 | baron_builder_file_mgmt | ???() | List of save games isn't updated after an archived save game is restored |
 
 ### Legend
 
