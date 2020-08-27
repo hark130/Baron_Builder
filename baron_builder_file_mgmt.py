@@ -46,7 +46,7 @@ def user_file_menu(operSys, saveGamePath, oldSaveGameFileList, curNumBadAns):
     '''
         PURPOSE - Top level menu leading to all file-related functionality
         INPUT
-            operSys - See OPERATAING SYSTEM macros
+            operSys - See OPERATING SYSTEM macros
             saveGamePath - Relative or absolute path to check for save games
             saveGameFileList - Sorted list of save games found in saveGamePath
             curNumBadAns - Current number of incorrect answers to track error tolerance
